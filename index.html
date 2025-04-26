@@ -1,5 +1,3 @@
---- START OF FILE index.html ---
-
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -23,8 +21,86 @@
             color: #e0d6c8;
             box-sizing: border-box;
             position: relative;
-            touch-action: none;
+            touch-action: none; /* Important for preventing default touch actions like zooming */
         }
+
+        /* --- Rotate Device Message (Forcing Landscape) --- */
+        #rotate-device-message {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* Dark overlay */
+            color: #fff;
+            font-size: clamp(1.2em, 4vh, 1.8em);
+            text-align: center;
+            flex-direction: column; /* Use flexbox to center content */
+            align-items: center;
+            justify-content: center;
+            z-index: 200; /* Ensure it's above everything else */
+            padding: 20px;
+            box-sizing: border-box;
+            pointer-events: auto; /* Ensure interactions work on the message */
+            line-height: 1.5;
+        }
+
+        /* Styling for the rotation icon (optional but helpful) */
+        .rotate-icon {
+            width: clamp(60px, 10vh, 90px);
+            height: clamp(60px, 10vh, 90px);
+            border: clamp(6px, 1vh, 10px) solid #fff;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin-top: 30px;
+            position: relative;
+            box-sizing: border-box;
+        }
+        .rotate-icon::before {
+             content: '';
+             position: absolute;
+             /* Adjust positioning based on icon size */
+             top: clamp(-12px, -2vh, -18px);
+             right: clamp(-8px, -1.5vh, -12px);
+             border: clamp(8px, 1.5vh, 12px) solid transparent;
+             border-top-color: #fff;
+             transform: rotate(45deg); /* Pointing outwards */
+             transform-origin: 50% 50%;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Media Query to show the overlay and hide content in portrait --- */
+        @media (orientation: portrait) {
+            #rotate-device-message {
+                display: flex; /* Show the overlay */
+            }
+
+            /* Hide all other direct children of the body */
+            body > *:not(#rotate-device-message) {
+                 display: none !important; /* Use !important to override other display rules */
+            }
+             /* Explicitly hide key containers just in case */
+            #settings-button, #settings-overlay, #settings-panel,
+            #start-screen, #ai-difficulty-selector-container, #game-container,
+            #game-over-screen, #board-selection-screen, #piece-style-selection-screen,
+            #confirmation-modal {
+                 display: none !important;
+            }
+        }
+
+        @media (orientation: landscape) {
+             #rotate-device-message {
+                  display: none; /* Ensure it's hidden in landscape */
+             }
+             /* When switching back to landscape, default/JS display rules will apply */
+        }
+
 
         /* --- Start Screen --- */
         #start-screen {
@@ -267,6 +343,13 @@
     </style>
 </head>
 <body class="piece-style-classic">
+
+     <!-- Message to rotate device -->
+     <div id="rotate-device-message">
+         <p>Please rotate your device to landscape mode to play.</p>
+         <div class="rotate-icon"></div>
+     </div>
+
     <!-- Settings Button -->
     <button id="settings-button" title="Settings"> <i class="fas fa-cog"></i> </button>
 
@@ -426,6 +509,7 @@
         const confirmLogoutButton = document.getElementById('confirm-logout-button');
         const cancelLogoutButton = document.getElementById('cancel-logout-button');
         const closeDifficultySelectorButton = document.getElementById('close-difficulty-selector');
+        const rotateDeviceMessage = document.getElementById('rotate-device-message'); // Added reference
 
         // --- Audio ---
         let audioCtx; function getAudioContext() { if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { console.error("Web Audio API not supported", e); } } return audioCtx; }
@@ -518,7 +602,10 @@
             isGameOver = true; capturedByBlack = 0; capturedByWhite = 0; moveHistory = [];
             whiteIndicator.classList.remove('active-turn'); blackIndicator.classList.remove('active-turn');
             updateStatus(""); updateCapturedCounters(); updateUndoButton(); updateHintButton(); updateTimerDisplay();
-            mainTitle.style.opacity = 1; startSubtitle.style.opacity = 1; startOptions.style.opacity = 1;
+            // Ensure start screen elements are visible for the fade-in animation if needed
+            mainTitle.style.opacity = 1; // Or 0 if animation should replay
+            startSubtitle.style.opacity = 1; // Or 0
+            startOptions.style.opacity = 1; // Or 0
             startSubtitle.textContent = "Select Play Mode";
         }
         function endGame(message) {
@@ -570,7 +657,8 @@
         function createBoardUI() { boardElement.innerHTML = ''; const squareSize = parseFloat(getComputedStyle(boardElement).getPropertyValue('--square-size')); for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const sq = document.createElement('div'); sq.classList.add('square', (r + c) % 2 === 0 ? 'light-square' : 'dark-square'); sq.dataset.row = r; sq.dataset.col = c; sq.dataset.x = c * squareSize; sq.dataset.y = r * squareSize; if ((r + c) % 2 !== 0) { sq.addEventListener('click', handleSquareClick); } boardElement.appendChild(sq); } } }
         function getSquareElement(row, col) { if (!isValidSquare(row, col)) return null; return boardElement.querySelector(`.square[data-row="${row}"][data-col="${col}"]`); }
         let renderTimeout; function requestRender() { clearTimeout(renderTimeout); renderTimeout = setTimeout(renderBoard, 0); }
-        function renderBoard() { clearHintHighlights(); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver); const allSquares = boardElement.querySelectorAll('.square'); allSquares.forEach(sq => { sq.classList.remove('possible-move'); const isDarkSquare = sq.classList.contains('dark-square'); sq.style.cursor = (isDarkSquare && !isInteractionBlocked && !isSettingsPanelVisible) ? 'pointer' : 'default'; const existingPiece = sq.querySelector('.piece'); if (existingPiece && !existingPiece.classList.contains('moving')) { existingPiece.remove(); } }); const allPossibleJumps = !isInteractionBlocked ? getAllPossibleMoves(currentPlayer, true, boardState) : []; const jumpIsPossibleAnywhere = allPossibleJumps.length > 0; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const pieceData = boardState[r][c]; const square = getSquareElement(r, c); if (pieceData && square) { let pieceEl = square.querySelector(`.piece[data-piece-id="${r}-${c}"]`); if (!pieceEl) { pieceEl = document.createElement('div'); pieceEl.dataset.pieceId = `${r}-${c}`; pieceEl.className = `piece ${pieceData.player}-piece ${pieceData.isKing ? 'king' : ''}`; pieceEl.style.transform = `translate(-50%, -50%)`; square.appendChild(pieceEl); } else { pieceEl.className = `piece ${pieceData.player}-piece ${pieceData.isKing ? 'king' : ''}`; } const canInteractPiece = !isInteractionBlocked && pieceData.player === currentPlayer && !(continuousJumpPossible && selectedPiece && (selectedPiece.row !== r || selectedPiece.col !== c)); pieceEl.classList.toggle('interactive', canInteractPiece); pieceEl.style.cursor = (canInteractPiece && !isSettingsPanelVisible) ? 'grab' : 'default'; pieceEl.style.pointerEvents = (canInteractPiece && !isSettingsPanelVisible) ? 'auto' : 'none'; pieceEl.onclick = (canInteractPiece && !isSettingsPanelVisible) ? (e) => { e.stopPropagation(); handlePieceClick(e); } : null; pieceEl.classList.remove('jump-hint'); if (jumpIsPossibleAnywhere && !continuousJumpPossible && pieceData.player === currentPlayer) { const thisPieceCanJump = allPossibleJumps.some(jump => jump.origin.r === r && jump.origin.c === c); if (thisPieceCanJump) { pieceEl.classList.add('jump-hint'); } } pieceEl.classList.toggle('selected', selectedPiece && selectedPiece.row === r && selectedPiece.col === c); if(selectedPiece && selectedPiece.row === r && selectedPiece.col === c){ selectedPiece.element = pieceEl; } } } } if (selectedPiece && !isInteractionBlocked) { const movesToHighlight = continuousJumpPossible ? calculateMovesForPiece(selectedPiece.row, selectedPiece.col, true, boardState) : calculateMovesForPiece(selectedPiece.row, selectedPiece.col, false, boardState); movesToHighlight.forEach(move => { const sq = getSquareElement(move.row, move.col); if (sq) { sq.classList.add('possible-move'); sq.style.cursor = 'pointer'; } }); } if (!isInteractionBlocked && !isSettingsPanelVisible) { addHoverEffects(); } else { removeHoverEffects(); } }
+        function renderBoard() { clearHintHighlights(); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver) || window.innerHeight > window.innerWidth; // Add check for portrait mode
+        const allSquares = boardElement.querySelectorAll('.square'); allSquares.forEach(sq => { sq.classList.remove('possible-move'); const isDarkSquare = sq.classList.contains('dark-square'); sq.style.cursor = (isDarkSquare && !isInteractionBlocked && !isSettingsPanelVisible) ? 'pointer' : 'default'; const existingPiece = sq.querySelector('.piece'); if (existingPiece && !existingPiece.classList.contains('moving')) { existingPiece.remove(); } }); const allPossibleJumps = !isInteractionBlocked ? getAllPossibleMoves(currentPlayer, true, boardState) : []; const jumpIsPossibleAnywhere = allPossibleJumps.length > 0; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const pieceData = boardState[r][c]; const square = getSquareElement(r, c); if (pieceData && square) { let pieceEl = square.querySelector(`.piece[data-piece-id="${r}-${c}"]`); if (!pieceEl) { pieceEl = document.createElement('div'); pieceEl.dataset.pieceId = `${r}-${c}`; pieceEl.className = `piece ${pieceData.player}-piece ${pieceData.isKing ? 'king' : ''}`; pieceEl.style.transform = `translate(-50%, -50%)`; square.appendChild(pieceEl); } else { pieceEl.className = `piece ${pieceData.player}-piece ${pieceData.isKing ? 'king' : ''}`; } const canInteractPiece = !isInteractionBlocked && pieceData.player === currentPlayer && !(continuousJumpPossible && selectedPiece && (selectedPiece.row !== r || selectedPiece.col !== c)); pieceEl.classList.toggle('interactive', canInteractPiece); pieceEl.style.cursor = (canInteractPiece && !isSettingsPanelVisible) ? 'grab' : 'default'; pieceEl.style.pointerEvents = (canInteractPiece && !isSettingsPanelVisible) ? 'auto' : 'none'; pieceEl.onclick = (canInteractPiece && !isSettingsPanelVisible) ? (e) => { e.stopPropagation(); handlePieceClick(e); } : null; pieceEl.classList.remove('jump-hint'); if (jumpIsPossibleAnywhere && !continuousJumpPossible && pieceData.player === currentPlayer) { const thisPieceCanJump = allPossibleJumps.some(jump => jump.origin.r === r && jump.origin.c === c); if (thisPieceCanJump) { pieceEl.classList.add('jump-hint'); } } pieceEl.classList.toggle('selected', selectedPiece && selectedPiece.row === r && selectedPiece.col === c); if(selectedPiece && selectedPiece.row === r && selectedPiece.col === c){ selectedPiece.element = pieceEl; } } } } if (selectedPiece && !isInteractionBlocked) { const movesToHighlight = continuousJumpPossible ? calculateMovesForPiece(selectedPiece.row, selectedPiece.col, true, boardState) : calculateMovesForPiece(selectedPiece.row, selectedPiece.col, false, boardState); movesToHighlight.forEach(move => { const sq = getSquareElement(move.row, move.col); if (sq) { sq.classList.add('possible-move'); sq.style.cursor = 'pointer'; } }); } if (!isInteractionBlocked && !isSettingsPanelVisible) { addHoverEffects(); } else { removeHoverEffects(); } }
 
         // --- Board & Piece Style Functions ---
         function applyBoardStyle(styleName) {
@@ -609,10 +697,10 @@
         }
 
         // --- Game Logic ---
-        function handlePieceClick(event) { const pieceElement = event.target; const squareElement = pieceElement.closest('.square'); if (!squareElement) return; const row = parseInt(squareElement.dataset.row); const col = parseInt(squareElement.dataset.col); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER); if (isInteractionBlocked) return; const pieceData = boardState[row][col]; if (!pieceData || pieceData.player !== currentPlayer) return; if (continuousJumpPossible && selectedPiece && (selectedPiece.row !== row || selectedPiece.col !== col)) { return; } if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) { deselectPiece(); } else { selectPiece(row, col, pieceElement); } }
-        function handleSquareClick(event) { const targetSquare = event.target.closest('.square'); if (!targetSquare || !targetSquare.classList.contains('dark-square')) return; const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER); if (isInteractionBlocked) return; const row = parseInt(targetSquare.dataset.row); const col = parseInt(targetSquare.dataset.col); if (selectedPiece && !boardState[row][col]) { let move; if (continuousJumpPossible) { const possibleJumps = calculateMovesForPiece(selectedPiece.row, selectedPiece.col, true, boardState); move = possibleJumps.find(m => m.row === row && m.col === col); } else { const allMovesForSelected = calculateMovesForPiece(selectedPiece.row, selectedPiece.col, false, boardState); move = allMovesForSelected.find(m => m.row === row && m.col === col); } if (move) { saveCurrentStateToHistory(); animateAndMovePiece(selectedPiece.row, selectedPiece.col, move); } else { deselectPiece(); } } else { deselectPiece(); } }
-        function deselectPiece() { if (selectedPiece && selectedPiece.element && boardElement.contains(selectedPiece.element)) { selectedPiece.element.classList.remove('selected'); } selectedPiece = null; requestRender(); }
-        function selectPiece(row, col, element) { if (!selectedPiece || selectedPiece.row !== row || selectedPiece.col !== col) { playSound('select'); } deselectPiece(); selectedPiece = { row, col, element }; if (element && boardElement.contains(element)) { element.classList.add('selected'); } requestRender(); }
+        function handlePieceClick(event) { const pieceElement = event.target; const squareElement = pieceElement.closest('.square'); if (!squareElement) return; const row = parseInt(squareElement.dataset.row); const col = parseInt(squareElement.dataset.col); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || window.innerHeight > window.innerWidth; // Add check for portrait mode
+        if (isInteractionBlocked) return; const pieceData = boardState[row][col]; if (!pieceData || pieceData.player !== currentPlayer) return; if (continuousJumpPossible && selectedPiece && (selectedPiece.row !== row || selectedPiece.col !== col)) { return; } if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) { deselectPiece(); } else { selectPiece(row, col, pieceElement); } }
+        function handleSquareClick(event) { const targetSquare = event.target.closest('.square'); if (!targetSquare || !targetSquare.classList.contains('dark-square')) return; const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || window.innerHeight > window.innerWidth; // Add check for portrait mode
+        if (isInteractionBlocked) return; const row = parseInt(targetSquare.dataset.row); const col = parseInt(targetSquare.dataset.col); if (selectedPiece && !boardState[row][col]) { let move; if (continuousJumpPossible) { const possibleJumps = calculateMovesForPiece(selectedPiece.row, selectedPiece.col, true, boardState); move = possibleJumps.find(m => m.row === row && m.col === col); } else { const allMovesForSelected = calculateMovesForPiece(selectedPiece.row, selectedPiece.col, false, boardState); move = allMovesForSelected.find(m => m.row === row && m.col === col); } if (move) { saveCurrentStateToHistory(); animateAndMovePiece(selectedPiece.row, selectedPiece.col, move); } else { deselectPiece(); } } else { deselectPiece(); } }
         function calculateMovesForPiece(r, c, onlyJumps = false, currentBoard = boardState) { const piece = currentBoard[r]?.[c]; if (!piece) return []; let jumpMovesFound = []; let regularMovesFound = []; const directions = []; const playerDirection = (piece.player === PLAYER_BLACK) ? -1 : 1; directions.push(playerDirection); if (piece.isKing) directions.push(-playerDirection); for (const dir of directions) { for (const dc of [-1, 1]) { const jumpedPieceRow = r + dir; const jumpedPieceCol = c + dc; const jumpLandingRow = r + dir * 2; const jumpLandingCol = c + dc * 2; if (isValidSquare(jumpLandingRow, jumpLandingCol) && !currentBoard[jumpLandingRow][jumpLandingCol]) { const jumpedPiece = isValidSquare(jumpedPieceRow, jumpedPieceCol) ? currentBoard[jumpedPieceRow][jumpedPieceCol] : null; if (jumpedPiece && jumpedPiece.player !== piece.player) { jumpMovesFound.push({ row: jumpLandingRow, col: jumpLandingCol, isJump: true, captured: { row: jumpedPieceRow, col: jumpedPieceCol }, origin: { r, c } }); } } const nr = r + dir; const nc = c + dc; if (isValidSquare(nr, nc) && !currentBoard[nr][nc]) { regularMovesFound.push({ row: nr, col: nc, isJump: false, origin: { r, c } }); } } } if (onlyJumps) { return jumpMovesFound; } return [...jumpMovesFound, ...regularMovesFound]; }
         function getAllPossibleMoves(player, onlyJumps = false, currentBoard = boardState) { let allMoves = []; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = currentBoard[r][c]; if (piece && piece.player === player) { const movesForPiece = calculateMovesForPiece(r, c, false, currentBoard); if (onlyJumps) { allMoves.push(...movesForPiece.filter(m => m.isJump)); } else { allMoves.push(...movesForPiece); } } } } return allMoves; }
         function calculateMovesForPieceInternal(r, c, onlyJumps, currentBoard) { const piece = currentBoard[r]?.[c]; if (!piece) return []; let moves = []; const directions = []; const playerDirection = (piece.player === PLAYER_BLACK) ? -1 : 1; directions.push(playerDirection); if (piece.isKing) directions.push(-playerDirection); for (const dir of directions) { for (const dc of [-1, 1]) { const jumpedPieceRow = r + dir; const jumpedPieceCol = c + dc; const jumpLandingRow = r + dir * 2; const jumpLandingCol = c + dc * 2; if (isValidSquare(jumpLandingRow, jumpLandingCol) && !currentBoard[jumpLandingRow][jumpLandingCol]) { const jumpedPiece = isValidSquare(jumpedPieceRow, jumpedPieceCol) ? currentBoard[jumpedPieceRow][jumpedPieceCol] : null; if (jumpedPiece && jumpedPiece.player !== piece.player) { moves.push({ row: jumpLandingRow, col: jumpLandingCol, isJump: true, captured: { row: jumpedPieceRow, col: jumpedPieceCol }, origin: { r, c } }); } } if (!onlyJumps) { const nr = r + dir; const nc = c + dc; if (isValidSquare(nr, nc) && !currentBoard[nr][nc]) { moves.push({ row: nr, col: nc, isJump: false, origin: { r, c } }); } } } } return moves; }
@@ -651,22 +739,48 @@
         function saveCurrentStateToHistory() { const stateToSave = { boardState: deepCopyBoard(boardState), currentPlayer: currentPlayer, capturedByBlack: capturedByBlack, capturedByWhite: capturedByWhite, continuousJumpPossible: continuousJumpPossible, }; moveHistory.push(stateToSave); updateUndoButton(); }
         function undoMove() { if (moveHistory.length === 0 || isAiThinking) return; stopTurnTimer(); const previousState = moveHistory.pop(); boardState = previousState.boardState; currentPlayer = previousState.currentPlayer; capturedByBlack = previousState.capturedByBlack; capturedByWhite = previousState.capturedByWhite; continuousJumpPossible = previousState.continuousJumpPossible; selectedPiece = null; isGameOver = false; gameOverScreen.classList.remove('visible'); updateCapturedCounters(); updateStatus(); updateUndoButton(); updateHintButton(); createBoardUI(); renderBoard(); startTurnTimer(); isAiThinking = false; }
         function clearHintHighlights() { if (hintTimeoutId) { clearTimeout(hintTimeoutId); hintTimeoutId = null; } document.querySelectorAll('.hint-piece-suggestion, .hint-move-suggestion').forEach(el => { el.classList.remove('hint-piece-suggestion', 'hint-move-suggestion'); }); document.querySelectorAll('.square.possible-move.hint-move-suggestion').forEach(sq => { sq.classList.remove('hint-move-suggestion'); }); }
-        function showHint() { clearHintHighlights(); if (isGameOver || isAiThinking || (gameMode === 'ai' && currentPlayer === AI_PLAYER)) { return; } let bestHintMove; if (gameMode === 'ai' || aiDifficulty !== DIFFICULTIES.EASY) { bestHintMove = findBestMoveMinimax(currentPlayer, aiDifficulty === DIFFICULTIES.HARD ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM).move; } else { const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState); if (allPossibleJumps.length > 0) { bestHintMove = allPossibleJumps[Math.floor(Math.random() * allPossibleJumps.length)]; } else { const regularMoves = getAllPossibleMoves(currentPlayer, false, boardState); if (regularMoves.length > 0) { bestHintMove = regularMoves[Math.floor(Math.random() * regularMoves.length)]; } } } if (bestHintMove) { const pieceSquare = getSquareElement(bestHintMove.origin.r, bestHintMove.origin.c); const targetSquare = getSquareElement(bestHintMove.row, bestHintMove.col); const pieceElement = pieceSquare?.querySelector('.piece'); if (pieceElement && targetSquare) { pieceElement.classList.add('hint-piece-suggestion'); targetSquare.classList.add('hint-move-suggestion'); targetSquare.classList.add('possible-move'); hintTimeoutId = setTimeout(clearHintHighlights, 2500); } } }
+        function showHint() { clearHintHighlights(); if (isGameOver || isAiThinking || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || window.innerHeight > window.innerWidth) { return; } let bestHintMove; if (gameMode === 'ai' || aiDifficulty !== DIFFICULTIES.EASY) { bestHintMove = findBestMoveMinimax(currentPlayer, aiDifficulty === DIFFICULTIES.HARD ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM).move; } else { const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState); if (allPossibleJumps.length > 0) { bestHintMove = allPossibleJumps[Math.floor(Math.random() * allPossibleJumps.length)]; } else { const regularMoves = getAllPossibleMoves(currentPlayer, false, boardState); if (regularMoves.length > 0) { bestHintMove = regularMoves[Math.floor(Math.random() * regularMoves.length)]; } } } if (bestHintMove) { const pieceSquare = getSquareElement(bestHintMove.origin.r, bestHintMove.origin.c); const targetSquare = getSquareElement(bestHintMove.row, bestHintMove.col); const pieceElement = pieceSquare?.querySelector('.piece'); if (pieceElement && targetSquare) { pieceElement.classList.add('hint-piece-suggestion'); targetSquare.classList.add('hint-move-suggestion'); targetSquare.classList.add('possible-move'); hintTimeoutId = setTimeout(clearHintHighlights, 2500); } } }
 
         // --- AI Logic ---
-        function makeAiMove() { if (isGameOver || currentPlayer !== AI_PLAYER) { isAiThinking = false; requestRender(); return; } let bestMoveResult; if (continuousJumpPossible && selectedPiece && selectedPiece.player === AI_PLAYER) { const nextJumps = calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState); if (nextJumps.length > 0) { bestMoveResult = { move: nextJumps[0], score: 0 }; } else { continuousJumpPossible = false; bestMoveResult = findBestMoveForAI(); } } else { bestMoveResult = findBestMoveForAI(); } if (bestMoveResult && bestMoveResult.move) { const chosenMove = bestMoveResult.move; saveCurrentStateToHistory(); const aiPieceSquare = getSquareElement(chosenMove.origin.r, chosenMove.origin.c); const aiPieceElement = aiPieceSquare?.querySelector('.piece'); selectedPiece = { row: chosenMove.origin.r, col: chosenMove.origin.c, player: AI_PLAYER, element: aiPieceElement }; animateAndMovePiece(chosenMove.origin.r, chosenMove.origin.c, chosenMove); } else { isAiThinking = false; endTurn(); } }
+        function makeAiMove() { if (isGameOver || currentPlayer !== AI_PLAYER || window.innerHeight > window.innerWidth) { isAiThinking = false; requestRender(); return; } let bestMoveResult; if (continuousJumpPossible && selectedPiece && selectedPiece.player === AI_PLAYER) { const nextJumps = calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState); if (nextJumps.length > 0) { bestMoveResult = { move: nextJumps[0], score: 0 }; } else { continuousJumpPossible = false; bestMoveResult = findBestMoveForAI(); } } else { bestMoveResult = findBestMoveForAI(); } if (bestMoveResult && bestMoveResult.move) { const chosenMove = bestMoveResult.move; saveCurrentStateToHistory(); const aiPieceSquare = getSquareElement(chosenMove.origin.r, chosenMove.origin.c); const aiPieceElement = aiPieceSquare?.querySelector('.piece'); selectedPiece = { row: chosenMove.origin.r, col: chosenMove.origin.c, player: AI_PLAYER, element: aiPieceElement }; animateAndMovePiece(chosenMove.origin.r, chosenMove.origin.c, chosenMove); } else { isAiThinking = false; endTurn(); } }
         function findBestMoveForAI() { if (aiDifficulty === DIFFICULTIES.EASY) { const allPossibleJumps = getAllPossibleMoves(AI_PLAYER, true, boardState); let possibleAiMoves; if (allPossibleJumps.length > 0) { possibleAiMoves = allPossibleJumps; } else { possibleAiMoves = getAllPossibleMoves(AI_PLAYER, false, boardState); } if (possibleAiMoves.length === 0) { return null; } const randomMove = possibleAiMoves[Math.floor(Math.random() * possibleAiMoves.length)]; return { move: randomMove, score: 0 }; } else { const depth = (aiDifficulty === DIFFICULTIES.HARD) ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM; return findBestMoveMinimax(AI_PLAYER, depth); } }
         function findBestMoveMinimax(player, depth) { let bestScore = -Infinity; let bestMove = null; const possibleMoves = getAllPossibleMoves(player, false, boardState); if (possibleMoves.length === 0) { return { move: null, score: evaluateBoard(boardState, player, depth) }; } possibleMoves.forEach(move => { const tempBoard = deepCopyBoard(boardState); simulateMove(tempBoard, move); let finalBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); } const score = minimax(finalBoardState, depth - 1, -Infinity, Infinity, false, getOpponent(currentPlayer), player); if (score > bestScore) { bestScore = score; bestMove = move; } }); if (!bestMove && possibleMoves.length > 0) { bestMove = possibleMoves[0]; } return { move: bestMove, score: bestScore }; }
-        function minimax(currentBoard, depth, alpha, beta, isMaximizingPlayer, currentPlayerMM, originalPlayer) { if (depth === 0 || checkGameOverSimulated(currentBoard, currentPlayerMM)) { return evaluateBoard(currentBoard, originalPlayer, depth); } const possibleMoves = getAllPossibleMoves(currentPlayerMM, false, currentBoard); if (isMaximizingPlayer) { let maxEval = -Infinity; for (const move of possibleMoves) { const tempBoard = deepCopyBoard(currentBoard); simulateMove(tempBoard, move); let nextBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); if (nextJumps.length > 0) { maxEval = Math.max(maxEval, minimax(nextBoardState, depth, alpha, beta, true, currentPlayerMM, originalPlayer)); alpha = Math.max(alpha, maxEval); if (beta <= alpha) break; continue; } } const evalScore = minimax(nextBoardState, depth - 1, alpha, beta, false, getOpponent(currentPlayerMM), originalPlayer); maxEval = Math.max(maxEval, evalScore); alpha = Math.max(alpha, evalScore); if (beta <= alpha) break; } if (possibleMoves.length === 0) { return evaluateBoard(currentBoard, originalPlayer, depth); } return maxEval; } else { let minEval = Infinity; for (const move of possibleMoves) { const tempBoard = deepCopyBoard(currentBoard); simulateMove(tempBoard, move); let nextBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); if (nextJumps.length > 0) { minEval = Math.min(minEval, minimax(nextBoardState, depth, alpha, beta, false, currentPlayerMM, originalPlayer)); beta = Math.min(beta, minEval); if (beta <= alpha) break; continue; } } const evalScore = minimax(nextBoardState, depth - 1, alpha, beta, true, getOpponent(currentPlayerMM), originalPlayer); minEval = Math.min(minEval, evalScore); beta = Math.min(beta, evalScore); if (beta <= alpha) break; } if (possibleMoves.length === 0) { return evaluateBoard(currentBoard, originalPlayer, depth); } return minEval; } }
-        function evaluateBoard(currentBoard, player, depth = 0) { let score = 0; const opponent = getOpponent(player); const WIN_SCORE = 1000; const KING_VALUE = 3; const PIECE_VALUE = 1; const ADVANCEMENT_VALUE = 0.1; let myPieces = 0, oppPieces = 0; let myKings = 0, oppKings = 0; let myMoves = 0, oppMoves = 0; let oppCanMove = false, myCanMove = false; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = currentBoard[r][c]; if (piece) { const pieceMoves = calculateMovesForPieceInternal(r,c,false, currentBoard).length; if (piece.player === player) { myPieces++; if (pieceMoves > 0) myCanMove = true; myMoves += pieceMoves; score += PIECE_VALUE; if (piece.isKing) { myKings++; score += KING_VALUE - PIECE_VALUE; } else { score += (player === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r)) * ADVANCEMENT_VALUE; } } else { oppPieces++; if (pieceMoves > 0) oppCanMove = true; oppMoves += pieceMoves; score -= PIECE_VALUE; if (piece.isKing) { oppKings++; score -= KING_VALUE - PIECE_VALUE; } else { score -= (opponent === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r)) * ADVANCEMENT_VALUE; } } } } } let currentDepthPassed = depth; if (oppPieces === 0 || !oppCanMove) { return WIN_SCORE + currentDepthPassed; } if (myPieces === 0 || !myCanMove) { return -WIN_SCORE - currentDepthPassed; } score += (myKings * KING_VALUE + (myPieces - myKings) * PIECE_VALUE); score -= (oppKings * KING_VALUE + (oppPieces - oppkings) * PIECE_VALUE); return score; }
+        function minimax(currentBoard, depth, alpha, beta, isMaximizingPlayer, currentPlayerMM, originalPlayer) { if (depth === 0 || checkGameOverSimulated(currentBoard, currentPlayerMM)) { return evaluateBoard(currentBoard, originalPlayer, depth); } const possibleMoves = getAllPossibleMoves(currentPlayerMM, false, currentBoard); if (isMaximizingPlayer) { let maxEval = -Infinity; for (const move of possibleMoves) { const tempBoard = deepCopyBoard(currentBoard); simulateMove(tempBoard, move); let nextBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); if (nextJumps.length > 0) { maxEval = Math.max(maxEval, minimax(nextBoardState, depth, alpha, beta, true, currentPlayerMM, originalPlayer)); alpha = Math.max(alpha, maxEval); if (beta <= alpha) break; continue; } } const evalScore = minimax(nextBoardState, depth - 1, alpha, beta, true, getOpponent(currentPlayerMM), originalPlayer); maxEval = Math.max(maxEval, evalScore); alpha = Math.max(alpha, evalScore); if (beta <= alpha) break; } if (possibleMoves.length === 0) { return evaluateBoard(currentBoard, originalPlayer, depth); } return maxEval; } else { let minEval = Infinity; for (const move of possibleMoves) { const tempBoard = deepCopyBoard(currentBoard); simulateMove(tempBoard, move); let nextBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); if (nextJumps.length > 0) { minEval = Math.min(minEval, minimax(nextBoardState, depth, alpha, beta, false, currentPlayerMM, originalPlayer)); beta = Math.min(beta, minEval); if (beta <= alpha) break; continue; } } const evalScore = minimax(nextBoardState, depth - 1, alpha, beta, true, getOpponent(currentPlayerMM), originalPlayer); minEval = Math.min(minEval, evalScore); beta = Math.min(beta, evalScore); if (beta <= alpha) break; } if (possibleMoves.length === 0) { return evaluateBoard(currentBoard, originalPlayer, depth); } return minEval; } }
+        function evaluateBoard(currentBoard, player, depth = 0) { let score = 0; const opponent = getOpponent(player); const WIN_SCORE = 1000; const KING_VALUE = 3; const PIECE_VALUE = 1; const ADVANCEMENT_VALUE = 0.1; let myPieces = 0, oppPieces = 0; let myKings = 0, oppKings = 0; let myMoves = 0, oppMoves = 0; let oppCanMove = false, myCanMove = false; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = currentBoard[r][c]; if (piece) { const pieceMoves = calculateMovesForPieceInternal(r,c,false, currentBoard).length; if (piece.player === player) { myPieces++; if (pieceMoves > 0) myCanMove = true; myMoves += pieceMoves; score += PIECE_VALUE; if (piece.isKing) { myKings++; score += KING_VALUE - PIECE_VALUE; } else { score += (player === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r)) * ADVANCEMENT_VALUE; } } else { oppPieces++; if (pieceMoves > 0) oppCanMove = true; oppMoves += pieceMoves; score -= PIECE_VALUE; if (piece.isKing) { oppKings++; score -= KING_VALUE - PIECE_VALUE; } else { score -= (opponent === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r)) * ADVANCEMENT_VALUE; } } } } } let currentDepthPassed = depth; if (oppPieces === 0 || !oppCanMove) { return WIN_SCORE + currentDepthPassed; } if (myPieces === 0 || !myCanMove) { return -WIN_SCORE - currentDepthPassed; } score += (myKings * KING_VALUE + (myPieces - myKings) * PIECE_VALUE); score -= (oppKings * KING_VALUE + (oppPieces - oppKings) * PIECE_VALUE); // Fixed oppkings typo
+        return score; }
         function simulateMove(board, move) { const pieceData = board[move.origin.r][move.origin.c]; if (!pieceData) return; board[move.row][move.col] = pieceData; board[move.origin.r][move.origin.c] = null; if (move.isJump && move.captured) { board[move.captured.row][move.captured.col] = null; } if (!pieceData.isKing) { if ((pieceData.player === PLAYER_BLACK && move.row === 0) || (pieceData.player === PLAYER_WHITE && move.row === BOARD_SIZE - 1)) { pieceData.isKing = true; } } }
         function checkGameOverSimulated(board, playerToCheck) { let pieces = 0; let canMove = false; for(let r=0; r<BOARD_SIZE; r++){ for(let c=0; c<BOARD_SIZE; c++){ if(board[r][c]?.player === playerToCheck){ pieces++; if(!canMove && calculateMovesForPieceInternal(r, c, false, board).length > 0){ canMove = true; } } } } return pieces === 0 || !canMove; }
-        function addHoverEffects() { removeHoverEffects(); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER); if (isInteractionBlocked) return; boardElement.querySelectorAll(`.piece.${currentPlayer}-piece:not(.selected)`).forEach(piece => { const square = piece.closest('.square'); if (!square) return; const r = parseInt(square.dataset.row); const c = parseInt(square.dataset.col); const isHoverable = (!selectedPiece || (selectedPiece.row === r && selectedPiece.col === c)) && !continuousJumpPossible ; if (isHoverable) { const movesForThisPiece = calculateMovesForPiece(r, c, false, boardState); if (movesForThisPiece.length > 0) { piece.classList.add('hoverable'); piece.style.cursor = 'grab'; } else { piece.style.cursor = 'default'; } } else { piece.style.cursor = 'default'; } }); if (selectedPiece && selectedPiece.element && boardElement.contains(selectedPiece.element)) { selectedPiece.element.style.cursor = 'grab'; } }
+        function addHoverEffects() { removeHoverEffects(); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || window.innerHeight > window.innerWidth; // Add check for portrait mode
+        if (isInteractionBlocked) return; boardElement.querySelectorAll(`.piece.${currentPlayer}-piece:not(.selected)`).forEach(piece => { const square = piece.closest('.square'); if (!square) return; const r = parseInt(square.dataset.row); const c = parseInt(square.dataset.col); const isHoverable = (!selectedPiece || (selectedPiece.row === r && selectedPiece.col === c)) && !continuousJumpPossible ; if (isHoverable) { const movesForThisPiece = calculateMovesForPiece(r, c, false, boardState); if (movesForThisPiece.length > 0) { piece.classList.add('hoverable'); piece.style.cursor = 'grab'; } else { piece.style.cursor = 'default'; } } else { piece.style.cursor = 'default'; } } ); if (selectedPiece && selectedPiece.element && boardElement.contains(selectedPiece.element)) { selectedPiece.element.style.cursor = 'grab'; } }
         function removeHoverEffects() { document.querySelectorAll('.piece.hoverable').forEach(p => p.classList.remove('hoverable')); }
 
         // --- Initialization on Load ---
         document.addEventListener('DOMContentLoaded', () => {
             console.log("DOM Loaded. Initializing...");
+
+            // --- Orientation Handling ---
+            function lockOrientation() {
+                // Check if the Screen Orientation API is supported
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock('landscape')
+                        .then(() => {
+                            console.log("Screen orientation locked to landscape.");
+                            // If successfully locked, the CSS media query will handle hiding the message
+                        })
+                        .catch((error) => {
+                            console.warn("Screen orientation lock failed:", error);
+                            // If locking fails, the CSS media query will display the message
+                        });
+                } else {
+                    console.warn("Screen Orientation API or lock() method not supported.");
+                    // If API is not supported, the CSS media query will display the message
+                }
+            }
+
+            // Attempt to lock orientation immediately when DOM is ready
+            lockOrientation();
+            // The CSS media query handles the visual state based on orientation change.
+
             updateSoundButtonIcon(); updateTimerButtonIcon();
             settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible');
             settingsOverlay.style.display = 'none';
