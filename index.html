@@ -108,9 +108,9 @@
         .start-button {
             font-family: 'Roboto', 'Cairo', sans-serif;
             font-size: clamp(1.4em, 4.5vh, 2em); /* Scales font size */
-            padding: clamp(12px, 3vh, 25px) clamp(25px, 6vw, 50px); /* Responsive padding */
+            padding: clamp(15px, 3.5vh, 25px) clamp(30px, 7vw, 50px); /* Increased responsive padding */
             margin: clamp(10px, 2vh, 20px) 0; /* Responsive vertical margin, zero horizontal */
-            min-width: clamp(260px, 60vw, 400px); /* Responsive min-width */
+            min-width: clamp(280px, 65vw, 400px); /* Increased responsive min-width */
             max-width: 95%; /* Max width to prevent overflow */
             cursor: pointer;
             border: none;
@@ -243,7 +243,7 @@
             justify-content: center; /* Center items vertically */
             width: 100%;
             height: 100%;
-            padding: clamp(10px, 2vh, 20px) clamp(5px, 1vw, 15px); /* Responsive padding */
+            padding: clamp(10px, 2vh, 20px) clamp(5px, 2vw, 15px); /* Horizontal padding uses vw */
             gap: clamp(10px, 2vh, 15px); /* Responsive gap */
             box-sizing: border-box;
             position: relative;
@@ -344,7 +344,7 @@
         /* --- Board & Piece Styles --- */
         #board {
             display: grid;
-            /* Define square size relative to viewport, clamped between min/max px */
+            /* Define square size primarily relative to viewport height, clamped between min/max px */
             --square-size: clamp(40px, 9.5vmin, 75px);
             --board-size: calc(var(--square-size) * 8); /* Board size is 8 squares */
             grid-template-columns: repeat(8, var(--square-size));
@@ -354,7 +354,7 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.4);
             border-radius: 8px;
             position: relative;
-            margin: 0 auto; /* Center the board */
+            margin: 0 auto; /* Center the board initially */
             max-width: 95vmin; /* Ensure board fits in viewport */
             max-height: 95vmin;
             aspect-ratio: 1 / 1; /* Ensure it's square */
@@ -417,7 +417,7 @@
         /* Hint animation for pieces that MUST jump */
         .piece.jump-hint {
             outline-color: rgba(0, 255, 0, 0.7);
-            outline-width: 3px; /* Fixed outline width */
+            outline-width: clamp(2px, 0.5vmin, 3px); /* Responsive outline width */
             animation: hintPulseGreen 1.5s infinite ease-in-out !important;
         }
         @keyframes hintPulseGreen {
@@ -510,7 +510,7 @@
         /* --- General Piece Modifiers --- */
         .selected {
             z-index: 20;
-            transform: translate(-50%, -50%) scale(1.05); /* Slightly larger when selected */
+            transform: translate(-50%, -50%) scale(1.05); /* Slightly enlarge when selected */
             outline-width: 0px !important; /* Hide hint/jump outline when selected */
             animation: none !important;
         }
@@ -523,7 +523,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 255, 0, 0.15);
-            border: 2px solid rgba(0, 255, 0, 0.4); /* Fixed border for visibility */
+            border: clamp(1px, 0.3vmin, 2px) solid rgba(0, 255, 0, 0.4); /* Responsive border for visibility */
             border-radius: 50%;
             pointer-events: none;
             z-index: 5;
@@ -539,7 +539,7 @@
 
         /* Hint animation for suggesting a move */
         .hint-piece-suggestion {
-            outline: 4px dashed #ffdd00 !important; /* Fixed outline width/style */
+            outline: clamp(3px, 0.7vmin, 4px) dashed #ffdd00 !important; /* Responsive outline width/style */
             outline-offset: 3px;
             animation: hintPulseYellow 1s infinite !important;
             z-index: 22 !important;
@@ -613,8 +613,8 @@
         }
         #back-to-menu-button {
             font-family: 'Roboto', 'Cairo', sans-serif;
-            font-size: clamp(1em, 2.5vh, 1.1em); /* Scales font size */
-            padding: clamp(8px, 1.5vh, 10px) clamp(20px, 4vw, 25px); /* Responsive padding */
+            font-size: clamp(1.1em, 2.5vh, 1.2em); /* Increased font size */
+            padding: clamp(10px, 2vh, 12px) clamp(24px, 5vw, 28px); /* Increased responsive padding */
             cursor: pointer;
             border: none;
             border-radius: 8px;
@@ -681,7 +681,7 @@
             justify-content: center;
             width: clamp(40px, 6vmin, 45px); /* Responsive size */
             height: clamp(40px, 6vmin, 45px); /* Responsive size */
-            font-size: clamp(1.1em, 2.2vh, 1.3em); /* Scales icon size */
+            font-size: clamp(1.2em, 2.5vh, 1.3em); /* Slightly increased icon size */
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -801,8 +801,8 @@
 
         .close-selection-button {
             font-family: 'Roboto', 'Cairo', sans-serif;
-            font-size: clamp(1em, 2.5vh, 1.1em); /* Scales font size */
-            padding: clamp(10px, 2vh, 12px) clamp(24px, 5vw, 28px); /* Responsive padding */
+            font-size: clamp(1.1em, 2.5vh, 1.2em); /* Increased font size */
+            padding: clamp(10px, 2vh, 12px) clamp(24px, 5vw, 28px); /* Increased responsive padding */
             cursor: pointer;
             border: none;
             border-radius: 10px;
@@ -940,9 +940,11 @@
         /* but media queries are still useful for layout adjustments (like grid columns) */
         /* or specific overrides that clamp can't handle alone. */
 
+        /* Tablet and larger phone portrait */
          @media (max-height: 800px), (max-width: 700px) {
              /* Adjust base square size breakpoint if needed */
              #board { --square-size: clamp(40px, 9vmin, 70px); } /* Slightly adjust clamp max */
+
              /* Overlay content and options container adjustments */
              .selection-content { padding: clamp(15px, 3vh, 20px); max-width: 90%; }
              .options-container { grid-template-columns: repeat(auto-fit, minmax(clamp(80px, 12vw, 110px), 1fr)); gap: clamp(10px, 2vw, 15px); } /* Adjust minmax/gap */
@@ -951,13 +953,20 @@
              .piece-preview { width: clamp(25px, 3.5vmin, 32px); height: clamp(25px, 3.5vmin, 32px); }
              .piece-preview-container { height: clamp(30px, 4.5vh, 40px); gap: clamp(4px, 0.8vw, 6px); } /* Adjust height/gap */
              .selection-content h2 { font-size: clamp(1.4em, 3.5vh, 1.6em); } /* Adjust title size */
-             .close-selection-button { font-size: clamp(0.9em, 2vh, 1em); padding: clamp(8px, 1.5vh, 10px) clamp(20px, 4vw, 24px); } /* Adjust button size */
+             .close-selection-button { font-size: clamp(1em, 2vh, 1.1em); padding: clamp(8px, 1.5vh, 10px) clamp(20px, 4vw, 24px); } /* Adjust button size */
              #confirmation-modal .selection-content { max-width: 90%; } /* Ensure confirmation fits */
              #confirmation-message { font-size: clamp(1em, 2vh, 1.2em); } /* Adjust message size */
          }
 
+         /* Portrait phones */
          @media (max-height: 650px), (max-width: 550px) {
-             #board { --square-size: clamp(35px, 8.5vmin, 65px); } /* Further adjust clamp max */
+             /* Make board width primarily scale with viewport width */
+             #board {
+                 /* Use min(11vw, 9.5vmin) - prioritize 11vw on narrow screens, fall back to 9.5vmin on wider ones */
+                 /* Ensure height constraint from vmin is still considered to prevent excessive board height */
+                 --square-size: clamp(35px, min(11.5vw, 9.5vmin), 65px); /* Increased vw factor, clamped by vmin and px */
+             }
+
               /* Status bar flex-wrap takes care of stacking sections */
              #status-bar { flex-direction: column; align-items: stretch; /* Stretch items to fill width */ padding: clamp(8px, 1.5vh, 15px); gap: clamp(8px, 1.5vh, 15px); }
              #turn-indicators { order: 2; width: 100%; justify-content: center; min-width: auto; } /* Center indicators */
@@ -977,13 +986,19 @@
              .selection-content h2 { font-size: clamp(1.3em, 3vh, 1.5em); } /* Adjust title size */
          }
 
+        /* Smaller portrait phones */
          @media (max-height: 500px), (max-width: 400px) {
-             #board { --square-size: clamp(30px, 8vmin, 55px); } /* Further adjust clamp max */
+             /* Make board width scale even more with viewport width */
+              #board {
+                  /* Use min(12vw, 9.5vmin) - prioritize 12vw on very narrow screens */
+                  --square-size: clamp(30px, min(12vw, 9.5vmin), 55px); /* Increased vw factor */
+              }
+
              /* Start screen padding */
              #start-screen { padding: clamp(15px, 3vh, 30px); }
              #main-title { margin-bottom: clamp(20px, 5vh, 40px); }
              #start-screen h2#start-subtitle { margin-bottom: clamp(15px, 3vh, 25px); }
-             .start-button { min-width: clamp(200px, 70vw, 300px); }
+             .start-button { min-width: clamp(220px, 75vw, 300px); padding: clamp(12px, 2.5vh, 20px) clamp(25px, 6vw, 40px); } /* Increased min-width and padding */
 
               /* Status bar adjustments */
              #status-bar { padding: clamp(5px, 1vh, 10px); gap: clamp(5px, 1vh, 10px); }
@@ -997,25 +1012,25 @@
              #ai-difficulty-selector-container h3 { font-size: clamp(1.2em, 3.5vh, 1.4em); margin-bottom: clamp(15px, 3vh, 20px); }
              #difficulty-display { font-size: clamp(1.4em, 4vh, 1.8em); min-width: clamp(80px, 18vw, 100px); }
              .difficulty-arrow-button { font-size: clamp(1.3em, 3vh, 1.5em); padding: clamp(6px, 1vh, 8px) clamp(10px, 2vw, 14px); }
-             #confirm-difficulty-button { min-width: clamp(200px, 65vw, 300px); }
+             #confirm-difficulty-button { min-width: clamp(220px, 70vw, 300px); padding: clamp(10px, 2vh, 20px) clamp(20px, 5vw, 40px);} /* Increased min-width/padding */
              #close-difficulty-selector { font-size: clamp(1.2em, 2.5vh, 1.4em); }
 
 
              /* Overlay content and options container adjustments */
              .selection-content { padding: clamp(10px, 2vh, 15px); max-height: 85vh;}
              .options-container { grid-template-columns: repeat(2, 1fr); gap: clamp(8px, 1.5vw, 10px); padding-left: 5px; padding-right: 8px; padding-bottom: 10px; } /* Fixed 2 columns */
-             .option-button { min-height: clamp(60px, 8vh, 70px); padding: clamp(4px, 0.8vh, 6px); font-size: clamp(0.7em, 1.8vh, 0.8em); }
+             .option-button { padding: clamp(4px, 0.8vh, 6px); font-size: clamp(0.7em, 1.8vh, 0.8em); min-height: clamp(65px, 8.5vh, 75px); } /* Adjusted min-height */
              .board-preview { width: clamp(25px, 4vmin, 35px); height: clamp(25px, 4vmin, 35px); margin-bottom: clamp(4px, 0.8vh, 6px);}
              .piece-preview { width: clamp(20px, 2.8vmin, 25px); height: clamp(20px, 2.8vmin, 25px); }
              .piece-preview-container { height: clamp(20px, 3.5vh, 30px); gap: clamp(3px, 0.5vw, 5px); }
              .selection-content h2 { font-size: clamp(1.2em, 2.5vh, 1.3em); margin-bottom: clamp(8px, 1.5vh, 10px);}
-             .close-selection-button { font-size: clamp(0.8em, 1.8vh, 0.9em); padding: clamp(6px, 1vh, 8px) clamp(15px, 3vw, 20px);}
+             .close-selection-button { font-size: clamp(0.9em, 1.8vh, 1em); padding: clamp(8px, 1.5vh, 10px) clamp(15px, 3vw, 20px);} /* Adjusted font size/padding */
 
              /* Confirmation modal adjustments */
              #confirmation-modal .selection-content { max-width: 95%; padding: clamp(20px, 4vh, 25px) clamp(15px, 3vw, 20px); }
              #confirmation-message { font-size: clamp(1em, 2vh, 1.1em); margin-bottom: clamp(15px, 3vh, 20px); }
              #confirmation-buttons { margin-top: clamp(10px, 2vh, 15px); gap: clamp(10px, 2vh, 15px); }
-             #confirmation-buttons button { font-size: clamp(0.8em, 1.8vh, 0.9em); padding: clamp(6px, 1vh, 8px) clamp(10px, 2vw, 18px); }
+             #confirmation-buttons button { font-size: clamp(0.9em, 1.8vh, 1em); padding: clamp(8px, 1.5vh, 10px) clamp(10px, 2vw, 18px); } /* Adjusted font size/padding */
          }
 
 
@@ -1567,7 +1582,7 @@
                        currentScore = minimax(tempBoard, depth, -Infinity, Infinity, player === AI_PLAYER, player, player).score; // Stay on current player, pass AI player as original
                   } else {
                        // No subsequent jumps, or it was a regular move. Switch to the opponent's turn.
-                       currentScore = minimax(tempBoard, depth - 1, -Infinity, Infinity, player === AI_PLAYER ? false : true, getOpponent(player), player).score;
+                       currentScore = minimax(tempBoard, depth - 1, -Infinity, Infinity, player === AI_PLAYER ? false : true, getOpponent(currentPlayerMM), player).score;
                   }
 
 
