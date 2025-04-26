@@ -1,3 +1,5 @@
+--- START OF FILE index.html ---
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -9,24 +11,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* --- Base Styles --- */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Prevent scrolling on the main page */
-            box-sizing: border-box;
-            touch-action: none; /* Disable default touch behaviors */
-        }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
         body {
             font-family: 'Roboto', 'Cairo', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh; /* Ensure body covers full viewport height */
-            background-color: #321e06; /* Dark wood brown */
-            color: #e0d6c8; /* Light tan */
+            min-height: 100vh;
+            background-color: #321e06;
+            color: #e0d6c8;
+            box-sizing: border-box;
             position: relative;
+            touch-action: none;
         }
 
         /* --- Start Screen --- */
@@ -46,13 +43,11 @@
             text-align: center;
             z-index: 120;
             box-sizing: border-box;
-            padding: clamp(20px, 5vh, 60px) clamp(15px, 5vw, 40px); /* Responsive padding */
+            padding: 5vh 20px;
             transition: opacity 0.3s ease-out, visibility 0s linear 0.3s;
             opacity: 1;
             visibility: visible;
-            overflow-y: auto; /* Allow scrolling if content exceeds height */
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        }
+         }
         #start-screen.hidden-completely {
             opacity: 0;
             visibility: hidden;
@@ -60,95 +55,67 @@
         }
 
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
         #main-title {
-            font-size: clamp(3.5em, 13vh, 7em); /* Scales font size */
+            font-size: clamp(3.5em, 13vh, 7em);
             color: #e8d5b7;
             font-weight: 700;
-            margin-bottom: clamp(30px, 7vh, 60px); /* Responsive spacing */
+            margin-bottom: clamp(30px, 7vh, 60px); /* Increased spacing */
             text-shadow: 0 0 7px #fff, 0 0 14px #ffd700, 5px 5px 5px rgba(0,0,0,0.6);
-            letter-spacing: clamp(1px, 0.8vw, 4px); /* Responsive letter spacing */
+            letter-spacing: 4px;
             font-family: 'Roboto', 'Cairo', Impact, sans-serif;
             opacity: 0;
             animation: fadeInTitle 1s ease-out 0.5s forwards;
             transition: opacity 0.4s ease-out;
             flex-shrink: 0;
-            max-width: 95vw; /* Prevent overflow on very narrow screens */
-            word-break: break-word; /* Break long words if necessary */
         }
         @keyframes fadeInTitle { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
         #start-screen h2#start-subtitle {
-            font-size: clamp(1.6em, 5vh, 2.5em); /* Scales font size */
+            font-size: clamp(1.6em, 5vh, 2.5em);
             color: #f0e5d1;
             margin-top: 0;
-            margin-bottom: clamp(25px, 5vh, 40px); /* Responsive spacing */
+            margin-bottom: clamp(25px, 5vh, 40px);
             opacity: 0;
             animation: fadeInSubtitle 1s ease-out 1s forwards;
             text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
             transition: opacity 0.4s ease-out;
             flex-shrink: 0;
-             max-width: 95vw; /* Prevent overflow */
-            word-break: break-word;
         }
         @keyframes fadeInSubtitle { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        #start-options {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            opacity: 1;
-            transition: opacity 0.5s ease-out;
-            flex-shrink: 0;
-            padding: 0 clamp(10px, 2vw, 30px); /* Added horizontal padding */
-            box-sizing: border-box;
-        }
-
-        .start-button {
-            font-family: 'Roboto', 'Cairo', sans-serif;
-            font-size: clamp(1.4em, 4.5vh, 2em); /* Scales font size */
-            padding: clamp(15px, 3.5vh, 25px) clamp(30px, 7vw, 50px); /* Increased responsive padding */
-            margin: clamp(10px, 2vh, 20px) 0; /* Responsive vertical margin, zero horizontal */
-            min-width: clamp(280px, 65vw, 400px); /* Increased responsive min-width */
-            max-width: 95%; /* Max width to prevent overflow */
-            cursor: pointer;
-            border: none;
-            border-radius: 20px;
-            background: linear-gradient(to bottom, #966f4d, #7a542e);
-            color: #ffffff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            box-shadow: 0 7px 12px rgba(0,0,0,0.45), inset 0 1px 2px rgba(255,255,255,0.2);
-            transition: all 0.2s ease;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUpButton 0.6s ease-out forwards;
-            flex-shrink: 0;
-            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        #start-options { display: flex; flex-direction: column; align-items: center; width: 100%; opacity: 1; transition: opacity 0.5s ease-out; flex-shrink: 0; }
+        .start-button { 
+            font-family: 'Roboto', 'Cairo', sans-serif; 
+            font-size: clamp(1.3em, 4vh, 1.8em); /* Adjusted font size */
+            padding: clamp(10px, 2.5vh, 22px) clamp(20px, 5vw, 40px); /* Adjusted padding */
+            margin: clamp(8px, 1.8vh, 18px); /* Adjusted margin */
+            min-width: clamp(240px, 50vw, 360px); /* Adjusted min-width */
+            cursor: pointer; 
+            border: none; 
+            border-radius: 18px; /* Adjusted border-radius */
+            background: linear-gradient(to bottom, #966f4d, #7a542e); 
+            color: #ffffff; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); 
+            box-shadow: 0 6px 10px rgba(0,0,0,0.45), inset 0 1px 2px rgba(255,255,255,0.2); 
+            transition: all 0.2s ease; 
+            opacity: 0; 
+            transform: translateY(20px); 
+            animation: fadeInUpButton 0.6s ease-out forwards; 
+            flex-shrink: 0; 
         }
         #vs-human-button { animation-delay: 1.3s; }
         #vs-ai-button { animation-delay: 1.5s; }
         @keyframes fadeInUpButton { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .start-button:hover {
-            background: linear-gradient(to bottom, #a07551, #8b5e3c);
-            box-shadow: 0 9px 16px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.2);
-            transform: translateY(-4px) scale(1.04);
-        }
-        .start-button:active {
-            transform: translateY(0px) scale(1);
-            box-shadow: 0 5px 8px rgba(0,0,0,0.4), inset 0 1px 2px rgba(0,0,0,0.25);
-        }
+        .start-button:hover { background: linear-gradient(to bottom, #a07551, #8b5e3c); box-shadow: 0 8px 14px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.2); transform: translateY(-3px) scale(1.03); }
+        .start-button:active { transform: translateY(0px) scale(1); box-shadow: 0 5px 8px rgba(0,0,0,0.4), inset 0 1px 2px rgba(0,0,0,0.25); }
 
         /* --- AI Difficulty Selector --- */
         #ai-difficulty-selector-container {
-            display: none; /* Managed by JS */
+            display: none;
             flex-direction: column;
             align-items: center;
-            width: clamp(300px, 75vw, 480px); /* Responsive width */
-            padding: clamp(20px, 4vh, 30px) clamp(20px, 5vw, 35px); /* Responsive padding */
+            width: clamp(280px, 70vw, 450px); /* Adjusted width */
+            padding: 25px 30px; /* Adjusted padding */
             background-color: #3a281a;
-            border-radius: 15px;
+            border-radius: 12px; /* Adjusted border-radius */
             border: 1px solid #6b4f3b;
             z-index: 130;
             opacity: 0;
@@ -158,913 +125,284 @@
             transform: translate(-50%, -50%) scale(0.9);
             transition: opacity 0.3s ease-out 0.1s, transform 0.3s ease-out 0.1s;
             visibility: hidden;
-            box-sizing: border-box;
-            text-align: center; /* Center text inside */
         }
         #ai-difficulty-selector-container.visible {
-            display: flex; /* Managed by JS */
+            display: flex;
             opacity: 1;
             transform: translate(-50%, -50%) scale(1);
             visibility: visible;
         }
-        #ai-difficulty-selector-container h3 {
-            color: #f0e5d1;
-            margin-top: 0;
-            margin-bottom: clamp(20px, 4vh, 30px); /* Responsive margin */
-            font-size: clamp(1.4em, 4vh, 1.8em); /* Scales font size */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-             max-width: 100%; /* Prevent overflow */
-             word-break: break-word;
+        #ai-difficulty-selector-container h3 { color: #f0e5d1; margin-top: 0; margin-bottom: 25px; font-size: clamp(1.3em, 3.8vh, 1.7em); text-shadow: 1px 1px 2px rgba(0,0,0,0.4); }
+        .difficulty-control { display: flex; align-items: center; justify-content: center; gap: 25px; width: 100%; margin-bottom: 30px; }
+        .difficulty-arrow-button { 
+            background: linear-gradient(to bottom, #966f4d, #7a542e); 
+            border: none; 
+            color: white; 
+            font-size: 1.6em; /* Adjusted font size */
+            padding: 8px 16px; /* Adjusted padding */
+            border-radius: 8px; /* Adjusted border-radius */
+            cursor: pointer; 
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3); 
+            transition: all 0.2s ease; 
+            flex-shrink: 0; 
         }
-        .difficulty-control {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: clamp(15px, 3vw, 30px); /* Responsive gap */
-            width: 100%;
-            margin-bottom: clamp(25px, 5vh, 35px); /* Responsive margin */
+        .difficulty-arrow-button:hover { background: linear-gradient(to bottom, #a07551, #8b5e3c); transform: scale(1.04); }
+        .difficulty-arrow-button:active { transform: scale(0.97); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        #difficulty-display { font-size: clamp(1.5em, 4.3vh, 2em); font-weight: bold; color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.6); min-width: 110px; text-align: center; }
+        #confirm-difficulty-button { 
+            font-size: clamp(1.2em, 3.8vh, 1.8em); /* Adjusted font size */
+            padding: clamp(11px, 2.8vh, 23px) clamp(22px, 5.5vw, 45px); /* Adjusted padding */
+            min-width: clamp(230px, 50vw, 330px); /* Adjusted min-width */
+            opacity: 1; 
+            transform: none; 
+            animation: none; 
+            margin-top: 12px; /* Adjusted margin-top */
         }
-        .difficulty-arrow-button {
-            background: linear-gradient(to bottom, #966f4d, #7a542e);
-            border: none;
-            color: white;
-            font-size: clamp(1.5em, 3.5vh, 1.8em); /* Scales font size */
-            padding: clamp(8px, 1.5vh, 10px) clamp(15px, 3vw, 18px); /* Responsive padding */
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        .difficulty-arrow-button:hover { background: linear-gradient(to bottom, #a07551, #8b5e3c); transform: scale(1.05); }
-        .difficulty-arrow-button:active { transform: scale(0.98); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-
-        #difficulty-display {
-            font-size: clamp(1.6em, 4.5vh, 2.1em); /* Scales font size */
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-            min-width: clamp(100px, 15vw, 120px); /* Responsive min-width */
-            text-align: center;
-        }
-        #confirm-difficulty-button {
-            /* Inherits .start-button styles but overrides some */
-            font-size: clamp(1.3em, 4vh, 1.9em); /* Scales font size */
-            padding: clamp(12px, 3vh, 25px) clamp(25px, 6vw, 50px); /* Responsive padding */
-            min-width: clamp(250px, 55vw, 350px); /* Responsive min-width */
-            opacity: 1;
-            transform: none;
-            animation: none;
-            margin-top: clamp(10px, 2vh, 15px); /* Responsive top margin */
-        }
-        #close-difficulty-selector {
-            position: absolute;
-            top: clamp(10px, 2vh, 15px); /* Responsive positioning */
-            right: clamp(10px, 2vw, 15px); /* Responsive positioning */
-            left: auto;
-            background: none;
-            border: none;
-            font-size: clamp(1.4em, 3vh, 1.6em); /* Scales font size */
-            color: #e0d6c8;
-            cursor: pointer;
-            padding: 5px;
-            transition: color 0.2s ease, transform 0.2s ease;
-            z-index: 131;
-        }
-         #close-difficulty-selector:hover { color: #ffffff; transform: scale(1.1); }
-        /* Arrow icons are already correct direction, no need to flip */
+        #close-difficulty-selector { position: absolute; top: 12px; right: 12px; left: auto; background: none; border: none; font-size: 1.5em; color: #e0d6c8; cursor: pointer; padding: 4px; transition: color 0.2s ease, transform 0.2s ease; z-index: 131; }
+        #close-difficulty-selector:hover { color: #ffffff; transform: scale(1.1); }
+        #difficulty-prev i { transform: scaleX(-1); }
+        #difficulty-next i { transform: scaleX(-1); }
 
 
         /* --- Game Container --- */
-        #game-container {
-            display: none; /* Managed by JS */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; /* Center items vertically */
-            width: 100%;
-            height: 100%;
-            padding: clamp(10px, 2vh, 20px) clamp(5px, 2vw, 15px); /* Horizontal padding uses vw */
-            gap: clamp(10px, 2vh, 15px); /* Responsive gap */
-            box-sizing: border-box;
-            position: relative;
-            overflow: hidden; /* Prevent layout issues */
-        }
-
+        #game-container { display: none; flex-direction: column; align-items: center; justify-content: space-around; width: 100%; height: 100%; padding: 15px; gap: clamp(10px, 2vh, 15px); box-sizing: border-box; position: relative; overflow: hidden; }
         /* --- Status Bar --- */
-        #status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            /* Board size is dynamic, match its max-width */
-            width: var(--board-size, 95vmin); /* Fallback to 95vmin if var not set */
-            max-width: 95vmin; /* Ensure it doesn't exceed board width */
-            min-height: clamp(40px, 6vh, 60px); /* Responsive min-height */
-            margin: 0 auto;
-            padding: clamp(5px, 1vh, 10px) clamp(8px, 1.5vw, 15px); /* Responsive padding */
-            background-color: rgba(0,0,0,0.2);
-            border-radius: 8px;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
-            flex-wrap: wrap; /* Allow items to wrap on small screens */
-            gap: clamp(5px, 1vw, 10px); /* Responsive gap between items */
-            flex-shrink: 0; /* Prevent shrinking */
-            box-sizing: border-box;
-            font-size: clamp(0.8em, 2.5vh, 1.1em); /* Scales text size */
-            line-height: 1.4; /* Improve readability */
-        }
-        /* Order items when wrapped (default flex-direction is row) */
+        #status-bar { display: flex; justify-content: space-between; align-items: center; width: var(--board-size); max-width: 95vmin; margin: 0 auto; padding: 5px 10px; background-color: rgba(0,0,0,0.2); border-radius: 8px; box-shadow: inset 0 0 5px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 10px; flex-shrink: 0; box-sizing: border-box; }
         .status-section.capture-count.white { order: 1; }
-        #turn-indicators { order: 2; flex-grow: 1; justify-content: center; /* Center indicators when space allows */ }
+        #turn-indicators { order: 2; }
         .status-section.capture-count.black { order: 3; text-align: right; }
-
-        .status-section {
-            display: flex;
-            align-items: center;
-            gap: clamp(5px, 1vw, 8px); /* Responsive gap */
-            flex-shrink: 0; /* Prevent sections from shrinking too much */
-        }
-        .status-icon {
-            font-size: 1.2em; /* Relative to parent font size */
-            width: 1.5em; /* Relative width */
-            text-align: center;
-            flex-shrink: 0;
-        }
-        .timer-display {
-            min-width: clamp(40px, 7vw, 60px); /* Responsive min-width */
-            text-align: right;
-            background-color: rgba(0,0,0,0.3);
-            padding: clamp(2px, 0.5vh, 4px) clamp(4px, 1vw, 6px); /* Responsive padding */
-            border-radius: 4px;
-            font-variant-numeric: tabular-nums; /* Align numbers nicely */
-            flex-shrink: 0;
-             font-size: 1em; /* Keep size relative to parent status-bar */
-        }
+        .status-section { display: flex; align-items: center; gap: 8px; font-size: clamp(0.8em, 2.5vh, 1.1em); }
+        .status-icon { font-size: 1.2em; width: 20px; text-align: center; }
+        .timer-display { min-width: 50px; text-align: right; background-color: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-variant-numeric: tabular-nums; }
         .capture-count span:first-of-type { margin-right: 3px; margin-left: 0; }
         .capture-count span:last-of-type { font-weight: bold; }
-        /* Adjust timer margins relative to section gaps */
-        .status-section.capture-count.white .timer-display { margin-left: clamp(5px, 1vw, 10px); margin-right: 0; }
-        .status-section.capture-count.black .timer-display { margin-right: clamp(5px, 1vw, 10px); margin-left: 0; }
+        .status-section.capture-count.white .timer-display { margin-left: 10px; margin-right: 0; }
+        .status-section.capture-count.black .timer-display { margin-right: 10px; margin-left: 0; }
 
-        #turn-indicators {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 0;
-            flex-shrink: 0;
-            height: clamp(30px, 5vh, 40px); /* Responsive height */
-             min-width: clamp(80px, 15vw, 120px); /* Ensure space for indicators */
-        }
-        .turn-indicator {
-            width: clamp(25px, 4vh, 30px); /* Responsive size */
-            height: clamp(25px, 4vh, 30px); /* Responsive size */
-            border-radius: 50%;
-            margin: 0 clamp(5px, 1vw, 8px); /* Responsive margin */
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            border: 2px solid rgba(255, 50, 50, 0.6); /* Red border for inactive */
-            box-shadow: 0 0 4px rgba(255, 50, 50, 0.4);
-            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-        }
-        .turn-indicator .piece-visual {
-            width: 85%;
-            height: 85%;
-            border-radius: 50%;
-            /* Styles applied via JS based on piece style class */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-        }
-        .turn-indicator.active-turn {
-            border-color: rgba(50, 255, 50, 0.8); /* Green border for active */
-            box-shadow: 0 0 8px rgba(50, 255, 50, 0.7);
-            transform: scale(1.1);
-        }
-
+        #turn-indicators { display: flex; justify-content: center; align-items: center; margin-bottom: 0; flex-shrink: 0; height: 40px; }
+        .turn-indicator { width: 30px; height: 30px; border-radius: 50%; margin: 0 8px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; position: relative; border: 2px solid rgba(255, 50, 50, 0.6); box-shadow: 0 0 4px rgba(255, 50, 50, 0.4); transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease; }
+        .turn-indicator .piece-visual { width: 85%; height: 85%; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+        .turn-indicator.active-turn { border-color: rgba(50, 255, 50, 0.8); box-shadow: 0 0 8px rgba(50, 255, 50, 0.7); transform: scale(1.1); }
 
         /* --- Board & Piece Styles --- */
-        #board {
-            display: grid;
-            /* Define square size primarily relative to viewport height, clamped between min/max px */
-            --square-size: clamp(40px, 9.5vmin, 75px);
-            --board-size: calc(var(--square-size) * 8); /* Board size is 8 squares */
-            grid-template-columns: repeat(8, var(--square-size));
-            grid-template-rows: repeat(8, var(--square-size));
-            width: var(--board-size);
-            height: var(--board-size);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.4);
-            border-radius: 8px;
-            position: relative;
-            margin: 0 auto; /* Center the board initially */
-            max-width: 95vmin; /* Ensure board fits in viewport */
-            max-height: 95vmin;
-            aspect-ratio: 1 / 1; /* Ensure it's square */
-            flex-shrink: 1; /* Allow board to shrink */
-            border: 2px solid transparent; /* Style applied by board-style classes */
-            background-color: #4a311c; /* Default background for gaps */
-            transition: border-color 0.3s ease, background-color 0.3s ease;
-            user-select: none;
-            touch-action: none; /* Important for drag/drop */
-        }
-
-        .square {
-            width: var(--square-size);
-            height: var(--square-size);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: background-color 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
-            overflow: visible; /* Allow piece shadows/hints to show outside */
-        }
-
-        .piece {
-            width: 85%; /* Size relative to square */
-            height: 85%; /* Size relative to square */
-            border-radius: 50%;
-            cursor: grab;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white; /* Default color, might be overridden by style */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%); /* Center the piece */
-            z-index: 10;
-            transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.3s ease, border-color 0.3s ease, outline-color 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.1); /* Default border */
-            overflow: hidden; /* Hide content overflowing the circle (like text) */
-            animation: none; /* Animations added dynamically */
-            outline: 0px solid transparent; /* For hint/selection outlines */
-            outline-offset: 2px; /* Offset outline */
-            will-change: transform; /* Hint browser about animation */
-            touch-action: none; /* Important for drag/drop */
-        }
-
-        .piece.dragging {
-            cursor: grabbing;
-            z-index: 1000 !important; /* Ensure dragging piece is on top */
-            transform: translate(-50%, -50%) scale(1.1); /* Slightly enlarge while dragging */
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important; /* Larger shadow */
-            opacity: 0.85;
-            transition: none !important; /* No transition during drag */
-        }
-        .piece.ghost { opacity: 0.3 !important; } /* Style for ghost piece */
+        #board { display: grid; --square-size: clamp(45px, 9.5vmin, 75px); --board-size: calc(var(--square-size) * 8); grid-template-columns: repeat(8, var(--square-size)); grid-template-rows: repeat(8, var(--square-size)); width: var(--board-size); height: var(--board-size); box-shadow: 0 8px 16px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.4); border-radius: 8px; position: relative; margin: 0 auto; max-width: 95vmin; max-height: 95vmin; aspect-ratio: 1 / 1; flex-shrink: 1; border: 2px solid transparent; background-color: #4a311c; transition: border-color 0.3s ease, background-color 0.3s ease; user-select: none; }
+        .square { width: var(--square-size); height: var(--square-size); display: flex; align-items: center; justify-content: center; position: relative; transition: background-color 0.15s ease, box-shadow 0.2s ease, background 0.2s ease; overflow: visible; }
+        .piece { width: 85%; height: 85%; border-radius: 50%; cursor: grab; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.3s ease, border-color 0.3s ease, outline-color 0.3s ease; border: 2px solid rgba(255, 255, 255, 0.1); overflow: hidden; animation: none; outline: 0px solid transparent; outline-offset: 2px; will-change: transform; touch-action: none; }
+        .piece.dragging { cursor: grabbing; z-index: 1000 !important; transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important; opacity: 0.85; transition: none !important; }
+        .piece.ghost { opacity: 0.3 !important; }
         .piece.captured-fade { animation: fadeOutPiece 0.4s ease-out forwards; z-index: 5; }
         @keyframes fadeOutPiece { from { opacity: 1; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } }
-
-        /* Hint animation for pieces that MUST jump */
-        .piece.jump-hint {
-            outline-color: rgba(0, 255, 0, 0.7);
-            outline-width: clamp(2px, 0.5vmin, 3px); /* Responsive outline width */
-            animation: hintPulseGreen 1.5s infinite ease-in-out !important;
-        }
-        @keyframes hintPulseGreen {
-            0%, 100% { outline-color: rgba(0, 255, 0, 0.7); box-shadow: 0 0 8px rgba(0, 255, 0, 0.4); }
-            50% { outline-color: rgba(150, 255, 150, 0.9); box-shadow: 0 0 15px rgba(150, 255, 150, 0.7); }
-        }
-
+        .piece.jump-hint { outline-color: rgba(0, 255, 0, 0.7); outline-width: 3px; animation: hintPulseGreen 1.5s infinite ease-in-out !important; }
+        @keyframes hintPulseGreen { 0%, 100% { outline-color: rgba(0, 255, 0, 0.7); box-shadow: 0 0 8px rgba(0, 255, 0, 0.4); } 50% { outline-color: rgba(150, 255, 150, 0.9); box-shadow: 0 0 15px rgba(150, 255, 150, 0.7); } }
 
         /* --- King Crown Style --- */
-        .piece.king::after {
-            content: '♕'; /* Unicode for Queen */
-            position: absolute;
-            font-size: calc(var(--square-size) * 0.35); /* Size relative to square */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, calc(-50% - calc(var(--square-size) * 0.02))); /* Slightly adjust vertical position */
-            pointer-events: none; /* Allow clicks to pass through */
-            z-index: 11;
-            opacity: 1;
-            line-height: 1; /* Ensure centered vertically */
-            text-align: center;
-             /* Adjust color based on piece style? Or keep fixed? Fixed might be more visible */
-        }
-        /* Specific crown colors for piece styles */
-        body.piece-style-classic .piece.king.white-piece::after,
-        body.piece-style-flat .piece.king.white-piece::after,
-        body.piece-style-crimson .piece.king.white-piece::after,
-        body.piece-style-azure .piece.king.white-piece::after,
-        body.piece-style-forest .piece.king.white-piece::after,
-        body.piece-style-royal .piece.king.white-piece::after {
-             color: #000000;
-             text-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
-        }
-        body.piece-style-classic .piece.king.black-piece::after,
-        body.piece-style-flat .piece.king.black-piece::after,
-        body.piece-style-crimson .piece.king.black-piece::after,
-        body.piece-style-azure .piece.king.black-piece::after,
-        body.piece-style-forest .piece.king.black-piece::after,
-        body.piece-style-royal .piece.king.black-piece::after {
+        .piece.king::after { content: '♕'; position: absolute; font-size: calc(var(--square-size) * 0.35); top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 11; opacity: 1; line-height: 1; text-align: center; }
+        .piece.king.white-piece::after { color: #000000; text-shadow: 0 0 2px rgba(255, 255, 255, 0.6); }
+        .piece.king.black-piece::after {
             color: #FFD700; /* Gold color */
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
         }
 
-
-        /* --- Piece Style Variations (Ensure responsiveness of base piece styles) --- */
-        /* Add responsive adjustments here if needed, otherwise base piece styles are fine */
-        /* Example: Adjust box-shadow or border thickness relative to --square-size if needed */
-
-        body.piece-style-classic .piece.black-piece { background: linear-gradient(to bottom right, #444 0%, #111 100%); box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(255, 255, 255, 0.2), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.1) rgba(0, 0, 0, 0.7); border-color: rgba(0, 0, 0, 0.2); }
-        body.piece-style-classic .piece.white-piece { background: linear-gradient(to bottom right, #eee 0%, #ccc 100%); box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(0, 0, 0, 0.2), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.1) rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.3); }
-        body.piece-style-classic .piece.selected { box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(255, 255, 255, 0.3), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.9), 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(52, 152, 219, 0.8) !important; } /* Responsive outline */
-        body.piece-style-classic .piece.white-piece.selected { box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(0, 0, 0, 0.3), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.6), 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(52, 152, 219, 0.8) !important; } /* Responsive outline */
-        body.piece-style-classic .piece.hoverable:hover { box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(255, 255, 255, 0.3), 0 calc(var(--square-size) * 0.08) calc(var(--square-size) * 0.2) rgba(0, 0, 0, 0.8); }
-        body.piece-style-classic .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.3), 0 calc(var(--square-size) * 0.08) calc(var(--square-size) * 0.2) rgba(0, 0, 0, 0.6); }
-
-        body.piece-style-flat .piece { border: 1px solid rgba(0,0,0,0.3); box-shadow: none; }
-        body.piece-style-flat .piece.black-piece { background: #2c2c2c; }
-        body.piece-style-flat .piece.white-piece { background: #f0f0f0; }
-        body.piece-style-flat .piece.selected { box-shadow: 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(52, 152, 219, 0.8) !important; } /* Responsive outline */
-        body.piece-style-flat .piece.hoverable:hover { transform: translate(-50%, -50%) translateY(-3px) scale(1.04); opacity: 0.9; } /* Keep hover effect */
-
-        body.piece-style-crimson .piece.black-piece { background: linear-gradient(to bottom right, #b71c1c 0%, #7f0000 100%); box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(255, 255, 255, 0.25), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.1) rgba(0, 0, 0, 0.7); border-color: rgba(50, 0, 0, 0.3); }
-        body.piece-style-crimson .piece.white-piece { background: linear-gradient(to bottom right, #fffde7 0%, #fff8e1 100%); box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(0, 0, 0, 0.1), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.1) rgba(0, 0, 0, 0.4); border-color: rgba(200, 190, 170, 0.4); }
-        body.piece-style-crimson .piece.selected { box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(255, 255, 255, 0.3), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.9), 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(255, 82, 82, 0.8) !important; } /* Responsive outline */
-        body.piece-style-crimson .piece.white-piece.selected { box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(0, 0, 0, 0.2), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.5), 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(255, 82, 82, 0.8) !important; } /* Responsive outline */
-        body.piece-style-crimson .piece.hoverable:hover { box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(255, 255, 255, 0.3), 0 calc(var(--square-size) * 0.08) calc(var(--square-size) * 0.2) rgba(0, 0, 0, 0.8); }
-        body.piece-style-crimson .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.2), 0 calc(var(--square-size) * 0.08) calc(var(--square-size) * 0.2) rgba(0, 0, 0, 0.5); }
-
-        body.piece-style-azure .piece { border: 1px solid rgba(0,0,0,0.3); box-shadow: none; }
-        body.piece-style-azure .piece.black-piece { background: #1976d2; border-color: #0d47a1; }
-        body.piece-style-azure .piece.white-piece { background: #e3f2fd; border-color: #90caf9; }
-        body.piece-style-azure .piece.selected { box-shadow: 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(66, 165, 245, 0.8) !important; } /* Responsive outline */
-        body.piece-style-azure .piece.hoverable:hover { transform: translate(-50%, -50%) translateY(-3px) scale(1.04); opacity: 0.9; }
-
-        body.piece-style-forest .piece.black-piece { background: linear-gradient(to bottom right, #388e3c 0%, #1b5e20 100%); box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(255, 255, 255, 0.2), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.1) rgba(0, 0, 0, 0.7); border-color: rgba(0, 50, 0, 0.3); }
-        body.piece-style-forest .piece.white-piece { background: linear-gradient(to bottom right, #f5f5dc 0%, #d2b48c 100%); box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.15), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.1) rgba(0, 0, 0, 0.4); border-color: rgba(180, 160, 130, 0.4); }
-        body.piece-style-forest .piece.selected { box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(255, 255, 255, 0.3), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.9), 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(102, 187, 106, 0.8) !important; } /* Responsive outline */
-        body.piece-style-forest .piece.white-piece.selected { box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(0, 0, 0, 0.2), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.5), 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(102, 187, 106, 0.8) !important; } /* Responsive outline */
-        body.piece-style-forest .piece.hoverable:hover { box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(255, 255, 255, 0.3), 0 calc(var(--square-size) * 0.08) calc(var(--square-size) * 0.2) rgba(0, 0, 0, 0.8); }
-        body.piece-style-forest .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.2), 0 calc(var(--square-size) * 0.08) calc(var(--square-size) * 0.2) rgba(0, 0, 0, 0.5); }
-
-        body.piece-style-royal .piece.black-piece { background: linear-gradient(to bottom right, #6a1b9a 0%, #4a148c 100%); box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(255, 255, 255, 0.25), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.1) rgba(0, 0, 0, 0.7); border-color: rgba(30, 0, 50, 0.4); }
-        body.piece-style-royal .piece.white-piece { background: linear-gradient(to bottom right, #fff59d 0%, #ffee58 100%); box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(0, 0, 0, 0.1), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.1) rgba(0, 0, 0, 0.4); border-color: rgba(190, 180, 100, 0.5); }
-        body.piece-style-royal .piece.selected { box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(255, 255, 255, 0.3), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.9), 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(255, 238, 88, 0.8) !important; } /* Responsive outline */
-        body.piece-style-royal .piece.white-piece.selected { box-shadow: inset 0 0 calc(var(--square-size) * 0.13) rgba(0, 0, 0, 0.2), 0 calc(var(--square-size) * 0.05) calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.5), 0 0 0 clamp(3px, 0.7vmin, 5px) rgba(255, 238, 88, 0.8) !important; } /* Responsive outline */
-        body.piece-style-royal .piece.hoverable:hover { box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(255, 255, 255, 0.3), 0 calc(var(--square-size) * 0.08) calc(var(--square-size) * 0.2) rgba(0, 0, 0, 0.8); }
-        body.piece-style-royal .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 calc(var(--square-size) * 0.15) rgba(0, 0, 0, 0.2), 0 calc(var(--square-size) * 0.08) calc(var(--square-size) * 0.2) rgba(0, 0, 0, 0.5); }
-
+        /* --- Piece Style Variations --- */
+        body.piece-style-classic .piece.black-piece { background: linear-gradient(to bottom right, #444 0%, #111 100%); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.7); border-color: rgba(0, 0, 0, 0.2); } body.piece-style-classic .piece.white-piece { background: linear-gradient(to bottom right, #eee 0%, #ccc 100%); box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.3); } body.piece-style-classic .piece.selected { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 0 5px rgba(52, 152, 219, 0.8) !important; } body.piece-style-classic .piece.white-piece.selected { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 5px rgba(52, 152, 219, 0.8) !important; } body.piece-style-classic .piece.hoverable:hover { box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.3), 0 6px 15px rgba(0, 0, 0, 0.8); } body.piece-style-classic .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.3), 0 6px 15px rgba(0, 0, 0, 0.6); }
+        body.piece-style-flat .piece { border: 1px solid rgba(0,0,0,0.3); box-shadow: none; } body.piece-style-flat .piece.black-piece { background: #2c2c2c; } body.piece-style-flat .piece.white-piece { background: #f0f0f0; } body.piece-style-flat .piece.selected { box-shadow: 0 0 0 5px rgba(52, 152, 219, 0.8) !important; } body.piece-style-flat .piece.hoverable:hover { transform: translate(-50%, -50%) translateY(-3px) scale(1.04); opacity: 0.9; }
+        body.piece-style-crimson .piece.black-piece { background: linear-gradient(to bottom right, #b71c1c 0%, #7f0000 100%); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.25), 0 4px 8px rgba(0, 0, 0, 0.7); border-color: rgba(50, 0, 0, 0.3); } body.piece-style-crimson .piece.white-piece { background: linear-gradient(to bottom right, #fffde7 0%, #fff8e1 100%); box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.4); border-color: rgba(200, 190, 170, 0.4); } body.piece-style-crimson .piece.selected { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 0 5px rgba(255, 82, 82, 0.8) !important; } body.piece-style-crimson .piece.white-piece.selected { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 5px rgba(255, 82, 82, 0.8) !important; } body.piece-style-crimson .piece.hoverable:hover { box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.3), 0 6px 15px rgba(0, 0, 0, 0.8); } body.piece-style-crimson .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2), 0 6px 15px rgba(0, 0, 0, 0.5); }
+        body.piece-style-azure .piece { border: 1px solid rgba(0,0,0,0.3); box-shadow: none; } body.piece-style-azure .piece.black-piece { background: #1976d2; border-color: #0d47a1; } body.piece-style-azure .piece.white-piece { background: #e3f2fd; border-color: #90caf9; } body.piece-style-azure .piece.selected { box-shadow: 0 0 0 5px rgba(66, 165, 245, 0.8) !important; } body.piece-style-azure .piece.hoverable:hover { transform: translate(-50%, -50%) translateY(-3px) scale(1.04); opacity: 0.9; }
+        body.piece-style-forest .piece.black-piece { background: linear-gradient(to bottom right, #388e3c 0%, #1b5e20 100%); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.7); border-color: rgba(0, 50, 0, 0.3); } body.piece-style-forest .piece.white-piece { background: linear-gradient(to bottom right, #f5f5dc 0%, #d2b48c 100%); box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.4); border-color: rgba(180, 160, 130, 0.4); } body.piece-style-forest .piece.selected { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 0 5px rgba(102, 187, 106, 0.8) !important; } body.piece-style-forest .piece.white-piece.selected { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 5px rgba(102, 187, 106, 0.8) !important; } body.piece-style-forest .piece.hoverable:hover { box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.3), 0 6px 15px rgba(0, 0, 0, 0.8); } body.piece-style-forest .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2), 0 6px 15px rgba(0, 0, 0, 0.5); }
+        body.piece-style-royal .piece.black-piece { background: linear-gradient(to bottom right, #6a1b9a 0%, #4a148c 100%); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.25), 0 4px 8px rgba(0, 0, 0, 0.7); border-color: rgba(30, 0, 50, 0.4); } body.piece-style-royal .piece.white-piece { background: linear-gradient(to bottom right, #fff59d 0%, #ffee58 100%); box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.4); border-color: rgba(190, 180, 100, 0.5); } body.piece-style-royal .piece.selected { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 0 5px rgba(255, 238, 88, 0.8) !important; } body.piece-style-royal .piece.white-piece.selected { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 5px rgba(255, 238, 88, 0.8) !important; } body.piece-style-royal .piece.hoverable:hover { box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.3), 0 6px 15px rgba(0, 0, 0, 0.8); } body.piece-style-royal .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2), 0 6px 15px rgba(0, 0, 0, 0.5); }
 
         /* --- General Piece Modifiers --- */
-        .selected {
-            z-index: 20;
-            transform: translate(-50%, -50%) scale(1.05); /* Slightly enlarge when selected */
-            outline-width: 0px !important; /* Hide hint/jump outline when selected */
-            animation: none !important;
-        }
-        .possible-move::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.5); /* Start smaller */
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 255, 0, 0.15);
-            border: clamp(1px, 0.3vmin, 2px) solid rgba(0, 255, 0, 0.4); /* Responsive border for visibility */
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 5;
-            box-sizing: border-box;
-            animation: pulsePossible 1.8s infinite ease-in-out;
-            will-change: transform, opacity;
-        }
-        @keyframes pulsePossible {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(0.7); opacity: 0.8; } /* Scale slightly larger */
-            100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.5; }
-        }
-
-        /* Hint animation for suggesting a move */
-        .hint-piece-suggestion {
-            outline: clamp(3px, 0.7vmin, 4px) dashed #ffdd00 !important; /* Responsive outline width/style */
-            outline-offset: 3px;
-            animation: hintPulseYellow 1s infinite !important;
-            z-index: 22 !important;
-        }
-        .hint-move-suggestion::before {
-            background-color: rgba(255, 221, 0, 0.3) !important; /* Yellow background */
-            border-color: #ffdd00 !important; /* Yellow border */
-            animation: pulsePossible 1s infinite ease-in-out !important; /* Use pulsing animation */
-            z-index: 6 !important;
-        }
-        @keyframes hintPulseYellow {
-            0%, 100% { outline-color: #ffdd00; }
-            50% { outline-color: #fff3a0; }
-        }
-
-        /* Hover effect for interactive pieces */
-        .piece.hoverable:hover {
-             /* Adjust translateY relative to square size */
-            transform: translate(-50%, -50%) translateY(calc(-1 * var(--square-size) * 0.04)) scale(1.04);
-        }
-
+        .selected { z-index: 20; transform: translate(-50%, -50%) scale(1.05); outline-width: 0px !important; animation: none !important; }
+        .possible-move::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 255, 0, 0.15); border: 2px solid rgba(0, 255, 0, 0.4); border-radius: 50%; pointer-events: none; z-index: 5; box-sizing: border-box; animation: pulsePossible 1.8s infinite ease-in-out; }
+        @keyframes pulsePossible { 0% { transform: scale(0.5); opacity: 0.5; } 50% { transform: scale(0.7); opacity: 0.8; } 100% { transform: scale(0.5); opacity: 0.5; } }
+        .hint-piece-suggestion { outline: 4px dashed #ffdd00 !important; outline-offset: 3px; animation: hintPulseYellow 1s infinite !important; z-index: 22 !important; }
+        .hint-move-suggestion::before { background-color: rgba(255, 221, 0, 0.3) !important; border-color: #ffdd00 !important; animation: pulsePossible 1s infinite ease-in-out !important; z-index: 6 !important; }
+        @keyframes hintPulseYellow { 0%, 100% { outline-color: #ffdd00; } 50% { outline-color: #fff3a0; } }
+        .piece.hoverable:hover { transform: translate(-50%, -50%) translateY(-3px) scale(1.04); }
 
         /* --- Game Over Screen --- */
-        #game-over-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
-            display: none; /* Managed by JS */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.6s ease-in-out;
-             padding: clamp(20px, 5vh, 40px) clamp(15px, 5vw, 30px); /* Responsive padding */
-             box-sizing: border-box;
-             overflow-y: auto;
-        }
-        #game-over-screen.visible { display: flex; opacity: 1; }
-        #game-over-content {
-            background-color: rgba(60, 40, 20, 0.8);
-            padding: clamp(25px, 5vh, 30px) clamp(30px, 6vw, 40px); /* Responsive padding */
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.6);
-            transform: scale(0.8);
-            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            border: 1px solid #a07551;
-            max-width: 95%; /* Ensure fits on screen */
-            width: 450px; /* Preferred max width */
-            box-sizing: border-box;
-        }
-        #game-over-screen.visible #game-over-content { transform: scale(1); }
-        #game-over-message {
-            font-size: clamp(1.8em, 5vh, 2.2em); /* Scales font size */
-            color: #fff;
-            text-shadow: 1px 1px 0px #ffeb3b, 3px 3px 5px rgba(0,0,0,0.7);
-            margin-bottom: clamp(20px, 4vh, 25px); /* Responsive margin */
-            font-weight: 700;
-            line-height: 1.4;
-        }
-        #game-over-message::before {
-            content: '🏆';
-            display: block;
-            font-size: clamp(1.5em, 4vh, 2em); /* Scales icon size */
-            margin-bottom: clamp(5px, 1vh, 10px); /* Responsive margin */
-            text-shadow: 0 0 clamp(5px, 1vw, 10px) #ffd700; /* Responsive shadow */
-        }
-        #back-to-menu-button {
-            font-family: 'Roboto', 'Cairo', sans-serif;
-            font-size: clamp(1.1em, 2.5vh, 1.2em); /* Increased font size */
-            padding: clamp(10px, 2vh, 12px) clamp(24px, 5vw, 28px); /* Increased responsive padding */
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(to bottom, #e0d6c8, #c1b2a3);
-            color: #321e06;
-            font-weight: bold;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.25), inset 0 -2px 1px rgba(0,0,0,0.1);
+        #game-over-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; opacity: 0; transition: opacity 0.6s ease-in-out; } #game-over-screen.visible { display: flex; opacity: 1; } #game-over-content { background-color: rgba(60, 40, 20, 0.8); padding: 30px 40px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.6); transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); border: 1px solid #a07551; } #game-over-screen.visible #game-over-content { transform: scale(1); } #game-over-message { font-size: clamp(1.8em, 5vh, 2.2em); color: #fff; text-shadow: 1px 1px 0px #ffeb3b, 3px 3px 5px rgba(0,0,0,0.7); margin-bottom: 25px; font-weight: 700; } #game-over-message::before { content: '🏆'; display: block; font-size: 2em; margin-bottom: 10px; text-shadow: 0 0 10px #ffd700; } #back-to-menu-button { 
+            font-family: 'Roboto', 'Cairo', sans-serif; 
+            font-size: 1em; /* Adjusted font size */
+            padding: 9px 22px; /* Adjusted padding */
+            cursor: pointer; 
+            border: none; 
+            border-radius: 7px; /* Adjusted border-radius */
+            background: linear-gradient(to bottom, #e0d6c8, #c1b2a3); 
+            color: #321e06; 
+            font-weight: bold; 
+            box-shadow: 0 2.5px 4px rgba(0,0,0,0.25), inset 0 -1.5px 0.8px rgba(0,0,0,0.1); 
             transition: all 0.2s ease;
-             max-width: 95%; /* Ensure button fits */
-             box-sizing: border-box;
-        }
-        #back-to-menu-button:hover { background: linear-gradient(to bottom, #f7f2e8, #e8e0d0); box-shadow: 0 4px 7px rgba(0,0,0,0.3), inset 0 -2px 1px rgba(0,0,0,0.1); transform: translateY(-1px); }
+        } 
+        #back-to-menu-button:hover { background: linear-gradient(to bottom, #f7f2e8, #e8e0d0); box-shadow: 0 3px 6px rgba(0,0,0,0.3), inset 0 -2px 1px rgba(0,0,0,0.1); transform: translateY(-1px); } 
         #back-to-menu-button:active { transform: translateY(0px); box-shadow: 0 2px 4px rgba(0,0,0,0.25), inset 0 -1px 1px rgba(0,0,0,0.15); }
 
-
         /* --- Settings Button & Panel Styles --- */
-        #settings-button {
-            position: fixed;
-            top: clamp(10px, 2vh, 15px); /* Responsive positioning */
-            right: clamp(10px, 2vw, 15px); /* Responsive positioning */
-            z-index: 110;
-            font-size: clamp(1.5em, 3vh, 1.8em); /* Scales icon size */
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-            padding: clamp(3px, 0.5vh, 5px); /* Responsive padding */
-            transition: color 0.2s ease, transform 0.2s ease;
-        }
-         #settings-button:hover { color: rgba(255, 255, 255, 1); transform: rotate(15deg); }
-
-        #settings-panel {
-            position: fixed;
-            top: clamp(50px, 8vh, 60px); /* Position below button */
-            right: clamp(10px, 2vw, 15px); /* Align with button */
-            transform: none;
-            background-color: rgba(40, 25, 10, 0.9);
-            padding: clamp(10px, 2vh, 15px); /* Responsive padding */
-            border-radius: 10px;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-            z-index: 115;
-            display: none; /* Managed by JS */
-            flex-direction: column;
-            align-items: center;
-            gap: clamp(8px, 1.5vh, 10px); /* Responsive gap */
-            border: 1px solid #7a542e;
-            max-height: calc(100vh - clamp(70px, 10vh, 80px)); /* Max height relative to viewport and button position */
-            overflow-y: auto; /* Allow scrolling if many settings */
-            box-sizing: border-box;
-        }
+        #settings-button { position: fixed; top: 15px; right: 15px; z-index: 110; font-size: 1.8em; background: none; border: none; color: rgba(255, 255, 255, 0.7); cursor: pointer; padding: 5px; transition: color 0.2s ease, transform 0.2s ease; } #settings-button:hover { color: rgba(255, 255, 255, 1); transform: rotate(15deg); }
+        #settings-panel { position: fixed; top: 60px; right: 15px; transform: none; background-color: rgba(40, 25, 10, 0.9); padding: 15px; border-radius: 10px; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4); z-index: 115; display: none; flex-direction: column; align-items: center; gap: 10px; border: 1px solid #7a542e; max-height: calc(100vh - 80px); overflow-y: auto; }
         #settings-panel.visible { display: flex; }
-
-        #settings-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: transparent; /* Invisible overlay */
-            z-index: 114;
-            display: none; /* Managed by JS */
-        }
-
-        .settings-icon-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: clamp(40px, 6vmin, 45px); /* Responsive size */
-            height: clamp(40px, 6vmin, 45px); /* Responsive size */
-            font-size: clamp(1.2em, 2.5vh, 1.3em); /* Slightly increased icon size */
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            background: linear-gradient(to bottom, #966f4d, #7a542e);
-            color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
-            text-align: center;
+        #settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: transparent; z-index: 114; display: none; }
+        .settings-icon-button { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 40px; /* Adjusted size */
+            height: 40px; /* Adjusted size */
+            font-size: 1.2em; /* Adjusted font size */
+            border: none; 
+            border-radius: 7px; /* Adjusted border-radius */
+            cursor: pointer; 
+            background: linear-gradient(to bottom, #966f4d, #7a542e); 
+            color: #ffffff; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+            transition: all 0.2s ease; 
+            text-align: center; 
             flex-shrink: 0;
         }
-        .settings-icon-button i { pointer-events: none; /* Ensure clicks go to button */ }
         .settings-icon-button:hover { background: linear-gradient(to bottom, #a07551, #8b5e3c); box-shadow: 0 3px 6px rgba(0,0,0,0.4); transform: translateY(-1px); }
         .settings-icon-button:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
         .settings-icon-button:disabled { background: #aaa; color: #666; cursor: not-allowed; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transform: none; }
-
         #sound-toggle-button.sound-off { background: linear-gradient(to bottom, #c1b2a3, #a39588); color: #321e06; }
         #sound-toggle-button.sound-off:hover { background: linear-gradient(to bottom, #d0c5b8, #b8a99a); }
         #timer-toggle-button.timer-off { background: linear-gradient(to bottom, #c1b2a3, #a39588); color: #321e06; }
         #timer-toggle-button.timer-off:hover { background: linear-gradient(to bottom, #d0c5b8, #b8a99a); }
 
-        /* --- Overlay Screen Styles (Board/Piece selection, Confirmation) --- */
-        .overlay-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            display: none; /* Managed by JS */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 150;
-            opacity: 0;
-            transition: opacity 0.4s ease-in-out;
-            padding: clamp(15px, 3vh, 25px) clamp(10px, 2vw, 20px); /* Responsive padding */
-            box-sizing: border-box;
-            overflow-y: auto; /* Allow scrolling the whole overlay if needed */
-        }
+        /* --- Overlay Screen Styles (Board/Piece selection) --- */
+        .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150; opacity: 0; transition: opacity 0.4s ease-in-out; padding: 20px; box-sizing: border-box; overflow-y: hidden; }
         .overlay-screen.visible { display: flex; opacity: 1; }
-
-        .selection-content {
-            background-color: rgba(60, 40, 20, 0.9);
-            padding: clamp(20px, 4vh, 25px) clamp(25px, 5vw, 35px); /* Responsive padding */
-            border-radius: 15px;
-            box-shadow: 0 6px 25px rgba(0,0,0,0.6);
-            text-align: center;
-            max-width: 95%; /* Ensure fits on most screens */
-            width: 700px; /* Preferred max width for large options */
-            transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            border: 1px solid #966f4d;
-            margin: 10px auto; /* Center and add vertical margin */
-            display: flex;
-            flex-direction: column;
-            max-height: 90vh; /* Max height relative to viewport */
-            overflow: hidden; /* Hide content overflow for the container */
-            box-sizing: border-box;
+        .selection-content { 
+            background-color: rgba(60, 40, 20, 0.9); 
+            padding: 20px 30px; /* Adjusted padding */
+            border-radius: 13px; /* Adjusted border-radius */
+            box-shadow: 0 5px 22px rgba(0,0,0,0.6); /* Adjusted shadow */
+            text-align: center; 
+            max-width: 85%; /* Slightly reduced max-width */
+            width: 650px; /* Adjusted width */
+            transform: scale(0.9); 
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
+            border: 1px solid #966f4d; 
+            margin: 10px 0; 
+            display: flex; 
+            flex-direction: column; 
+            max-height: 80vh; /* Adjusted max-height */
         }
-        #confirmation-modal .selection-content {
-            width: auto;
-            max-width: clamp(300px, 70vw, 450px); /* More responsive max-width */
-            max-height: none; /* Allow height to fit content */
-            display: block; /* Don't need flex inside */
-             padding: clamp(25px, 5vh, 30px) clamp(20px, 4vw, 35px); /* Responsive padding */
-            border-width: 2px;
-            border-color: #b58863;
-            background-color: #4a311c;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-        }
+        #confirmation-modal .selection-content { width: auto; max-width: 400px; /* Adjusted max-width */ max-height: none; display: block; }
         .overlay-screen.visible .selection-content { transform: scale(1); }
-
-        .selection-content h2 {
-            font-size: clamp(1.5em, 4vh, 1.8em); /* Scales font size */
-            color: #f0e5d1;
-            margin-top: 0;
-            margin-bottom: clamp(15px, 3vh, 20px); /* Responsive margin */
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-            flex-shrink: 0; /* Prevent shrinking */
-            max-width: 100%;
-            word-break: break-word;
-        }
-
-        .options-container {
-            display: grid;
-            /* Adaptive grid: minimum item width 110px, grows */
-            grid-template-columns: repeat(auto-fit, minmax(clamp(90px, 15vw, 120px), 1fr)); /* Responsive minmax width */
-            gap: clamp(15px, 3vw, 20px); /* Responsive gap */
-            margin-bottom: clamp(15px, 3vh, 20px); /* Responsive margin */
-            overflow-y: auto; /* Allow scrolling within options */
-            flex-shrink: 1;
-            flex-grow: 1;
-            padding-left: 5px; padding-right: 15px; padding-bottom: 15px; /* Padding for scrollbar */
-            scrollbar-width: thin;
-            scrollbar-color: #966f4d rgba(0,0,0,0.2);
-        }
-        .options-container::-webkit-scrollbar { width: 8px; }
-        .options-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
-        .options-container::-webkit-scrollbar-thumb { background-color: #966f4d; border-radius: 4px; border: 2px solid transparent; background-clip: content-box;}
-
-        .option-button {
-            font-family: 'Roboto', 'Cairo', sans-serif;
-            cursor: pointer;
-            border: 2px solid #7a542e;
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: clamp(8px, 1.5vh, 10px); /* Responsive padding */
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #e0d6c8;
-            font-size: clamp(0.8em, 2vh, 0.9em); /* Scales font size */
-            min-height: clamp(90px, 12vh, 100px); /* Responsive min-height */
+        .selection-content h2 { font-size: 1.6em; color: #f0e5d1; margin-top: 0; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); flex-shrink: 0; }
+        .options-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 18px; margin-bottom: 18px; overflow-y: auto; flex-shrink: 1; flex-grow: 1; padding-left: 4px; padding-right: 12px; padding-bottom: 12px; scrollbar-width: thin; scrollbar-color: #966f4d rgba(0,0,0,0.2); }
+        .options-container::-webkit-scrollbar { width: 7px; }
+        .options-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+        .options-container::-webkit-scrollbar-thumb { background-color: #966f4d; border-radius: 3px; border: 2px solid transparent; background-clip: content-box;}
+        .option-button { 
+            font-family: 'Roboto', 'Cairo', sans-serif; 
+            cursor: pointer; 
+            border: 2px solid #7a542e; 
+            border-radius: 7px; /* Adjusted border-radius */
+            background-color: rgba(255, 255, 255, 0.05); 
+            padding: 9px; /* Adjusted padding */
+            transition: all 0.2s ease; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: #e0d6c8; 
+            font-size: 0.85em; /* Adjusted font size */
+            min-height: 90px; /* Adjusted min-height */
             justify-content: space-between;
-            text-align: center;
         }
-        .option-button:hover { background-color: rgba(255, 255, 255, 0.15); border-color: #a07551; transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        .option-button.selected-style { border-color: #ffd700; background-color: rgba(255, 215, 0, 0.15); box-shadow: 0 0 clamp(5px, 1vmin, 10px) rgba(255, 215, 0, 0.4); /* Responsive shadow */ }
-
-        .close-selection-button {
-            font-family: 'Roboto', 'Cairo', sans-serif;
-            font-size: clamp(1.1em, 2.5vh, 1.2em); /* Increased font size */
-            padding: clamp(10px, 2vh, 12px) clamp(24px, 5vw, 28px); /* Increased responsive padding */
-            cursor: pointer;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(to bottom, #e0d6c8, #c1b2a3);
-            color: #321e06;
-            font-weight: bold;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.25), inset 0 -2px 1px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
-            margin-top: clamp(15px, 3vh, 20px); /* Responsive top margin */
+        .option-button:hover { background-color: rgba(255, 255, 255, 0.15); border-color: #a07551; transform: translateY(-2px); box-shadow: 0 3px 6px rgba(0,0,0,0.3); }
+        .option-button.selected-style { border-color: #ffd700; background-color: rgba(255, 215, 0, 0.15); box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); }
+        .close-selection-button { 
+            font-family: 'Roboto', 'Cairo', sans-serif; 
+            font-size: 1em; /* Adjusted font size */
+            padding: 10px 24px; /* Adjusted padding */
+            cursor: pointer; 
+            border: none; 
+            border-radius: 9px; /* Adjusted border-radius */
+            background: linear-gradient(to bottom, #e0d6c8, #c1b2a3); 
+            color: #321e06; 
+            font-weight: bold; 
+            box-shadow: 0 2.5px 4px rgba(0,0,0,0.25), inset 0 -1.5px 0.8px rgba(0,0,0,0.1); /* Adjusted shadow */
+            transition: all 0.2s ease; 
+            margin-top: auto; 
             flex-shrink: 0;
-            align-self: center; /* Center the button */
-             max-width: 95%; /* Ensure button fits */
-             box-sizing: border-box;
         }
-        #confirmation-buttons button { margin-top: 0; width: 100%; /* Make buttons fill container width */ } /* Override margin-top */
-        .close-selection-button:hover { background: linear-gradient(to bottom, #f7f2e8, #e8e0d0); box-shadow: 0 4px 7px rgba(0,0,0,0.3), inset 0 -2px 1px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        #confirmation-buttons button { margin-top: 0; }
+        .close-selection-button:hover { background: linear-gradient(to bottom, #f7f2e8, #e8e0d0); box-shadow: 0 3px 6px rgba(0,0,0,0.3), inset 0 -2px 1px rgba(0,0,0,0.1); transform: translateY(-1.5px); }
         .close-selection-button:active { transform: translateY(0px); box-shadow: 0 2px 4px rgba(0,0,0,0.25), inset 0 -1px 1px rgba(0,0,0,0.15); }
 
         /* --- Board Selection Screen --- */
-        .board-preview {
-            width: clamp(40px, 6vmin, 50px); /* Responsive size */
-            height: clamp(40px, 6vmin, 50px); /* Responsive size */
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            border: 1px solid rgba(0,0,0,0.3);
-            margin-bottom: clamp(5px, 1vh, 8px); /* Responsive margin */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            border-radius: 3px;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
+        #board-options-container { }
+        .board-option { }
+        .board-preview { width: 45px; height: 45px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); border: 1px solid rgba(0,0,0,0.3); margin-bottom: 7px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); border-radius: 3px; overflow: hidden; }
         .board-preview .sq { width: 100%; height: 100%; }
+        .board-preview-wood .light { background-color: #DEB887; } .board-preview-wood .dark { background-color: #A0522D; }
+        .board-preview-desert .light { background-color: #f4a460; } .board-preview-desert .dark { background-color: #8b4513; }
+        .board-preview-stone-path .light { background-color: #e0e0e0; } .board-preview-stone-path .dark { background-color: #616161; }
+        .board-preview-emerald .light { background-color: #e0f2f1; } .board-preview-emerald .dark { background-color: #00695c; }
+        .board-preview-volcano .light { background-color: #d3d3d3; } .board-preview-volcano .dark { background-color: #dc143c; }
+        .board-preview-royal .light { background-color: #fffacd; } .board-preview-royal .dark { background-color: #4b0082; }
 
-        /* --- Board Styles (Shadows/Borders can be relative to board size or fixed) --- */
-        #board.board-style-wood { border: clamp(5px, 1vmin, 10px) solid #8B4513; background-color: #A0522D; } /* Responsive border */
-        #board.board-style-wood .light-square { background: #DEB887; box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.3); }
-        #board.board-style-wood .dark-square { background: #A0522D; box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); cursor: pointer; }
-        #board.board-style-wood .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: #b3623f; }
-
-        #board.board-style-desert { border: clamp(5px, 1vmin, 10px) solid #a0522d; background-color: #cd853f; } /* Responsive border */
-        #board.board-style-desert .light-square { background: linear-gradient(135deg, #f4a460 0%, #deb887 100%); box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.25); }
-        #board.board-style-desert .dark-square { background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); cursor: pointer; }
-        #board.board-style-desert .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #9e5624 0%, #b3623f 100%); }
-
-        #board.board-style-stone-path { border: clamp(5px, 1vmin, 10px) solid #5d4037; background-color: #795548; } /* Responsive border */
-        #board.board-style-stone-path .light-square { background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.2); }
-        #board.board-style-stone-path .dark-square { background: linear-gradient(135deg, #616161 0%, #424242 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); cursor: pointer; }
-        #board.board-style-stone-path .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #757575 0%, #5a5a5a 100%); }
-
-        #board.board-style-emerald { border: clamp(5px, 1vmin, 10px) solid #004d40; background-color: #00695c; } /* Responsive border */
-        #board.board-style-emerald .light-square { background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%); box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1); }
-        #board.board-style-emerald .dark-square { background: linear-gradient(135deg, #00695c 0%, #004d40 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); cursor: pointer; }
-        #board.board-style-emerald .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #00796b 0%, #005f51 100%); }
-
-        #board.board-style-volcano { border: clamp(5px, 1vmin, 10px) solid #696969; background-color: #8B0000; } /* Responsive border */
-        #board.board-style-volcano .light-square { background: linear-gradient(135deg, #d3d3d3 0%, #f5f5f5 100%); box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.1); }
-        #board.board-style-volcano .dark-square { background: linear-gradient(135deg, #dc143c 0%, #b22222 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); cursor: pointer; }
-        #board.board-style-volcano .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #e82e4f 0%, #c53030 100%); }
-
-        #board.board-style-royal { border: clamp(5px, 1vmin, 10px) solid #483d8b; background-color: #6a5acd; } /* Responsive border */
-        #board.board-style-royal .light-square { background: linear-gradient(135deg, #fffacd 0%, #eee8aa 100%); box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15); }
-        #board.board-style-royal .dark-square { background: linear-gradient(135deg, #4b0082 0%, #8a2be2 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); cursor: pointer; }
-        #board.board-style-royal .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #5c1092 0%, #9d3fe5 100%); }
-
+        /* --- Board Styles --- */
+        #board.board-style-wood { border: 10px solid #8B4513; background-color: #A0522D; } #board.board-style-wood .light-square { background: #DEB887; box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.3); } #board.board-style-wood .dark-square { background: #A0522D; box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); cursor: pointer; } #board.board-style-wood .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: #b3623f; }
+        #board.board-style-desert { border: 10px solid #a0522d; background-color: #cd853f; } #board.board-style-desert .light-square { background: linear-gradient(135deg, #f4a460 0%, #deb887 100%); box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.25); } #board.board-style-desert .dark-square { background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); cursor: pointer; } #board.board-style-desert .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #9e5624 0%, #b3623f 100%); }
+        #board.board-style-stone-path { border: 10px solid #5d4037; background-color: #795548; } #board.board-style-stone-path .light-square { background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.2); } #board.board-style-stone-path .dark-square { background: linear-gradient(135deg, #616161 0%, #424242 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); cursor: pointer; } #board.board-style-stone-path .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #757575 0%, #5a5a5a 100%); }
+        #board.board-style-emerald { border: 10px solid #004d40; background-color: #00695c; } #board.board-style-emerald .light-square { background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%); box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1); } #board.board-style-emerald .dark-square { background: linear-gradient(135deg, #00695c 0%, #004d40 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); cursor: pointer; } #board.board-style-emerald .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #00796b 0%, #005f51 100%); }
+        #board.board-style-volcano { border: 10px solid #696969; background-color: #8B0000; } #board.board-style-volcano .light-square { background: linear-gradient(135deg, #d3d3d3 0%, #f5f5f5 100%); box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.1); } #board.board-style-volcano .dark-square { background: linear-gradient(135deg, #dc143c 0%, #b22222 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); cursor: pointer; } #board.board-style-volcano .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #e82e4f 0%, #c53030 100%); }
+        #board.board-style-royal { border: 10px solid #483d8b; background-color: #6a5acd; } #board.board-style-royal .light-square { background: linear-gradient(135deg, #fffacd 0%, #eee8aa 100%); box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15); } #board.board-style-royal .dark-square { background: linear-gradient(135deg, #4b0082 0%, #8a2be2 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); cursor: pointer; } #board.board-style-royal .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #5c1092 0%, #9d3fe5 100%); }
 
         /* Piece Selection Screen specific styles */
-        /* Piece options container uses grid, responsive handled by clamp in .options-container */
-        #piece-options-container {
-            grid-template-columns: repeat(auto-fit, minmax(clamp(80px, 12vw, 100px), 1fr)); /* Slightly smaller minmax for pieces */
-        }
-        .piece-preview-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: clamp(5px, 1vw, 8px); /* Responsive gap */
-            margin-bottom: clamp(5px, 1vh, 10px); /* Responsive margin */
-            width: 100%;
-            height: clamp(35px, 5vh, 45px); /* Responsive height */
-            flex-shrink: 0;
-        }
-        .piece-preview {
-            width: clamp(28px, 4vmin, 35px); /* Responsive size */
-            height: clamp(28px, 4vmin, 35px); /* Responsive size */
-            border-radius: 50%;
-            border: 1px solid rgba(0,0,0,0.2);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        /* Piece preview styles inherit from main piece styles where possible, or define specifically */
-        .piece-preview.black.classic { background: linear-gradient(to bottom right, #444 0%, #111 100%); box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1), 0 2px 4px rgba(0, 0, 0, 0.5); border-color: rgba(0, 0, 0, 0.2); }
-        .piece-preview.white.classic { background: linear-gradient(to bottom right, #eee 0%, #ccc 100%); box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.3); }
-        .piece-preview.black.flat { background: #2c2c2c; border: 1px solid #555; box-shadow: none; }
-        .piece-preview.white.flat { background: #f0f0f0; border: 1px solid #ccc; box-shadow: none; }
-        .piece-preview.black.crimson { background: linear-gradient(to bottom right, #b71c1c 0%, #7f0000 100%); border-color: rgba(50, 0, 0, 0.3); }
-        .piece-preview.white.crimson { background: linear-gradient(to bottom right, #fffde7 0%, #fff8e1 100%); border-color: rgba(200, 190, 170, 0.4); }
-        .piece-preview.black.azure { background: #1976d2; border-color: #0d47a1; box-shadow: none; }
-        .piece-preview.white.azure { background: #e3f2fd; border-color: #90caf9; box-shadow: none; }
-        .piece-preview.black.forest { background: linear-gradient(to bottom right, #388e3c 0%, #1b5e20 100%); border-color: rgba(0, 50, 0, 0.3); }
-        .piece-preview.white.forest { background: linear-gradient(to bottom right, #f5f5dc 0%, #d2b48c 100%); border-color: rgba(180, 160, 130, 0.4); }
-        .piece-preview.black.royal { background: linear-gradient(to bottom right, #6a1b9a 0%, #4a148c 100%); border-color: rgba(30, 0, 50, 0.4); }
-        .piece-preview.white.royal { background: linear-gradient(to bottom right, #fff59d 0%, #ffee58 100%); border-color: rgba(190, 180, 100, 0.5); }
+        #piece-options-container { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); } .piece-option { }
+        .piece-preview-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; width: 100%; height: 45px; }
+        .piece-preview { width: 35px; height: 35px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.3); position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+         .piece-preview.black.classic { background: linear-gradient(to bottom right, #444 0%, #111 100%); box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1), 0 2px 4px rgba(0, 0, 0, 0.5); border-color: rgba(0, 0, 0, 0.2); } .piece-preview.white.classic { background: linear-gradient(to bottom right, #eee 0%, #ccc 100%); box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.3); }
+         .piece-preview.black.flat { background: #2c2c2c; border: 1px solid #555; box-shadow: none; } .piece-preview.white.flat { background: #f0f0f0; border: 1px solid #ccc; box-shadow: none; }
+         .piece-preview.black.crimson { background: linear-gradient(to bottom right, #b71c1c 0%, #7f0000 100%); border-color: rgba(50, 0, 0, 0.3); } .piece-preview.white.crimson { background: linear-gradient(to bottom right, #fffde7 0%, #fff8e1 100%); border-color: rgba(200, 190, 170, 0.4); }
+         .piece-preview.black.azure { background: #1976d2; border-color: #0d47a1; box-shadow: none; } .piece-preview.white.azure { background: #e3f2fd; border-color: #90caf9; box-shadow: none; }
+         .piece-preview.black.forest { background: linear-gradient(to bottom right, #388e3c 0%, #1b5e20 100%); border-color: rgba(0, 50, 0, 0.3); } .piece-preview.white.forest { background: linear-gradient(to bottom right, #f5f5dc 0%, #d2b48c 100%); border-color: rgba(180, 160, 130, 0.4); }
+         .piece-preview.black.royal { background: linear-gradient(to bottom right, #6a1b9a 0%, #4a148c 100%); border-color: rgba(30, 0, 50, 0.4); } .piece-preview.white.royal { background: linear-gradient(to bottom right, #fff59d 0%, #ffee58 100%); border-color: rgba(190, 180, 100, 0.5); }
 
-
-        /* Confirmation Modal Styles (Already has a responsive max-width) */
-        #confirmation-message {
-            font-size: clamp(1.1em, 2.5vh, 1.3em); /* Scales font size */
-            color: #f0e5d1;
-            margin-bottom: clamp(20px, 4vh, 35px); /* Responsive margin */
-            line-height: 1.6;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-             max-width: 100%;
-             word-break: break-word;
+        /* Confirmation Modal Styles */
+        #confirmation-modal .selection-content { 
+            width: auto; 
+            max-width: 400px; /* Adjusted max-width */
+            padding: 25px 30px; /* Adjusted padding */
+            border-width: 1.5px; /* Adjusted border-width */
+            border-color: #b58863; 
+            background-color: #4a311c; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6); /* Adjusted shadow */
+            max-height: none; 
+            display: block; 
         }
-        #confirmation-buttons {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: clamp(15px, 3vh, 20px); /* Responsive margin */
-            gap: clamp(10px, 2vh, 15px); /* Responsive gap */
-        }
-        #confirmation-buttons button { width: 80%; max-width: 250px; margin-top: 0; } /* Button styles */
-
+        #confirmation-message { font-size: 1.2em; color: #f0e5d1; margin-bottom: 30px; line-height: 1.5; text-shadow: 1px 1px 3px rgba(0,0,0,0.6); }
+        #confirmation-buttons { display: flex; flex-direction: column; align-items: center; margin-top: 18px; /* Adjusted margin-top */ gap: 12px; /* Adjusted gap */ }
+        #confirmation-buttons button { width: 75%; /* Adjusted width */ max-width: 230px; /* Adjusted max-width */ margin-top: 0; }
         #confirm-logout-button { background: linear-gradient(to bottom, #b75656, #913434); color: #ffffff; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); border: 1px solid #7a2a2a; }
         #confirm-logout-button:hover { background: linear-gradient(to bottom, #c96e6e, #a04a4a); border-color: #8b3a3a; }
-        /* #cancel-logout-button inherits .close-selection-button */
+        #cancel-logout-button { /* Style already inherited */ }
 
-
-        /* --- Media Queries (Keep and potentially refine) --- */
-        /* The clamp() function handles a lot of the scaling automatically, */
-        /* but media queries are still useful for layout adjustments (like grid columns) */
-        /* or specific overrides that clamp can't handle alone. */
-
-        /* Tablet and larger phone portrait */
-         @media (max-height: 800px), (max-width: 700px) {
-             /* Adjust base square size breakpoint if needed */
-             #board { --square-size: clamp(40px, 9vmin, 70px); } /* Slightly adjust clamp max */
-
-             /* Overlay content and options container adjustments */
-             .selection-content { padding: clamp(15px, 3vh, 20px); max-width: 90%; }
-             .options-container { grid-template-columns: repeat(auto-fit, minmax(clamp(80px, 12vw, 110px), 1fr)); gap: clamp(10px, 2vw, 15px); } /* Adjust minmax/gap */
-             .option-button { min-height: clamp(80px, 10vh, 90px); } /* Adjust min-height */
-             .board-preview { width: clamp(35px, 5vmin, 45px); height: clamp(35px, 5vmin, 45px); } /* Adjust preview sizes */
-             .piece-preview { width: clamp(25px, 3.5vmin, 32px); height: clamp(25px, 3.5vmin, 32px); }
-             .piece-preview-container { height: clamp(30px, 4.5vh, 40px); gap: clamp(4px, 0.8vw, 6px); } /* Adjust height/gap */
-             .selection-content h2 { font-size: clamp(1.4em, 3.5vh, 1.6em); } /* Adjust title size */
-             .close-selection-button { font-size: clamp(1em, 2vh, 1.1em); padding: clamp(8px, 1.5vh, 10px) clamp(20px, 4vw, 24px); } /* Adjust button size */
-             #confirmation-modal .selection-content { max-width: 90%; } /* Ensure confirmation fits */
-             #confirmation-message { font-size: clamp(1em, 2vh, 1.2em); } /* Adjust message size */
-         }
-
-         /* Portrait phones */
-         @media (max-height: 650px), (max-width: 550px) {
-             /* Make board width primarily scale with viewport width */
-             #board {
-                 /* Use min(11vw, 9.5vmin) - prioritize 11vw on narrow screens, fall back to 9.5vmin on wider ones */
-                 /* Ensure height constraint from vmin is still considered to prevent excessive board height */
-                 --square-size: clamp(35px, min(11.5vw, 9.5vmin), 65px); /* Increased vw factor, clamped by vmin and px */
-             }
-
-              /* Status bar flex-wrap takes care of stacking sections */
-             #status-bar { flex-direction: column; align-items: stretch; /* Stretch items to fill width */ padding: clamp(8px, 1.5vh, 15px); gap: clamp(8px, 1.5vh, 15px); }
-             #turn-indicators { order: 2; width: 100%; justify-content: center; min-width: auto; } /* Center indicators */
-             .status-section.capture-count.white { order: 1; width: 100%; justify-content: space-between; } /* Arrange counts and timers */
-             .status-section.capture-count.black { order: 3; width: 100%; justify-content: space-between; text-align: left; flex-direction: row-reverse; } /* Reverse for layout */
-             .status-section.capture-count.black .timer-display { margin-right: 0; margin-left: clamp(5px, 1vw, 10px); } /* Adjust timer margin */
-             .status-section.capture-count.black .status-icon { order: -1; } /* Move icon to the left */
-             .status-section span:last-of-type { min-width: 1em; } /* Ensure count doesn't shift */
-
-             /* Overlay content and options container adjustments */
-             .selection-content { padding: clamp(15px, 3vh, 20px); }
-             .options-container { grid-template-columns: repeat(auto-fit, minmax(clamp(70px, 10vw, 100px), 1fr)); gap: clamp(8px, 1.5vw, 10px); padding-right: 10px;} /* Adjust minmax/gap */
-             .option-button { min-height: clamp(70px, 9vh, 80px); } /* Adjust min-height */
-             .board-preview { width: clamp(30px, 4.5vmin, 40px); height: clamp(30px, 4.5vmin, 40px); } /* Adjust preview sizes */
-             .piece-preview { width: clamp(22px, 3vmin, 28px); height: clamp(22px, 3vmin, 28px); }
-             .piece-preview-container { height: clamp(25px, 4vh, 35px); gap: clamp(3px, 0.5vw, 5px); } /* Adjust height/gap */
-             .selection-content h2 { font-size: clamp(1.3em, 3vh, 1.5em); } /* Adjust title size */
-         }
-
-        /* Smaller portrait phones */
-         @media (max-height: 500px), (max-width: 400px) {
-             /* Make board width scale even more with viewport width */
-              #board {
-                  /* Use min(12vw, 9.5vmin) - prioritize 12vw on very narrow screens */
-                  --square-size: clamp(30px, min(12vw, 9.5vmin), 55px); /* Increased vw factor */
-              }
-
-             /* Start screen padding */
-             #start-screen { padding: clamp(15px, 3vh, 30px); }
-             #main-title { margin-bottom: clamp(20px, 5vh, 40px); }
-             #start-screen h2#start-subtitle { margin-bottom: clamp(15px, 3vh, 25px); }
-             .start-button { min-width: clamp(220px, 75vw, 300px); padding: clamp(12px, 2.5vh, 20px) clamp(25px, 6vw, 40px); } /* Increased min-width and padding */
-
-              /* Status bar adjustments */
-             #status-bar { padding: clamp(5px, 1vh, 10px); gap: clamp(5px, 1vh, 10px); }
-             .status-section { font-size: clamp(0.7em, 2vh, 0.9em); }
-             .timer-display { min-width: clamp(35px, 8vw, 50px); padding: clamp(1px, 0.3vh, 3px) clamp(3px, 0.8vw, 5px); }
-             .turn-indicator { width: clamp(20px, 3vh, 25px); height: clamp(20px, 3vh, 25px); }
-             #turn-indicators { height: clamp(25px, 4vh, 30px); }
-
-             /* AI difficulty selector adjustments */
-             #ai-difficulty-selector-container { width: clamp(280px, 85vw, 400px); padding: clamp(15px, 3vh, 25px) clamp(15px, 4vw, 25px); }
-             #ai-difficulty-selector-container h3 { font-size: clamp(1.2em, 3.5vh, 1.4em); margin-bottom: clamp(15px, 3vh, 20px); }
-             #difficulty-display { font-size: clamp(1.4em, 4vh, 1.8em); min-width: clamp(80px, 18vw, 100px); }
-             .difficulty-arrow-button { font-size: clamp(1.3em, 3vh, 1.5em); padding: clamp(6px, 1vh, 8px) clamp(10px, 2vw, 14px); }
-             #confirm-difficulty-button { min-width: clamp(220px, 70vw, 300px); padding: clamp(10px, 2vh, 20px) clamp(20px, 5vw, 40px);} /* Increased min-width/padding */
-             #close-difficulty-selector { font-size: clamp(1.2em, 2.5vh, 1.4em); }
-
-
-             /* Overlay content and options container adjustments */
-             .selection-content { padding: clamp(10px, 2vh, 15px); max-height: 85vh;}
-             .options-container { grid-template-columns: repeat(2, 1fr); gap: clamp(8px, 1.5vw, 10px); padding-left: 5px; padding-right: 8px; padding-bottom: 10px; } /* Fixed 2 columns */
-             .option-button { padding: clamp(4px, 0.8vh, 6px); font-size: clamp(0.7em, 1.8vh, 0.8em); min-height: clamp(65px, 8.5vh, 75px); } /* Adjusted min-height */
-             .board-preview { width: clamp(25px, 4vmin, 35px); height: clamp(25px, 4vmin, 35px); margin-bottom: clamp(4px, 0.8vh, 6px);}
-             .piece-preview { width: clamp(20px, 2.8vmin, 25px); height: clamp(20px, 2.8vmin, 25px); }
-             .piece-preview-container { height: clamp(20px, 3.5vh, 30px); gap: clamp(3px, 0.5vw, 5px); }
-             .selection-content h2 { font-size: clamp(1.2em, 2.5vh, 1.3em); margin-bottom: clamp(8px, 1.5vh, 10px);}
-             .close-selection-button { font-size: clamp(0.9em, 1.8vh, 1em); padding: clamp(8px, 1.5vh, 10px) clamp(15px, 3vw, 20px);} /* Adjusted font size/padding */
-
-             /* Confirmation modal adjustments */
-             #confirmation-modal .selection-content { max-width: 95%; padding: clamp(20px, 4vh, 25px) clamp(15px, 3vw, 20px); }
-             #confirmation-message { font-size: clamp(1em, 2vh, 1.1em); margin-bottom: clamp(15px, 3vh, 20px); }
-             #confirmation-buttons { margin-top: clamp(10px, 2vh, 15px); gap: clamp(10px, 2vh, 15px); }
-             #confirmation-buttons button { font-size: clamp(0.9em, 1.8vh, 1em); padding: clamp(8px, 1.5vh, 10px) clamp(10px, 2vw, 18px); } /* Adjusted font size/padding */
-         }
-
-
-         /* General responsiveness helpers */
-        .visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            margin: -1px;
-            padding: 0;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            border: 0;
-        }
-
+        /* --- Media Queries --- */
+         @media (max-height: 850px), (max-width: 700px) { #board { --square-size: clamp(40px, 9vmin, 65px); } .selection-content { width: 600px; /* Adjusted width */ max-height: 75vh; /* Adjusted max-height */ } .options-container { grid-template-columns: repeat(auto-fit, minmax(95px, 1fr)); /* Adjusted minmax */ gap: 14px; /* Adjusted gap */ } #status-bar { width: var(--board-size); } }
+         @media (max-height: 680px), (max-width: 550px) { #board { --square-size: clamp(40px, 8.5vmin, 60px); } .selection-content { width: auto; max-width: 92%; /* Adjusted max-width */ padding: 18px; /* Adjusted padding */ max-height: 75vh; /* Adjusted max-height */ } #confirmation-modal .selection-content { max-width: 85%; /* Adjusted max-width */ padding: 22px 18px; /* Adjusted padding */ max-height: none; } .options-container { grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); /* Adjusted minmax */ gap: 14px; /* Adjusted gap */ } .option-button { min-height: 85px; /* Adjusted min-height */ } .board-preview { width: 38px; /* Adjusted size */ height: 38px; /* Adjusted size */ } .piece-preview { width: 26px; /* Adjusted size */ height: 26px; /* Adjusted size */ } .piece-preview-container { height: 33px; /* Adjusted height */ } .selection-content h2 { font-size: 1.4em; margin-bottom: 14px; /* Adjusted margin */ } .close-selection-button { font-size: 0.9em; padding: 9px 22px; /* Adjusted padding */ } #status-bar { width: var(--board-size); flex-direction: row; align-items: center; } #turn-indicators { order: 2; } }
+         @media (max-height: 600px), (max-width: 450px) { #board { --square-size: clamp(35px, 8vmin, 55px); } .selection-content { padding: 14px; /* Adjusted padding */ max-height: 75vh; /* Adjusted max-height */ } .options-container { grid-template-columns: repeat(2, 1fr); gap: 9px; /* Adjusted gap */ padding-left: 4px; padding-right: 6px; padding-bottom: 8px; /* Adjusted padding */} .option-button { padding: 5px; /* Adjusted padding */ font-size: 0.75em; /* Adjusted font size */ min-height: 75px; /* Adjusted min-height */ } .board-preview { width: 33px; /* Adjusted size */ height: 33px; /* Adjusted size */ } .piece-preview { width: 23px; /* Adjusted size */ height: 23px; /* Adjusted size */ } .piece-preview-container { height: 28px; /* Adjusted height */ gap: 4px; /* Adjusted gap */ } .selection-content h2 { font-size: 1.2em; margin-bottom: 9px; /* Adjusted margin */} .close-selection-button { font-size: 0.85em; padding: 7px 18px; /* Adjusted padding */} #confirmation-modal .selection-content { padding: 18px 14px; /* Adjusted padding */ max-height: none;} #confirmation-message { font-size: 1em; margin-bottom: 16px; /* Adjusted margin */ } #confirmation-buttons button { font-size: 0.85em; /* Adjusted font size */ padding: 7px 16px; /* Adjusted padding */} #status-bar { width: var(--board-size); flex-direction: row; align-items: center; } #turn-indicators { order: 2; } }
 
     </style>
 </head>
 <body class="piece-style-classic">
     <!-- Settings Button -->
-    <button id="settings-button" title="Settings"> <i class="fas fa-cog"></i> <span class="visually-hidden">Settings</span> </button>
+    <button id="settings-button" title="Settings"> <i class="fas fa-cog"></i> </button>
 
     <!-- Settings Overlay -->
     <div id="settings-overlay"></div>
 
     <!-- Settings Panel -->
     <div id="settings-panel">
-        <button id="sound-toggle-button" class="settings-icon-button" title="Toggle Sound"> <i class="fas fa-volume-up"></i> <span class="visually-hidden">Toggle Sound</span> </button>
-        <button id="timer-toggle-button" class="settings-icon-button" title="Toggle Turn Timer"> <i class="fas fa-clock"></i> <span class="visually-hidden">Toggle Turn Timer</span> </button>
-        <button id="undo-button" class="settings-icon-button" title="Undo Move" disabled> <i class="fas fa-undo"></i> <span class="visually-hidden">Undo Move</span> </button>
-        <button id="hint-button" class="settings-icon-button" title="Hint"> <i class="fas fa-lightbulb"></i> <span class="visually-hidden">Hint</span> </button>
-        <button id="change-board-button" class="settings-icon-button" title="Change Board Design"> <i class="fas fa-chess-board"></i> <span class="visually-hidden">Change Board Design</span> </button>
-        <button id="change-piece-style-button" class="settings-icon-button" title="Change Piece Style"> <i class="fas fa-puzzle-piece"></i> <span class="visually-hidden">Change Piece Style</span> </button>
-        <button id="logout-button" class="settings-icon-button" title="Back to Main Menu"> <i class="fas fa-sign-out-alt"></i> <span class="visually-hidden">Back to Main Menu</span> </button>
+        <button id="sound-toggle-button" class="settings-icon-button" title="Toggle Sound"> <i class="fas fa-volume-up"></i> </button>
+        <button id="timer-toggle-button" class="settings-icon-button" title="Toggle Turn Timer"> <i class="fas fa-clock"></i> </button>
+        <button id="undo-button" class="settings-icon-button" title="Undo Move" disabled> <i class="fas fa-undo"></i> </button>
+        <button id="hint-button" class="settings-icon-button" title="Hint"> <i class="fas fa-lightbulb"></i> </button>
+        <button id="change-board-button" class="settings-icon-button" title="Change Board Design"> <i class="fas fa-chess-board"></i> </button>
+        <button id="change-piece-style-button" class="settings-icon-button" title="Change Piece Style"> <i class="fas fa-puzzle-piece"></i> </button>
+        <button id="logout-button" class="settings-icon-button" title="Back to Main Menu"> <i class="fas fa-sign-out-alt"></i> </button>
     </div>
 
     <!-- Start Screen -->
@@ -1079,12 +417,12 @@
 
     <!-- AI Difficulty Selector -->
     <div id="ai-difficulty-selector-container">
-        <button id="close-difficulty-selector" title="Close"><i class="fas fa-times"></i> <span class="visually-hidden">Close</span></button>
+        <button id="close-difficulty-selector" title="Close"><i class="fas fa-times"></i></button>
         <h3>Select Difficulty Level</h3>
         <div class="difficulty-control">
-            <button id="difficulty-prev" class="difficulty-arrow-button" title="Previous"> <i class="fas fa-chevron-left"></i> <span class="visually-hidden">Previous Difficulty</span> </button>
+            <button id="difficulty-prev" class="difficulty-arrow-button" title="Previous"> <i class="fas fa-chevron-left"></i> </button>
             <span id="difficulty-display">Medium</span>
-            <button id="difficulty-next" class="difficulty-arrow-button" title="Next"> <i class="fas fa-chevron-right"></i> <span class="visually-hidden">Next Difficulty</span> </button>
+            <button id="difficulty-next" class="difficulty-arrow-button" title="Next"> <i class="fas fa-chevron-right"></i> </button>
         </div>
         <button id="confirm-difficulty-button" class="start-button">Start Game</button>
     </div>
@@ -1098,8 +436,8 @@
                 <div id="white-timer" class="timer-display">--:--</div>
             </div>
             <div id="turn-indicators">
-                <div id="white-indicator" class="turn-indicator"><div class="piece-visual white piece white-piece"></div> <span class="visually-hidden">White Turn</span></div>
-                <div id="black-indicator" class="turn-indicator"><div class="piece-visual black piece black-piece"></div> <span class="visually-hidden">Black Turn</span></div>
+                <div id="white-indicator" class="turn-indicator"><div class="piece-visual white piece white-piece"></div></div>
+                <div id="black-indicator" class="turn-indicator"><div class="piece-visual black piece black-piece"></div></div>
             </div>
             <div class="status-section capture-count black">
                 <div id="black-timer" class="timer-display">--:--</div>
@@ -1121,7 +459,8 @@
     <!-- Board Selection Screen -->
     <div id="board-selection-screen" class="overlay-screen">
         <div id="board-selection-content" class="selection-content">
-             <h2>Choose Your Preferred Board Design</h2>
+            <!-- **** TITLE TRANSLATED **** -->
+            <h2>Choose Your Preferred Board Design</h2>
             <div id="board-options-container" class="options-container">
                 <button class="board-option option-button" data-style="wood" title="Wood"><div class="board-preview board-preview-wood"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Wood</span></button>
                 <button class="board-option option-button" data-style="desert" title="Desert"><div class="board-preview board-preview-desert"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Desert</span></button>
@@ -1137,7 +476,8 @@
     <!-- Piece Style Selection Screen -->
     <div id="piece-style-selection-screen" class="overlay-screen">
         <div id="piece-style-selection-content" class="selection-content">
-             <h2>Choose Your Preferred Piece Style</h2>
+             <!-- **** TITLE TRANSLATED **** -->
+            <h2>Choose Your Preferred Piece Style</h2>
             <div id="piece-options-container" class="options-container">
                 <button class="piece-option option-button" data-style="classic" title="Classic"><div class="piece-preview-container"><div class="piece-preview white classic"></div> <div class="piece-preview black classic"></div></div> <span>Classic</span></button>
                 <button class="piece-option option-button" data-style="flat" title="Flat"><div class="piece-preview-container"><div class="piece-preview white flat"></div> <div class="piece-preview black flat"></div></div> <span>Flat</span></button>
@@ -1233,38 +573,25 @@
         // --- UI Update Functions ---
         function updateSoundButtonIcon() {
             const icon = soundToggleButton.querySelector('i');
-            const text = soundToggleButton.querySelector('.visually-hidden');
             if (isSoundEnabled) {
                 icon.classList.remove('fa-volume-mute'); icon.classList.add('fa-volume-up');
                 soundToggleButton.classList.remove('sound-off'); soundToggleButton.title = "Toggle Sound (On)";
-                text.textContent = "Toggle Sound (On)";
             } else {
                 icon.classList.remove('fa-volume-up'); icon.classList.add('fa-volume-mute');
                 soundToggleButton.classList.add('sound-off'); soundToggleButton.title = "Toggle Sound (Off)";
-                 text.textContent = "Toggle Sound (Off)";
             }
         }
         function updateTimerButtonIcon() {
             const icon = timerToggleButton.querySelector('i');
-             const text = timerToggleButton.querySelector('.visually-hidden');
             if (isTimerEnabled) {
                 icon.classList.remove('fa-stopwatch'); icon.classList.add('fa-clock');
                 timerToggleButton.classList.remove('timer-off'); timerToggleButton.title = "Toggle Turn Timer (On)";
-                 text.textContent = "Toggle Turn Timer (On)";
             } else {
                 icon.classList.remove('fa-clock'); icon.classList.add('fa-stopwatch');
                 timerToggleButton.classList.add('timer-off'); timerToggleButton.title = "Toggle Turn Timer (Off)";
-                 text.textContent = "Toggle Turn Timer (Off)";
             }
         }
-        function updateTurnIndicatorVisuals() {
-            // Re-create piece visuals to apply updated piece styles
-            whiteIndicator.innerHTML = '<div class="piece-visual white piece white-piece"></div> <span class="visually-hidden">White Turn</span>';
-            blackIndicator.innerHTML = '<div class="piece-visual black piece black-piece"></div> <span class="visually-hidden">Black Turn</span>';
-            // Ensure king class is applied if needed (though not standard on indicator)
-            // If indicator should show king status, you'd need to track that globally or pass state.
-            // For now, just ensure correct base piece style is shown.
-        }
+        function updateTurnIndicatorVisuals() { const whiteVisual = whiteIndicator.querySelector('.piece-visual'); const blackVisual = blackIndicator.querySelector('.piece-visual'); whiteVisual.style = ''; blackVisual.style = ''; whiteVisual.className = `piece-visual white piece white-piece`; blackVisual.className = `piece-visual black piece black-piece`; }
         function updateCapturedCounters() { whiteCapturedDisplay.textContent = capturedByBlack; blackCapturedDisplay.textContent = capturedByWhite; }
         function updateUndoButton() { undoButton.disabled = moveHistory.length === 0 || isAiThinking || isGameOver || (gameMode === 'ai' && currentPlayer !== AI_PLAYER && moveHistory.length < 1); }
         function updateHintButton() { hintButton.disabled = isAiThinking || isGameOver || (gameMode === 'ai' && currentPlayer === AI_PLAYER); }
@@ -1312,15 +639,7 @@
             isGameOver = true; capturedByBlack = 0; capturedByWhite = 0; moveHistory = [];
             whiteIndicator.classList.remove('active-turn'); blackIndicator.classList.remove('active-turn');
             updateStatus(""); updateCapturedCounters(); updateUndoButton(); updateHintButton(); updateTimerDisplay();
-            // Restore initial state appearance for start screen elements
-            mainTitle.style.opacity = ''; mainTitle.style.transform = '';
-            startSubtitle.style.opacity = ''; startSubtitle.style.transform = '';
-            startOptions.style.opacity = '';
-            startOptions.querySelectorAll('.start-button').forEach(btn => {
-                btn.style.opacity = '';
-                btn.style.transform = '';
-                btn.style.animation = ''; // Clear animation property
-            });
+            mainTitle.style.opacity = 1; startSubtitle.style.opacity = 1; startOptions.style.opacity = 1;
             startSubtitle.textContent = "Select Play Mode";
         }
         function endGame(message) {
@@ -1353,12 +672,7 @@
         logoutButton.addEventListener('click', () => { playSound('select'); showConfirmationModal(); });
         confirmLogoutButton.addEventListener('click', () => { playSound('select'); hideConfirmationModal(); returnToStartScreen(); });
         cancelLogoutButton.addEventListener('click', () => { playSound('select'); hideConfirmationModal(); });
-        confirmationModal.addEventListener('click', (event) => { if (event.target === confirmationModal) { playSound('select'); hideConfirmationModal(); } }); // Close if clicking outside modal content
-         // Close overlays if clicking outside selection content
-        boardSelectionScreen.addEventListener('click', (event) => { if (event.target === boardSelectionScreen) { playSound('select'); hideOverlay(boardSelectionScreen); } });
-        pieceStyleSelectionScreen.addEventListener('click', (event) => { if (event.target === pieceStyleSelectionScreen) { playSound('select'); hideOverlay(pieceStyleSelectionScreen); } });
-
-
+        confirmationModal.addEventListener('click', (event) => { if (event.target === confirmationModal) { playSound('select'); hideConfirmationModal(); } });
         settingsButton.addEventListener('click', () => { playSound('select'); isSettingsPanelVisible = !isSettingsPanelVisible; if (isSettingsPanelVisible && !isGameOver) { stopTurnTimer(); settingsPanel.classList.add('visible'); settingsOverlay.style.display = 'block'; boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible'); confirmationModal.classList.remove('visible'); } else { if (!isGameOver) startTurnTimer(); settingsPanel.classList.remove('visible'); settingsOverlay.style.display = 'none'; } renderBoard(); });
         settingsOverlay.addEventListener('click', () => { if(isSettingsPanelVisible) { playSound('select'); isSettingsPanelVisible = false; settingsPanel.classList.remove('visible'); settingsOverlay.style.display = 'none'; if (!isGameOver) startTurnTimer(); renderBoard(); } });
         soundToggleButton.addEventListener('click', () => { isSoundEnabled = !isSoundEnabled; localStorage.setItem('isSoundEnabled', isSoundEnabled); updateSoundButtonIcon(); if (isSoundEnabled) { const ctx = getAudioContext(); if (ctx && ctx.state === 'suspended') { ctx.resume(); } playSound('select', { volume: 0.4 }); } });
@@ -1383,7 +697,7 @@
         function applyBoardStyle(styleName) {
             const validStyles = ['wood', 'desert', 'stone-path', 'emerald', 'volcano', 'royal'];
             if (!validStyles.includes(styleName)) styleName = 'wood';
-            const allPossibleStyles = ['wood', 'desert', 'stone-path', 'emerald', 'volcano', 'royal']; // Simplified list
+            const allPossibleStyles = ['classic', 'modern', 'wood', 'marble', 'minimal', 'stone', 'forest', 'ice', 'dark', 'desert', 'ocean', 'stone-path', 'emerald', 'volcano', 'royal'];
             boardElement.classList.remove(...allPossibleStyles.map(s => `board-style-${s}`));
             boardElement.classList.add(`board-style-${styleName}`);
             currentBoardStyle = styleName;
@@ -1399,7 +713,7 @@
         function applyPieceStyle(styleName) {
             const validStyles = ['classic', 'flat', 'crimson', 'azure', 'forest', 'royal'];
             if (!validStyles.includes(styleName)) styleName = 'classic';
-            const allPossibleStyles = ['classic', 'flat', 'crimson', 'azure', 'forest', 'royal']; // Simplified list
+            const allPossibleStyles = ['classic', 'flat', 'glossy', 'wood', 'metal', 'gemstone', 'stone', 'simple', 'marble', 'neon', 'glass', 'crimson', 'azure', 'forest', 'royal'];
             bodyElement.classList.remove(...allPossibleStyles.map(s => `piece-style-${s}`));
             bodyElement.classList.add(`piece-style-${styleName}`);
             currentPieceStyle = styleName;
@@ -1423,11 +737,10 @@
         function calculateMovesForPiece(r, c, onlyJumps = false, currentBoard = boardState) { const piece = currentBoard[r]?.[c]; if (!piece) return []; let jumpMovesFound = []; let regularMovesFound = []; const directions = []; const playerDirection = (piece.player === PLAYER_BLACK) ? -1 : 1; directions.push(playerDirection); if (piece.isKing) directions.push(-playerDirection); for (const dir of directions) { for (const dc of [-1, 1]) { const jumpedPieceRow = r + dir; const jumpedPieceCol = c + dc; const jumpLandingRow = r + dir * 2; const jumpLandingCol = c + dc * 2; if (isValidSquare(jumpLandingRow, jumpLandingCol) && !currentBoard[jumpLandingRow][jumpLandingCol]) { const jumpedPiece = isValidSquare(jumpedPieceRow, jumpedPieceCol) ? currentBoard[jumpedPieceRow][jumpedPieceCol] : null; if (jumpedPiece && jumpedPiece.player !== piece.player) { jumpMovesFound.push({ row: jumpLandingRow, col: jumpLandingCol, isJump: true, captured: { row: jumpedPieceRow, col: jumpedPieceCol }, origin: { r, c } }); } } const nr = r + dir; const nc = c + dc; if (isValidSquare(nr, nc) && !currentBoard[nr][nc]) { regularMovesFound.push({ row: nr, col: nc, isJump: false, origin: { r, c } }); } } } if (onlyJumps) { return jumpMovesFound; } return [...jumpMovesFound, ...regularMovesFound]; }
         function getAllPossibleMoves(player, onlyJumps = false, currentBoard = boardState) { let allMoves = []; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = currentBoard[r][c]; if (piece && piece.player === player) { const movesForPiece = calculateMovesForPiece(r, c, false, currentBoard); if (onlyJumps) { allMoves.push(...movesForPiece.filter(m => m.isJump)); } else { allMoves.push(...movesForPiece); } } } } return allMoves; }
         function calculateMovesForPieceInternal(r, c, onlyJumps, currentBoard) { const piece = currentBoard[r]?.[c]; if (!piece) return []; let moves = []; const directions = []; const playerDirection = (piece.player === PLAYER_BLACK) ? -1 : 1; directions.push(playerDirection); if (piece.isKing) directions.push(-playerDirection); for (const dir of directions) { for (const dc of [-1, 1]) { const jumpedPieceRow = r + dir; const jumpedPieceCol = c + dc; const jumpLandingRow = r + dir * 2; const jumpLandingCol = c + dc * 2; if (isValidSquare(jumpLandingRow, jumpLandingCol) && !currentBoard[jumpLandingRow][jumpLandingCol]) { const jumpedPiece = isValidSquare(jumpedPieceRow, jumpedPieceCol) ? currentBoard[jumpedPieceRow][jumpedPieceCol] : null; if (jumpedPiece && jumpedPiece.player !== piece.player) { moves.push({ row: jumpLandingRow, col: jumpLandingCol, isJump: true, captured: { row: jumpedPieceRow, col: jumpedPieceCol }, origin: { r, c } }); } } if (!onlyJumps) { const nr = r + dir; const nc = c + dc; if (isValidSquare(nr, nc) && !currentBoard[nr][nc]) { moves.push({ row: nr, col: nc, isJump: false, origin: { r, c } }); } } } } return moves; }
-        function animateAndMovePiece(fromRow, fromCol, move) { const pieceData = boardState[fromRow][fromCol]; const movingPieceElement = getSquareElement(fromRow, fromCol)?.querySelector(`.piece[data-piece-id="${fromRow}-${fromCol}"]`); const targetSquareElement = getSquareElement(move.row, move.col); if (!pieceData || !movingPieceElement || !targetSquareElement) { executeMoveLogic(fromRow, fromCol, move); handlePostMoveChecks(move); return; } movingPieceElement.classList.add('moving'); const startRect = movingPieceElement.getBoundingClientRect(); const endRect = targetSquareElement.getBoundingClientRect(); const startCenterX = startRect.left + startRect.width / 2; const startCenterY = startRect.top + startRect.height / 2; const endCenterX = endRect.left + endRect.width / 2; const endCenterY = endRect.top + endRect.height / 2; const offsetX = endCenterX - startCenterX; const offsetY = endCenterY - startCenterY; movingPieceElement.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`; if (move.isJump) { playSound('capture'); setTimeout(() => { const capturedSquare = getSquareElement(move.captured.row, move.captured.col); const capturedPieceEl = capturedSquare?.querySelector('.piece'); if (capturedPieceEl) { capturedPieceEl.classList.add('captured-fade'); setTimeout(() => capturedPieceEl.remove(), 400); } }, 100); } else { playSound('move'); } deselectPiece(); setTimeout(() => { movingPieceElement.classList.remove('moving'); movingPieceElement.style.transform = 'translate(-50%, -50%)'; executeMoveLogic(fromRow, fromCol, move); targetSquareElement.appendChild(movingPieceElement); movingPieceElement.dataset.pieceId = `${move.row}-${move.col}`; const finalPieceData = boardState[move.row][move.col]; if(finalPieceData?.isKing && !movingPieceElement.classList.contains('king')) { movingPieceElement.classList.add('king'); playSound('king'); } handlePostMoveChecks(move); }, 300); }
-        function executeMoveLogic(fromRow, fromCol, move) { const pieceData = boardState[fromRow][fromCol]; if (!pieceData) { return; } const toRow = move.row; const toCol = move.col; boardState[toRow][toCol] = pieceData; boardState[fromRow][fromCol] = null; if (move.isJump && move.captured) { const capR = move.captured.row; const capC = move.captured.col; if (isValidSquare(capR, capC) && boardState[capR][capC]) { if (boardState[capR][capC].player === PLAYER_WHITE) { capturedByWhite++; } else { capturedByBlack++; } boardState[capR][capC] = null; updateCapturedCounters(); } } } // checkForKing is now called after animation
+        function animateAndMovePiece(fromRow, fromCol, move) { const pieceData = boardState[fromRow][fromCol]; const movingPieceElement = getSquareElement(fromRow, fromCol)?.querySelector(`.piece[data-piece-id="${fromRow}-${fromCol}"]`); const targetSquareElement = getSquareElement(move.row, move.col); if (!pieceData || !movingPieceElement || !targetSquareElement) { executeMoveLogic(fromRow, fromCol, move); handlePostMoveChecks(move); return; } movingPieceElement.classList.add('moving'); const startRect = movingPieceElement.getBoundingClientRect(); const endRect = targetSquareElement.getBoundingClientRect(); const offsetX = endRect.left - startRect.left; const offsetY = endRect.top - startRect.top; movingPieceElement.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`; if (move.isJump) { playSound('capture'); setTimeout(() => { const capturedSquare = getSquareElement(move.captured.row, move.captured.col); const capturedPieceEl = capturedSquare?.querySelector('.piece'); if (capturedPieceEl) { capturedPieceEl.classList.add('captured-fade'); setTimeout(() => capturedPieceEl.remove(), 400); } }, 100); } else { playSound('move'); } deselectPiece(); setTimeout(() => { movingPieceElement.classList.remove('moving'); movingPieceElement.style.transform = 'translate(-50%, -50%)'; executeMoveLogic(fromRow, fromCol, move); targetSquareElement.appendChild(movingPieceElement); movingPieceElement.dataset.pieceId = `${move.row}-${move.col}`; const finalPieceData = boardState[move.row][move.col]; if(finalPieceData?.isKing && !movingPieceElement.classList.contains('king')) { movingPieceElement.classList.add('king'); } handlePostMoveChecks(move); }, 300); }
+        function executeMoveLogic(fromRow, fromCol, move) { const pieceData = boardState[fromRow][fromCol]; if (!pieceData) return; boardState[move.row][move.col] = pieceData; boardState[fromRow][fromCol] = null; if (move.isJump && move.captured) { const capR = move.captured.row; const capC = move.captured.col; if (isValidSquare(capR, capC) && boardState[capR][capC]) { if (boardState[capR][capC].player === PLAYER_WHITE) { capturedByWhite++; } else { capturedByBlack++; } boardState[capR][capC] = null; updateCapturedCounters(); } } checkForKing(move.row, move.col); }
         function handlePostMoveChecks(move) {
             const toRow = move.row; const toCol = move.col; const movedPieceData = boardState[toRow][toCol];
-            checkForKing(toRow, toCol); // Check for king AFTER move logic and animation
             if (move.isJump && movedPieceData) {
                 const nextJumps = calculateMovesForPieceInternal(toRow, toCol, true, boardState);
                 if (nextJumps.length > 0) {
@@ -1439,7 +752,7 @@
             }
             continuousJumpPossible = false; endTurn();
         }
-        function checkForKing(row, col) { const piece = boardState[row]?.[col]; if (!piece || piece.isKing) return false; if ((piece.player === PLAYER_BLACK && row === 0) || (piece.player === PLAYER_WHITE && row === BOARD_SIZE - 1)) { piece.isKing = true; return true; } return false; } // playSound('king') moved to animateAndMovePiece callback
+        function checkForKing(row, col) { const piece = boardState[row]?.[col]; if (!piece || piece.isKing) return false; if ((piece.player === PLAYER_BLACK && row === 0) || (piece.player === PLAYER_WHITE && row === BOARD_SIZE - 1)) { piece.isKing = true; playSound('king'); return true; } return false; }
         function endTurn() { deselectPiece(); if (checkWinCondition()) { return; } switchPlayer(); }
         function switchPlayer() { currentPlayer = getOpponent(currentPlayer); continuousJumpPossible = false; updateStatus(); startTurnTimer(); requestRender(); if (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver) { isAiThinking = true; updateUndoButton(); updateHintButton(); renderBoard(); requestAnimationFrame(() => { setTimeout(makeAiMove, 1000 + Math.random() * 50); }); } else { isAiThinking = false; updateUndoButton(); updateHintButton(); } }
         function updateStatus(message = null) { whiteIndicator.classList.remove('active-turn'); blackIndicator.classList.remove('active-turn'); if (!isGameOver) { if (currentPlayer === PLAYER_WHITE) whiteIndicator.classList.add('active-turn'); else blackIndicator.classList.add('active-turn'); } if(message) console.log("Status Update:", message); }
@@ -1447,7 +760,7 @@
             if (isGameOver) return true; let blackPieces = 0; let whitePieces = 0; let blackCanMove = false; let whiteCanMove = false;
             const blackMoves = getAllPossibleMoves(PLAYER_BLACK, false, boardState); const whiteMoves = getAllPossibleMoves(PLAYER_WHITE, false, boardState);
             blackCanMove = blackMoves.length > 0; whiteCanMove = whiteMoves.length > 0;
-            for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = boardState[r][c]; if (piece?.player === PLAYER_BLACK) blackPieces++; if (piece?.player === PLAYER_WHITE) whitePieces++; } } // Added optional chaining for safety
+            for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { if (boardState[r][c]?.player === PLAYER_BLACK) blackPieces++; if (boardState[r][c]?.player === PLAYER_WHITE) whitePieces++; } }
             let gameOverTriggered = false; let winMessage = "";
             if (whitePieces === 0) { winMessage = "Black Wins (No White pieces left)!"; gameOverTriggered = true; }
             else if (blackPieces === 0) { winMessage = "White Wins (No Black pieces left)!"; gameOverTriggered = true; }
@@ -1458,515 +771,10 @@
         }
         function saveCurrentStateToHistory() { const stateToSave = { boardState: deepCopyBoard(boardState), currentPlayer: currentPlayer, capturedByBlack: capturedByBlack, capturedByWhite: capturedByWhite, continuousJumpPossible: continuousJumpPossible, }; moveHistory.push(stateToSave); updateUndoButton(); }
         function undoMove() { if (moveHistory.length === 0 || isAiThinking) return; stopTurnTimer(); const previousState = moveHistory.pop(); boardState = previousState.boardState; currentPlayer = previousState.currentPlayer; capturedByBlack = previousState.capturedByBlack; capturedByWhite = previousState.capturedByWhite; continuousJumpPossible = previousState.continuousJumpPossible; selectedPiece = null; isGameOver = false; gameOverScreen.classList.remove('visible'); updateCapturedCounters(); updateStatus(); updateUndoButton(); updateHintButton(); createBoardUI(); renderBoard(); startTurnTimer(); isAiThinking = false; }
-        function clearHintHighlights() { if (hintTimeoutId) { clearTimeout(hintTimeoutId); hintTimeoutId = null; } document.querySelectorAll('.hint-piece-suggestion').forEach(el => { el.classList.remove('hint-piece-suggestion'); }); document.querySelectorAll('.square.hint-move-suggestion').forEach(sq => { sq.classList.remove('hint-move-suggestion', 'possible-move'); }); } // Also remove possible-move class
-        function showHint() { clearHintHighlights(); if (isGameOver || isAiThinking || (gameMode === 'ai' && currentPlayer === AI_PLAYER)) { return; } let bestHintMove; const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState); const regularMoves = getAllPossibleMoves(currentPlayer, false, boardState); let movesAvailable = regularMoves.length > 0; let jumpsAvailable = allPossibleJumps.length > 0; if (!movesAvailable && !jumpsAvailable) return; // No moves available
-         if (gameMode === 'ai' && aiDifficulty !== DIFFICULTIES.EASY) { // For Medium/Hard AI or if gameMode is AI
-             bestHintMove = findBestMoveMinimax(currentPlayer, aiDifficulty === DIFFICULTIES.HARD ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM).move;
-         } else { // For Easy AI or Human mode
-             if (jumpsAvailable) { bestHintMove = allPossibleJumps[Math.floor(Math.random() * allPossibleJumps.length)]; } // Prefer random jump
-             else if (movesAvailable) { bestHintMove = regularMoves[Math.floor(Math.random() * regularMoves.length)]; } // Otherwise random regular move
-         }
-         if (bestHintMove) {
-             const pieceSquare = getSquareElement(bestHintMove.origin.r, bestHintMove.origin.c);
-             const targetSquare = getSquareElement(bestHintMove.row, bestHintMove.col);
-             const pieceElement = pieceSquare?.querySelector('.piece');
-             if (pieceElement && targetSquare) {
-                 pieceElement.classList.add('hint-piece-suggestion');
-                 targetSquare.classList.add('hint-move-suggestion', 'possible-move'); // Add possible-move to make sure it's visible
-                 hintTimeoutId = setTimeout(clearHintHighlights, 2500);
-             }
-         }
-        }
-
+        function clearHintHighlights() { if (hintTimeoutId) { clearTimeout(hintTimeoutId); hintTimeoutId = null; } document.querySelectorAll('.hint-piece-suggestion, .hint-move-suggestion').forEach(el => { el.classList.remove('hint-piece-suggestion', 'hint-move-suggestion'); }); document.querySelectorAll('.square.possible-move.hint-move-suggestion').forEach(sq => { sq.classList.remove('hint-move-suggestion'); }); }
+        function showHint() { clearHintHighlights(); if (isGameOver || isAiThinking || (gameMode === 'ai' && currentPlayer === AI_PLAYER)) { return; } let bestHintMove; if (gameMode === 'ai' || aiDifficulty !== DIFFICULTIES.EASY) { bestHintMove = findBestMoveMinimax(currentPlayer, aiDifficulty === DIFFICULTIES.HARD ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM).move; } else { const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState); if (allPossibleJumps.length > 0) { bestHintMove = allPossibleJumps[Math.floor(Math.random() * allPossibleJumps.length)]; } else { const regularMoves = getAllPossibleMoves(currentPlayer, false, boardState); if (regularMoves.length > 0) { bestHintMove = regularMoves[Math.floor(Math.random() * regularMoves.length)]; } } } if (bestHintMove) { const pieceSquare = getSquareElement(bestHintMove.origin.r, bestHintMove.origin.c); const targetSquare = getSquareElement(bestHintMove.row, bestHintMove.col); const pieceElement = pieceSquare?.querySelector('.piece'); if (pieceElement && targetSquare) { pieceElement.classList.add('hint-piece-suggestion'); targetSquare.classList.add('hint-move-suggestion'); targetSquare.classList.add('possible-move'); hintTimeoutId = setTimeout(clearHintHighlights, 2500); } } }
 
         // --- AI Logic ---
-        function makeAiMove() { if (isGameOver || currentPlayer !== AI_PLAYER) { isAiThinking = false; requestRender(); return; } let bestMoveResult; if (continuousJumpPossible && selectedPiece && selectedPiece.player === AI_PLAYER) { const nextJumps = calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState); if (nextJumps.length > 0) { // Find a move that continues the jump
-             const availableJump = nextJumps.find(j => getSquareElement(j.row, j.col)?.classList.contains('possible-move')); // Find a valid one
-             bestMoveResult = { move: availableJump || nextJumps[0], score: 0 }; // Fallback to first jump if none highlighted (shouldn't happen if logic is right)
-         } else { // Jump sequence is over, find the next best move
-             continuousJumpPossible = false; // Reset jump flag as no more jumps from here
-             bestMoveResult = findBestMoveForAI(); // Find a new move (might be a jump from a different piece)
-         }
-     } else { // No continuous jump or selected piece is not AI's, find the best move
-         bestMoveResult = findBestMoveForAI();
-     }
-
-     if (bestMoveResult && bestMoveResult.move) {
-         const chosenMove = bestMoveResult.move;
-         saveCurrentStateToHistory();
-         // Simulate select for animation
-         const aiPieceSquare = getSquareElement(chosenMove.origin.r, chosenMove.origin.c);
-         const aiPieceElement = aiPieceSquare?.querySelector('.piece');
-         selectedPiece = { row: chosenMove.origin.r, col: chosenMove.origin.c, player: AI_PLAYER, element: aiPieceElement };
-         if (aiPieceElement) aiPieceElement.classList.add('selected'); // Add selected class temporarily for visual
-         requestRender(); // Render possible moves for AI (useful for debugging/visualizing)
-
-         // Small delay before animation starts after "selection"
-         setTimeout(() => {
-              if (selectedPiece && selectedPiece.element) selectedPiece.element.classList.remove('selected'); // Remove selection before animation
-              animateAndMovePiece(chosenMove.origin.r, chosenMove.origin.c, chosenMove);
-         }, 100); // Short delay to show selection
-     } else {
-         // This case should ideally not happen if checkWinCondition is correct and there are moves available
-         // But as a fallback, end the turn or declare win if necessary.
-         console.warn("AI found no moves. Checking win condition.");
-         isAiThinking = false;
-         if (!checkWinCondition()) {
-             // If no win condition met but AI found no moves, it's likely a stalemate or bug.
-             // For simplicity, we might just end the turn, leading to opponent win if they have moves.
-              endTurn(); // Pass the turn
-         } else {
-              renderBoard(); // Update UI based on win
-         }
-     }
- }
-        function findBestMoveForAI() {
-             // Prioritize jumps if available for the current player
-             const allPossibleJumps = getAllPossibleMoves(AI_PLAYER, true, boardState);
-             if (allPossibleJumps.length > 0) {
-                  // If jumps are mandatory, AI must choose one.
-                  // In checkers, any jump is usually better than no move if available.
-                  // For AI, choosing the "best" jump might involve evaluating follow-up jumps.
-                  // Simple AI: just pick a random jump.
-                  if (aiDifficulty === DIFFICULTIES.EASY) {
-                      return { move: allPossibleJumps[Math.floor(Math.random() * allPossibleJumps.length)], score: 0 };
-                  } else {
-                      // Minimax needs to prioritize jumps when they are available
-                      // This needs a slightly modified minimax or a pre-filter.
-                      // Let's filter moves to only include jumps if jumps exist.
-                      const depth = (aiDifficulty === DIFFICULTIES.HARD) ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM;
-                      return findBestMoveMinimax(AI_PLAYER, depth, allPossibleJumps); // Pass jumps to minimax
-                  }
-             }
-
-             // If no jumps, consider all regular moves
-             const regularMoves = getAllPossibleMoves(AI_PLAYER, false, boardState);
-             if (regularMoves.length === 0) {
-                  return null; // No moves available
-             }
-
-             if (aiDifficulty === DIFFICULTIES.EASY) {
-                  return { move: regularMoves[Math.floor(Math.random() * regularMoves.length)], score: 0 };
-             } else {
-                  const depth = (aiDifficulty === DIFFICULTIES.HARD) ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM;
-                  return findBestMoveMinimax(AI_PLAYER, depth, regularMoves); // Pass regular moves to minimax
-             }
-         }
-        // Modified minimax function to accept filtered moves (jumps or regular)
-        function findBestMoveMinimax(player, depth, possibleMoves) {
-             let bestScore = player === AI_PLAYER ? -Infinity : Infinity; // Maximize for AI, Minimize for opponent
-             let bestMove = null;
-
-             if (possibleMoves.length === 0) {
-                  // This case should be handled by the caller (findBestMoveForAI)
-                  // But return a score based on current board state
-                  return { move: null, score: evaluateBoard(boardState, player, depth) };
-             }
-
-             for (const move of possibleMoves) {
-                  const tempBoard = deepCopyBoard(boardState);
-                  simulateMove(tempBoard, move);
-
-                  let currentScore;
-                  // If a jump was just made, check for subsequent jumps from the landing square
-                  const pieceAfterMove = tempBoard[move.row][move.col];
-                  let subsequentJumps = [];
-                  if (move.isJump && pieceAfterMove) {
-                       subsequentJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard);
-                  }
-
-                  if (subsequentJumps.length > 0) {
-                       // If subsequent jumps exist, the current player MUST continue.
-                       // Evaluate the *best possible* sequence of jumps from here within the given depth.
-                       // This requires a recursive call that stays on the current player's turn.
-                       currentScore = minimax(tempBoard, depth, -Infinity, Infinity, player === AI_PLAYER, player, player).score; // Stay on current player, pass AI player as original
-                  } else {
-                       // No subsequent jumps, or it was a regular move. Switch to the opponent's turn.
-                       currentScore = minimax(tempBoard, depth - 1, -Infinity, Infinity, player === AI_PLAYER ? false : true, getOpponent(currentPlayerMM), player).score;
-                  }
-
-
-                  if (player === AI_PLAYER) { // Maximizing player (AI)
-                       if (currentScore > bestScore) {
-                            bestScore = currentScore;
-                            bestMove = move;
-                       }
-                  } else { // Minimizing player (Opponent)
-                        // This branch is only reached during the recursive calls for the opponent's turn
-                        // The score should be relative to the ORIGINAL player (AI).
-                        // So, we are minimizing the score *from the AI's perspective*.
-                       if (currentScore < bestScore) {
-                            bestScore = currentScore;
-                       }
-                  }
-             }
-             // If no moves led to a better score, pick the first available move as a fallback
-             if (!bestMove && possibleMoves.length > 0) {
-                  bestMove = possibleMoves[0];
-             }
-
-             return { move: bestMove, score: bestScore };
-         }
-
-        // Adjusted minimax function for the recursive calls within the search tree
-        function minimax(currentBoard, depth, alpha, beta, isMaximizingPlayer, currentPlayerMM, originalPlayer) {
-             if (depth === 0 || checkGameOverSimulated(currentBoard, currentPlayerMM)) {
-                  return { score: evaluateBoard(currentBoard, originalPlayer, depth), move: null }; // Return score and null move
-             }
-
-             const possibleMoves = getAllPossibleMoves(currentPlayerMM, false, currentBoard); // Get all possible moves for current player in simulation
-
-             // If no moves are possible for the current player in simulation, this branch ends.
-             // The score depends on whose turn it is relative to the original player.
-             if (possibleMoves.length === 0) {
-                 return { score: evaluateBoard(currentBoard, originalPlayer, depth), move: null };
-             }
-
-             if (isMaximizingPlayer) { // This player is trying to maximize the score (for originalPlayer)
-                  let maxEval = -Infinity;
-                  let bestMoveInSimulation = null; // Track best move *within this simulation branch*
-
-                  for (const move of possibleMoves) {
-                       const tempBoard = deepCopyBoard(currentBoard);
-                       simulateMove(tempBoard, move);
-
-                       const pieceAfterMove = tempBoard[move.row][move.col];
-                       let subsequentJumps = [];
-                       if (move.isJump && pieceAfterMove) {
-                            subsequentJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard);
-                       }
-
-                       let evalResult;
-                       if (subsequentJumps.length > 0) {
-                            // If subsequent jumps, current player stays on turn
-                            evalResult = minimax(tempBoard, depth, alpha, beta, true, currentPlayerMM, originalPlayer);
-                       } else {
-                            // No subsequent jumps, switch player
-                            evalResult = minimax(tempBoard, depth - 1, alpha, beta, false, getOpponent(currentPlayerMM), originalPlayer);
-                       }
-
-                       if (evalResult.score > maxEval) {
-                            maxEval = evalResult.score;
-                            bestMoveInSimulation = move; // Update best move in simulation
-                       }
-
-                       alpha = Math.max(alpha, evalResult.score);
-                       if (beta <= alpha) break; // Alpha-beta pruning
-                  }
-                  return { score: maxEval, move: bestMoveInSimulation };
-             } else { // This player is trying to minimize the score (for originalPlayer)
-                  let minEval = Infinity;
-                  let bestMoveInSimulation = null; // Track best move *within this simulation branch*
-
-                  for (const move of possibleMoves) {
-                       const tempBoard = deepCopyBoard(currentBoard);
-                       simulateMove(tempBoard, move);
-
-                       const pieceAfterMove = tempBoard[move.row][move.col];
-                       let subsequentJumps = [];
-                       if (move.isJump && pieceAfterMove) {
-                             subsequentJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard);
-                       }
-
-                       let evalResult;
-                       if (subsequentJumps.length > 0) {
-                            // If subsequent jumps, current player stays on turn
-                            evalResult = minimax(tempBoard, depth, alpha, beta, false, currentPlayerMM, originalPlayer); // Stay minimizing
-                       } else {
-                            // No subsequent jumps, switch player
-                            evalResult = minimax(tempBoard, depth - 1, alpha, beta, true, getOpponent(currentPlayerMM), originalPlayer); // Switch to maximizing (for originalPlayer)
-                       }
-
-
-                       if (evalResult.score < minEval) {
-                           minEval = evalResult.score;
-                           bestMoveInSimulation = move; // Update best move in simulation
-                       }
-
-                       beta = Math.min(beta, evalResult.score);
-                       if (beta <= alpha) break; // Alpha-beta pruning
-                  }
-                   return { score: minEval, move: bestMoveInSimulation };
-             }
-        }
-
-        function evaluateBoard(currentBoard, player, depth = 0) {
-            let score = 0;
-            const opponent = getOpponent(player);
-            // Score values (slightly adjusted)
-            const WIN_SCORE = 10000; // Increased win/loss score
-            const KING_VALUE = 2.5; // Relative value of a king vs piece
-            const PIECE_VALUE = 1;
-            const ADVANCEMENT_VALUE = 0.05; // Reduced value of advancement
-            const MOBILITY_VALUE = 0.01; // Value of having more moves
-            const TEMPO_BONUS = 0.1; // Bonus for winning faster (higher depth)
-            const ENDGAME_FACTOR = (16 - (countPieces(currentBoard) / 2)) * 0.1; // Value increases towards endgame
-
-            let myPieces = 0, oppPieces = 0;
-            let myKings = 0, oppKings = 0;
-            let myPotentialJumps = 0, oppPotentialJumps = 0;
-
-            // Piece count and positioning score
-            for (let r = 0; r < BOARD_SIZE; r++) {
-                for (let c = 0; c < BOARD_SIZE; c++) {
-                    const piece = currentBoard[r][c];
-                    if (piece) {
-                        if (piece.player === player) {
-                            myPieces++;
-                            score += PIECE_VALUE;
-                            if (piece.isKing) {
-                                myKings++;
-                                score += KING_VALUE - PIECE_VALUE;
-                            } else {
-                                // Advancement score: closer to opponent's back row
-                                score += (player === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r)) * ADVANCEMENT_VALUE;
-                                // Value pieces on edge or in center? (Optional complexity)
-                            }
-                             if(calculateMovesForPieceInternal(r, c, true, currentBoard).length > 0) { // Count jumps
-                                myPotentialJumps++;
-                             }
-                        } else { // Opponent's piece
-                            oppPieces++;
-                            score -= PIECE_VALUE;
-                            if (piece.isKing) {
-                                oppKings++;
-                                score -= KING_VALUE - PIECE_VALUE;
-                            } else {
-                                score -= (opponent === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r)) * ADVANCEMENT_VALUE;
-                            }
-                             if(calculateMovesForPieceInternal(r, c, true, currentBoard).length > 0) { // Count jumps
-                                oppPotentialJumps++;
-                             }
-                        }
-                    }
-                }
-            }
-
-            // Win/Loss condition checks
-             const myCanMove = getAllPossibleMoves(player, false, currentBoard).length > 0;
-             const oppCanMove = getAllPossibleMoves(opponent, false, currentBoard).length > 0;
-
-            if (oppPieces === 0 || !oppCanMove) {
-                 // Current player (originalPlayer) wins. Bonus for winning faster (less depth).
-                return WIN_SCORE + (depth * TEMPO_BONUS);
-            }
-            if (myPieces === 0 || !myCanMove) {
-                // Current player (originalPlayer) loses. Penalty for losing slower.
-                return -WIN_SCORE - (depth * TEMPO_BONUS);
-            }
-
-            // Material advantage (kings are more valuable)
-            score += (myKings * KING_VALUE + (myPieces - myKings) * PIECE_VALUE);
-            score -= (oppKings * KING_VALUE + (oppPieces - oppKings) * PIECE_VALUE);
-
-            // Mobility/Jump advantage (Optional)
-            // Having more moves is generally good
-             score += (myCanMove ? 1 : 0.1) * MOBILITY_VALUE; // Small bonus for having moves
-             score -= (oppCanMove ? 1 : 0.1) * MOBILITY_VALUE; // Small penalty if opponent has moves
-
-            // Prioritize jumps
-            score += (myPotentialJumps - oppPotentialJumps) * PIECE_VALUE * 0.5; // Value controlling more jumps
-
-             // Endgame bonus (value kings more in endgame) - Already partly covered by piece count factor
-
-             // Add a small random factor to break ties and add variation (useful for easy/medium)
-             if (aiDifficulty === DIFFICULTIES.EASY || aiDifficulty === DIFFICULTIES.MEDIUM) {
-                  score += Math.random() * 0.5; // Add small variability
-             }
-
-
-            return score;
-        }
-
-        function countPieces(currentBoard) {
-             let count = 0;
-             for(let r=0; r<BOARD_SIZE; r++){
-                 for(let c=0; c<BOARD_SIZE; c++){
-                      if(currentBoard[r][c] !== null) count++;
-                 }
-             }
-             return count;
-        }
-
-
-        function simulateMove(board, move) {
-             // Make sure the origin is valid
-             if (!isValidSquare(move.origin.r, move.origin.c)) {
-                  console.error("SimulateMove: Invalid origin square", move.origin);
-                  return;
-             }
-            const pieceData = board[move.origin.r][move.origin.c];
-             if (!pieceData) {
-                 console.error("SimulateMove: No piece at origin", move.origin);
-                 return; // Should not happen if move was generated correctly
-             }
-
-             // Make sure the destination is valid and empty
-             if (!isValidSquare(move.row, move.col)) {
-                 console.error("SimulateMove: Invalid destination square", move.row, move.col);
-                 return;
-             }
-             if (board[move.row][move.col] !== null) {
-                 console.error("SimulateMove: Destination not empty", move.row, move.col);
-                 // This might happen in complex jump sequences if not careful, but simple simulate should work
-                 // For robustness, maybe return or handle? For now assume valid moves generated.
-                 // return;
-             }
-
-            const toRow = move.row;
-            const toCol = move.col;
-
-            // Move the piece
-            board[toRow][toCol] = pieceData;
-            board[move.origin.r][move.origin.c] = null;
-
-            // Handle captured piece for jumps
-            if (move.isJump && move.captured) {
-                const capR = move.captured.row;
-                const capC = move.captured.col;
-                if (isValidSquare(capR, capC) && board[capR][capC]) {
-                     // Ensure the captured piece belongs to the opponent
-                     if (board[capR][capC].player !== pieceData.player) {
-                         board[capR][capC] = null;
-                     } else {
-                          console.error("SimulateMove: Captured piece belongs to same player?", move, board[capR][capC]);
-                     }
-                } else {
-                     console.error("SimulateMove: Captured square empty or invalid?", move);
-                }
-            }
-
-            // Check for kinging
-            if (!pieceData.isKing) {
-                if ((pieceData.player === PLAYER_BLACK && toRow === 0) || (pieceData.player === PLAYER_WHITE && toRow === BOARD_SIZE - 1)) {
-                    pieceData.isKing = true;
-                }
-            }
-            // Note: Kinging happens immediately in simulation, consistent with game rules.
-            // Check for subsequent jumps *after* kinging, if any. This is handled by the calling minimax function.
-        }
-
-        function checkGameOverSimulated(board, playerToCheck) {
-             let pieces = 0;
-             let hasMoves = false;
-             const opponent = getOpponent(playerToCheck);
-
-             for(let r=0; r<BOARD_SIZE; r++){
-                 for(let c=0; c<BOARD_SIZE; c++){
-                      const piece = board[r][c];
-                      if(piece){
-                           if(piece.player === playerToCheck){
-                                pieces++;
-                                if(!hasMoves){ // Only calculate moves if we haven't found any yet
-                                     if(calculateMovesForPieceInternal(r, c, false, board).length > 0){
-                                          hasMoves = true;
-                                     }
-                                }
-                           }
-                      }
-                 }
-             }
-             // Game over if playerToCheck has no pieces or no legal moves
-             return pieces === 0 || !hasMoves;
-        }
-
-        function addHoverEffects() {
-             // Remove existing hover classes first
-             removeHoverEffects();
-
-             // Check if interaction is blocked (game over, AI thinking, settings, etc.)
-             const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER);
-
-             if (isInteractionBlocked) {
-                 // If blocked, ensure all pieces have default cursor and no pointer events
-                 boardElement.querySelectorAll('.piece').forEach(piece => {
-                     piece.style.cursor = 'default';
-                     piece.style.pointerEvents = 'none';
-                 });
-                 return; // Exit the function
-             }
-
-             // If not blocked, add hover effects to interactive pieces
-             boardElement.querySelectorAll(`.piece.${currentPlayer}-piece`).forEach(piece => {
-                 const square = piece.closest('.square');
-                 if (!square) return;
-                 const r = parseInt(square.dataset.row);
-                 const c = parseInt(square.dataset.col);
-
-                 // A piece is hoverable if:
-                 // 1. No piece is currently selected OR the currently selected piece is THIS piece
-                 // 2. There is no continuous jump sequence required OR THIS piece is the one that must complete the jump
-                 const canSelectThisPiece = !selectedPiece || (selectedPiece.row === r && selectedPiece.col === c);
-                 const mustJumpWithThisPiece = continuousJumpPossible && selectedPiece && selectedPiece.row === r && selectedPiece.col === c;
-                 const isHoverable = canSelectThisPiece && (!continuousJumpPossible || mustJumpWithThisPiece);
-
-                 if (isHoverable) {
-                     const movesForThisPiece = calculateMovesForPiece(r, c, continuousJumpPossible, boardState); // Check moves including mandatory jumps
-                     if (movesForThisPiece.length > 0) {
-                         piece.classList.add('hoverable');
-                         piece.style.cursor = 'grab'; // Use grab cursor
-                         piece.style.pointerEvents = 'auto'; // Allow interaction
-                     } else {
-                         piece.style.cursor = 'default'; // No moves, not interactive
-                         piece.style.pointerEvents = 'none';
-                     }
-                 } else {
-                     // If not hoverable (e.g., wrong player's piece, or another piece needs to jump)
-                     piece.style.cursor = 'default';
-                     piece.style.pointerEvents = 'none';
-                 }
-             });
-
-             // Ensure the selected piece (if any) remains interactive
-             if (selectedPiece && selectedPiece.element && boardElement.contains(selectedPiece.element)) {
-                  selectedPiece.element.style.cursor = 'grab'; // Keep grab cursor
-                  selectedPiece.element.style.pointerEvents = 'auto'; // Ensure interaction
-             }
-
-              // Ensure dark squares have pointer cursor if not blocked and no piece selected
-             boardElement.querySelectorAll('.dark-square:not(:has(.piece))').forEach(sq => {
-                 const r = parseInt(sq.dataset.row);
-                 const c = parseInt(sq.dataset.col);
-                  // Square is clickable if a piece is selected AND it's a possible move
-                 const isClickable = selectedPiece && sq.classList.contains('possible-move') && !isInteractionBlocked && !isSettingsPanelVisible;
-                 sq.style.cursor = isClickable ? 'pointer' : ((!isInteractionBlocked && !isSettingsPanelVisible) ? 'pointer' : 'default'); // Default cursor for dark squares when no piece selected
-             });
-
-              // Reapply specific cursors for possible move squares when a piece is selected
-              if (selectedPiece && !isInteractionBlocked && !isSettingsPanelVisible) {
-                   boardElement.querySelectorAll('.square.possible-move').forEach(sq => {
-                        sq.style.cursor = 'pointer';
-                   });
-              }
-        }
-
-        function removeHoverEffects() {
-             document.querySelectorAll('.piece.hoverable').forEach(p => {
-                 p.classList.remove('hoverable');
-                 // Don't reset cursor here, it's handled by addHoverEffects or general piece styles
-             });
-             // Don't reset square cursors here, handled by renderBoard or addHoverEffects
-         }
-
-
-        // --- Initialization on Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM Loaded. Initializing...");
-            updateSoundButtonIcon(); updateTimerButtonIcon();
-            settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible');
-            settingsOverlay.style.display = 'none';
-            boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible'); confirmationModal.classList.remove('visible');
-            gameContainer.style.display = 'none'; gameOverScreen.classList.remove('visible');
-            startScreen.classList.remove('hidden-completely');
-            aiDifficultySelectorContainer.classList.remove('visible');
-            isSettingsPanelVisible = false; isGameOver = true;
-            loadBoardStyle(); loadPieceStyle();
-            updateTurnIndicatorVisuals(); updateUndoButton(); updateHintButton(); updateCapturedCounters(); updateTimerDisplay();
-            updateDifficultySelectorDisplay();
-            console.log("Initialization Complete. Ready.");
-        });
-
-    </script>
-
-</body>
-</html>
+        function makeAiMove() { if (isGameOver || currentPlayer !== AI_PLAYER) { isAiThinking = false; requestRender(); return; } let bestMoveResult; if (continuousJumpPossible && selectedPiece && selectedPiece.player === AI_PLAYER) { const nextJumps = calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState); if (nextJumps.length > 0) { bestMoveResult = { move: nextJumps[0], score: 0 }; } else { continuousJumpPossible = false; bestMoveResult = findBestMoveForAI(); } } else { bestMoveResult = findBestMoveForAI(); } if (bestMoveResult && bestMoveResult.move) { const chosenMove = bestMoveResult.move; saveCurrentStateToHistory(); const aiPieceSquare = getSquareElement(chosenMove.origin.r, chosenMove.origin.c); const aiPieceElement = aiPieceSquare?.querySelector('.piece'); selectedPiece = { row: chosenMove.origin.r, col: chosenMove.origin.c, player: AI_PLAYER, element: aiPieceElement }; animateAndMovePiece(chosenMove.origin.r, chosenMove.origin.c, chosenMove); } else { isAiThinking = false; endTurn(); } }
+        function findBestMoveForAI() { if (aiDifficulty === DIFFICULTIES.EASY) { const allPossibleJumps = getAllPossibleMoves(AI_PLAYER, true, boardState); let possibleAiMoves; if (allPossibleJumps.length > 0) { possibleAiMoves = allPossibleJumps; } else { possibleAiMoves = getAllPossibleMoves(AI_PLAYER, false, boardState); } if (possibleAiMoves.length === 0) { return null; } const randomMove = possibleAiMoves[Math.floor(Math.random() * possibleAiMoves.length)]; return { move: randomMove, score: 0 }; } else { const depth = (aiDifficulty === DIFFICULTIES.HARD) ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM; return findBestMoveMinimax(AI_PLAYER, depth); } }
+        function findBestMoveMinimax(player, depth) { let bestScore = -Infinity; let bestMove = null; const possibleMoves = getAllPossibleMoves(player, false, boardState); if (possibleMoves.length === 0) { return { move: null, score: evaluateBoard(boardState, player, depth) }; } possibleMoves.forEach(move => { const tempBoard = deepCopyBoard(boardState); simulateMove(tempBoard, move); let finalBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); } const score = minimax(finalBoardState, depth - 1, -Infinity, Infinity, false, getOpponent(currentPlayer), player); if (score > bestScore) { bestScore = score; bestMove = move; } }); if (!bestMove && possibleMoves.length > 0) { best
