@@ -1,1 +1,2425 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <!-- Updated Viewport Tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Enhanced Checkers - Drag & Drop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ---------------------------------------------------------- */
+        /* --- Base Styles --- */
+        /* ---------------------------------------------------------- */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-size: 16px; /* Base font size for rem units */
+        }
 
+        body {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #321e06;
+            color: #e0d6c8;
+            box-sizing: border-box;
+            position: relative;
+            touch-action: none; /* Important for preventing default touch actions like zooming */
+        }
+
+        /* Ensure images and videos are responsive */
+        img, video {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ---------------------------------------------------------- */
+        /* --- Layout Styles --- */
+        /* ---------------------------------------------------------- */
+
+        /* --- Rotate Device Message (Forcing Landscape) --- */
+        #rotate-device-message {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* Dark overlay */
+            color: #fff;
+            font-size: clamp(1.2em, 4vh, 1.8em);
+            text-align: center;
+            flex-direction: column; /* Use flexbox to center content */
+            align-items: center;
+            justify-content: center;
+            z-index: 200; /* Ensure it's above everything else */
+            padding: clamp(1rem, 3vh, 2rem); /* Responsive padding */
+            box-sizing: border-box;
+            pointer-events: auto; /* Ensure interactions work on the message */
+            line-height: 1.5;
+        }
+
+        /* Styling for the rotation icon (optional but helpful) */
+        .rotate-icon {
+            width: clamp(4rem, 10vh, 6rem); /* Responsive size */
+            height: clamp(4rem, 10vh, 6rem); /* Responsive size */
+            border: clamp(0.4rem, 1vh, 0.6rem) solid #fff; /* Responsive border */
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            margin-top: 2rem; /* Responsive margin */
+            position: relative;
+            box-sizing: border-box;
+        }
+        .rotate-icon::before {
+             content: '';
+             position: absolute;
+             /* Adjust positioning based on icon size */
+             top: clamp(-0.8rem, -2vh, -1.2rem); /* Responsive positioning */
+             right: clamp(-0.5rem, -1.5vh, -0.8rem); /* Responsive positioning */
+             border: clamp(0.5rem, 1.5vh, 0.8rem) solid transparent; /* Responsive border */
+             border-top-color: #fff;
+             transform: rotate(45deg); /* Pointing outwards */
+             transform-origin: 50% 50%;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Media Query to show the overlay and hide content in portrait --- */
+        @media (orientation: portrait) {
+            #rotate-device-message {
+                display: flex; /* Show the overlay */
+            }
+
+            /* Hide all other direct children of the body */
+            body > *:not(#rotate-device-message) {
+                 display: none !important; /* Use !important to override other display rules */
+            }
+             /* Explicitly hide key containers just in case */
+            #settings-button, #settings-overlay, #settings-panel,
+            #start-screen, #ai-difficulty-selector-container, #game-container,
+            #game-over-screen, #board-selection-screen, #piece-style-selection-screen,
+            #confirmation-modal {
+                 display: none !important;
+            }
+        }
+
+        @media (orientation: landscape) {
+             #rotate-device-message {
+                  display: none; /* Ensure it's hidden in landscape */
+             }
+             /* When switching back to landscape, default/JS display rules will apply */
+        }
+
+
+        /* --- Start Screen --- */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4a3b31, #321e06, #4a3b31);
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+            text-align: center;
+            z-index: 120;
+            box-sizing: border-box;
+            padding: 5vh clamp(1rem, 3vw, 2rem); /* Responsive padding */
+            transition: opacity 0.3s ease-out, visibility 0s linear 0.3s;
+            opacity: 1;
+            visibility: visible;
+         }
+        #start-screen.hidden-completely {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-out, visibility 0s linear 0.3s;
+        }
+
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        #main-title {
+            font-size: clamp(3.5em, 13vh, 7em); /* Keep: good responsive units */
+            color: #e8d5b7;
+            font-weight: 700;
+            margin-bottom: clamp(2rem, 7vh, 4rem); /* Responsive margin */
+            text-shadow: 0 0 0.5rem #fff, 0 0 0.8rem #ffd700, 0.3rem 0.3rem 0.3rem rgba(0,0,0,0.6); /* Responsive shadows */
+            letter-spacing: 0.2rem; /* Responsive letter spacing */
+            font-family: 'Roboto', 'Cairo', Impact, sans-serif;
+            opacity: 0;
+            animation: fadeInTitle 1s ease-out 0.5s forwards;
+            transition: opacity 0.4s ease-out;
+            flex-shrink: 0;
+        }
+        @keyframes fadeInTitle { from { opacity: 0; transform: translateY(-1.5rem); /* Responsive transform */ } to { opacity: 1; transform: translateY(0); } }
+        #start-screen h2#start-subtitle {
+            font-size: clamp(1.6em, 5vh, 2.5em); /* Keep: good responsive units */
+            color: #f0e5d1;
+            margin-top: 0;
+            margin-bottom: clamp(1.5rem, 5vh, 2.5rem); /* Responsive margin */
+            opacity: 0;
+            animation: fadeInSubtitle 1s ease-out 1s forwards;
+            text-shadow: 0.0625rem 0.0625rem 0.25rem rgba(0,0,0,0.5); /* Responsive shadow */
+            transition: opacity 0.4s ease-out;
+            flex-shrink: 0;
+        }
+        @keyframes fadeInSubtitle { from { opacity: 0; transform: translateY(-0.8rem); /* Responsive transform */ } to { opacity: 1; transform: translateY(0); } }
+        #start-options { display: flex; flex-direction: column; align-items: center; width: 100%; opacity: 1; transition: opacity 0.5s ease-out; flex-shrink: 0; }
+        .start-button {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            font-size: clamp(1.4em, 4.5vh, 2em); /* Keep: good responsive units */
+            padding: clamp(0.8rem, 3vh, 1.5rem) clamp(1.5rem, 6vw, 3rem); /* Responsive padding */
+            margin: clamp(0.8rem, 2vh, 1.5rem); /* Responsive margin */
+            min-width: clamp(16rem, 55vw, 24rem); /* Responsive min-width */
+            cursor: pointer;
+            border: none;
+            border-radius: 1.2rem; /* Responsive border-radius */
+            background: linear-gradient(to bottom, #966f4d, #7a542e);
+            color: #ffffff;
+            text-shadow: 0.0625rem 0.0625rem 0.125rem rgba(0,0,0,0.5); /* Responsive shadow */
+            box-shadow: 0 0.5rem 0.8rem rgba(0,0,0,0.45), inset 0 0.0625rem 0.125rem rgba(255,255,255,0.2); /* Responsive shadows */
+            transition: all 0.2s ease;
+            opacity: 0;
+            transform: translateY(1.5rem); /* Responsive transform */
+            animation: fadeInUpButton 0.6s ease-out forwards;
+            flex-shrink: 0;
+        }
+        #vs-human-button { animation-delay: 1.3s; }
+        #vs-ai-button { animation-delay: 1.5s; }
+        @keyframes fadeInUpButton { from { opacity: 0; transform: translateY(1.5rem); /* Responsive transform */ } to { opacity: 1; transform: translateY(0); } }
+        .start-button:hover {
+            background: linear-gradient(to bottom, #a07551, #8b5e3c);
+            box-shadow: 0 0.6rem 1rem rgba(0,0,0,0.55), inset 0 0.0625rem 0.125rem rgba(255,255,255,0.2); /* Responsive shadows */
+            transform: translateY(-0.25rem) scale(1.04); /* Responsive transform */
+        }
+        .start-button:active {
+            transform: translateY(0px) scale(1);
+            box-shadow: 0 0.3rem 0.5rem rgba(0,0,0,0.4), inset 0 0.0625rem 0.125rem rgba(0,0,0,0.25); /* Responsive shadows */
+        }
+
+        /* --- AI Difficulty Selector --- */
+        #ai-difficulty-selector-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: clamp(18rem, 75vw, 30rem); /* Responsive width */
+            padding: 2rem 2.5rem; /* Responsive padding */
+            background-color: #3a281a;
+            border-radius: 1rem; /* Responsive border-radius */
+            border: 0.0625rem solid #6b4f3b; /* Responsive border */
+            z-index: 130;
+            opacity: 0;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            transition: opacity 0.3s ease-out 0.1s, transform 0.3s ease-out 0.1s;
+            visibility: hidden;
+            box-sizing: border-box; /* Added for better padding control */
+        }
+        #ai-difficulty-selector-container.visible {
+            display: flex;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            visibility: visible;
+        }
+        #ai-difficulty-selector-container h3 {
+             color: #f0e5d1;
+             margin-top: 0;
+             margin-bottom: 2rem; /* Responsive margin */
+             font-size: clamp(1.4em, 4vh, 1.8em); /* Keep: good responsive units */
+             text-shadow: 0.0625rem 0.0625rem 0.125rem rgba(0,0,0,0.4); /* Responsive shadow */
+        }
+        .difficulty-control {
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             gap: 2rem; /* Responsive gap */
+             width: 100%;
+             margin-bottom: 2.2rem; /* Responsive margin */
+        }
+        .difficulty-arrow-button {
+             background: linear-gradient(to bottom, #966f4d, #7a542e);
+             border: none;
+             color: white;
+             font-size: 1.8em; /* Keep: relative to parent font size */
+             padding: 0.6rem 1.2rem; /* Responsive padding */
+             border-radius: 0.6rem; /* Responsive border-radius */
+             cursor: pointer;
+             box-shadow: 0 0.25rem 0.4rem rgba(0,0,0,0.3); /* Responsive shadow */
+             transition: all 0.2s ease;
+             flex-shrink: 0;
+        }
+        .difficulty-arrow-button:hover {
+             background: linear-gradient(to bottom, #a07551, #8b5e3c);
+             transform: scale(1.05);
+        }
+        .difficulty-arrow-button:active {
+             transform: scale(0.98);
+             box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.3); /* Responsive shadow */
+        }
+        #difficulty-display {
+             font-size: clamp(1.6em, 4.5vh, 2.1em); /* Keep: good responsive units */
+             font-weight: bold;
+             color: #fff;
+             text-shadow: 0.0625rem 0.0625rem 0.2rem rgba(0,0,0,0.6); /* Responsive shadow */
+             min-width: 8rem; /* Responsive min-width */
+             text-align: center;
+        }
+        #confirm-difficulty-button {
+             font-size: clamp(1.3em, 4vh, 1.9em); /* Keep: good responsive units */
+             padding: clamp(0.8rem, 3vh, 1.5rem) clamp(1.5rem, 6vw, 3rem); /* Responsive padding */
+             min-width: clamp(15rem, 55vw, 22rem); /* Responsive min-width */
+             opacity: 1;
+             transform: none;
+             animation: none;
+             margin-top: 1rem; /* Responsive margin */
+             box-shadow: 0 0.5rem 0.8rem rgba(0,0,0,0.45), inset 0 0.0625rem 0.125rem rgba(255,255,255,0.2); /* Ensure base button shadow applied */
+        }
+        #close-difficulty-selector {
+            position: absolute;
+            top: 1rem; /* Responsive position */
+            right: 1rem; /* Responsive position */
+            left: auto;
+            background: none;
+            border: none;
+            font-size: 1.6em; /* Keep: relative to parent */
+            color: #e0d6c8;
+            cursor: pointer;
+            padding: 0.3rem; /* Responsive padding */
+            transition: color 0.2s ease, transform 0.2s ease;
+            z-index: 131;
+        }
+        #close-difficulty-selector:hover {
+             color: #ffffff;
+             transform: scale(1.1);
+        }
+        #difficulty-prev i { transform: scaleX(-1); }
+        #difficulty-next i { transform: scaleX(-1); }
+
+
+        /* --- Game Container --- */
+        #game-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Changed to center to allow board to take available space */
+            width: 100%;
+            height: 100%;
+            padding: 1rem; /* Responsive padding */
+            gap: clamp(0.8rem, 2vh, 1rem); /* Responsive gap */
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+        /* --- Status Bar --- */
+        #status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: var(--board-size);
+            max-width: 95vmin; /* Keep: good responsive unit */
+            margin: 0 auto;
+            padding: 0.3rem 0.6rem; /* Responsive padding */
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 0.5rem; /* Responsive border-radius */
+            box-shadow: inset 0 0 0.3rem rgba(0,0,0,0.3); /* Responsive shadow */
+            flex-wrap: wrap;
+            gap: 0.6rem; /* Responsive gap */
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        /* Adjust order and justification for wrapping */
+        @media (max-width: 450px) { /* Example breakpoint for smaller screens */
+             #status-bar {
+                  justify-content: center;
+             }
+             .status-section.capture-count.white { order: 1; flex-basis: 100%; text-align: center; justify-content: center; }
+             #turn-indicators { order: 2; flex-basis: 100%; justify-content: center; }
+             .status-section.capture-count.black { order: 3; flex-basis: 100%; text-align: center; justify-content: center; }
+             .status-section.capture-count.white .timer-display,
+             .status-section.capture-count.black .timer-display { margin: 0 0.5rem; } /* Adjust timer spacing */
+        }
+
+
+        .status-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* Responsive gap */
+            font-size: clamp(0.8em, 2.5vh, 1.1em); /* Keep: good responsive units */
+        }
+        .status-icon {
+            font-size: 1.2em; /* Keep: relative */
+            width: 1.2rem; /* Responsive size */
+            text-align: center;
+        }
+        .timer-display {
+            min-width: 3rem; /* Responsive min-width */
+            text-align: right;
+            background-color: rgba(0,0,0,0.3);
+            padding: 0.125rem 0.4rem; /* Responsive padding */
+            border-radius: 0.25rem; /* Responsive border-radius */
+            font-variant-numeric: tabular-nums;
+        }
+        .capture-count span:first-of-type { margin-right: 0.2rem; margin-left: 0; } /* Responsive margin */
+        .capture-count span:last-of-type { font-weight: bold; }
+        .status-section.capture-count.white .timer-display { margin-left: 0.6rem; margin-right: 0; } /* Responsive margin */
+        .status-section.capture-count.black .timer-display { margin-right: 0.6rem; margin-left: 0; } /* Responsive margin */
+
+        #turn-indicators { display: flex; justify-content: center; align-items: center; margin-bottom: 0; flex-shrink: 0; height: 2.5rem; /* Responsive height */ }
+        .turn-indicator {
+             width: 2rem; height: 2rem; /* Responsive size */
+             border-radius: 50%;
+             margin: 0 0.5rem; /* Responsive margin */
+             box-sizing: border-box;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             position: relative;
+             border: 0.125rem solid rgba(255, 50, 50, 0.6); /* Responsive border */
+             box-shadow: 0 0 0.25rem rgba(255, 50, 50, 0.4); /* Responsive shadow */
+             transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .turn-indicator .piece-visual { width: 85%; height: 85%; border-radius: 50%; box-shadow: 0 0.0625rem 0.2rem rgba(0,0,0,0.4); /* Responsive shadow */ }
+        .turn-indicator.active-turn { border-color: rgba(50, 255, 50, 0.8); box-shadow: 0 0 0.5rem rgba(50, 255, 50, 0.7); /* Responsive shadow */ transform: scale(1.1); }
+
+        /* --- Board & Piece Styles --- */
+        #board {
+            display: grid;
+            --square-size: clamp(2.8rem, 9.5vmin, 4.7rem); /* Keep: good responsive units */
+            --board-size: calc(var(--square-size) * 8);
+            grid-template-columns: repeat(8, var(--square-size));
+            grid-template-rows: repeat(8, var(--square-size));
+            width: var(--board-size);
+            height: var(--board-size);
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.5), inset 0 0 0.6rem rgba(0,0,0,0.4); /* Responsive shadows */
+            border-radius: 0.5rem; /* Responsive border-radius */
+            position: relative;
+            margin: 0 auto;
+            max-width: 95vmin; /* Keep: good responsive unit */
+            max-height: 95vmin; /* Keep: good responsive unit */
+            aspect-ratio: 1 / 1;
+            flex-shrink: 1;
+            border: 0.625rem solid #8B4513; /* Example base border, overridden by specific styles */
+            background-color: #A0522D; /* Example base background, overridden by specific styles */
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+            user-select: none;
+        }
+        .square {
+            width: var(--square-size); height: var(--square-size);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            transition: background-color 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+            overflow: visible;
+            box-sizing: border-box; /* Added */
+        }
+        .piece {
+            width: 85%; height: 85%;
+            border-radius: 50%;
+            cursor: grab;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: white;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.3s ease, border-color 0.3s ease, outline-color 0.3s ease;
+            border: 0.125rem solid rgba(255, 255, 255, 0.1); /* Responsive border */
+            overflow: hidden;
+            animation: none;
+            outline: 0px solid transparent;
+            outline-offset: 0.125rem; /* Responsive outline-offset */
+            will-change: transform;
+            touch-action: none;
+        }
+        .piece.dragging { cursor: grabbing; z-index: 1000 !important; transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0.6rem 1.5rem rgba(0,0,0,0.5) !important; /* Responsive shadow */ opacity: 0.85; transition: none !important; }
+        .piece.ghost { opacity: 0.3 !important; }
+        .piece.captured-fade { animation: fadeOutPiece 0.4s ease-out forwards; z-index: 5; }
+        @keyframes fadeOutPiece { from { opacity: 1; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } }
+        .piece.jump-hint { outline-color: rgba(0, 255, 0, 0.7); outline-width: 0.2rem; /* Responsive outline */ animation: hintPulseGreen 1.5s infinite ease-in-out !important; }
+        @keyframes hintPulseGreen { 0%, 100% { outline-color: rgba(0, 255, 0, 0.7); box-shadow: 0 0 0.5rem rgba(0, 255, 0, 0.4); /* Responsive shadow */ } 50% { outline-color: rgba(150, 255, 150, 0.9); box-shadow: 0 0 1rem rgba(150, 255, 150, 0.7); /* Responsive shadow */ } }
+
+        /* --- King Crown Style --- */
+        .piece.king::after {
+             content: '♕';
+             position: absolute;
+             font-size: calc(var(--square-size) * 0.35); /* Keep: relative to square */
+             top: 50%; left: 50%;
+             transform: translate(-50%, -50%);
+             pointer-events: none;
+             z-index: 11;
+             opacity: 1;
+             line-height: 1;
+             text-align: center;
+        }
+        .piece.king.white-piece::after { color: #000000; text-shadow: 0 0 0.125rem rgba(255, 255, 255, 0.6); /* Responsive shadow */ }
+        .piece.king.black-piece::after { color: #FFD700; text-shadow: 0.0625rem 0.0625rem 0.125rem rgba(0, 0, 0, 0.6); /* Responsive shadow */ }
+
+        /* --- Piece Style Variations (Shadows/Borders converted) --- */
+        body.piece-style-classic .piece.black-piece { background: linear-gradient(to bottom right, #444 0%, #111 100%); box-shadow: inset 0 0 0.6rem rgba(255, 255, 255, 0.2), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.7); border-color: rgba(0, 0, 0, 0.2); } body.piece-style-classic .piece.white-piece { background: linear-gradient(to bottom right, #eee 0%, #ccc 100%); box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.2), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.3); } body.piece-style-classic .piece.selected { box-shadow: inset 0 0 0.6rem rgba(255, 255, 255, 0.3), 0 0.25rem 0.75rem rgba(0, 0, 0, 0.9), 0 0 0 0.3rem rgba(52, 152, 219, 0.8) !important; /* Responsive shadow */ } body.piece-style-classic .piece.white-piece.selected { box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.3), 0 0.25rem 0.75rem rgba(0, 0, 0, 0.6), 0 0 0 0.3rem rgba(52, 152, 219, 0.8) !important; /* Responsive shadow */ } body.piece-style-classic .piece.hoverable:hover { box-shadow: inset 0 0 0.75rem rgba(255, 255, 255, 0.3), 0 0.4rem 1rem rgba(0, 0, 0, 0.8); /* Responsive shadow */ } body.piece-style-classic .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 0.75rem rgba(0, 0, 0, 0.3), 0 0.4rem 1rem rgba(0, 0, 0, 0.6); /* Responsive shadow */ }
+        body.piece-style-flat .piece { border: 0.0625rem solid rgba(0,0,0,0.3); box-shadow: none; } body.piece-style-flat .piece.black-piece { background: #2c2c2c; } body.piece-style-flat .piece.white-piece { background: #f0f0f0; } body.piece-style-flat .piece.selected { box-shadow: 0 0 0 0.3rem rgba(52, 152, 219, 0.8) !important; /* Responsive shadow */ } body.piece-style-flat .piece.hoverable:hover { transform: translate(-50%, -50%) translateY(-0.2rem) scale(1.04); opacity: 0.9; } /* Responsive transform */
+        body.piece-style-crimson .piece.black-piece { background: linear-gradient(to bottom right, #b71c1c 0%, #7f0000 100%); box-shadow: inset 0 0 0.6rem rgba(255, 255, 255, 0.25), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.7); border-color: rgba(50, 0, 0, 0.3); } body.piece-style-crimson .piece.white-piece { background: linear-gradient(to bottom right, #fffde7 0%, #fff8e1 100%); box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.1), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.4); border-color: rgba(200, 190, 170, 0.4); } body.piece-style-crimson .piece.selected { box-shadow: inset 0 0 0.6rem rgba(255, 255, 255, 0.3), 0 0.25rem 0.75rem rgba(0, 0, 0, 0.9), 0 0 0 0.3rem rgba(255, 82, 82, 0.8) !important; /* Responsive shadow */ } body.piece-style-crimson .piece.white-piece.selected { box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.2), 0 0.25rem 0.75rem rgba(0, 0, 0, 0.5), 0 0 0 0.3rem rgba(255, 82, 82, 0.8) !important; /* Responsive shadow */ } body.piece-style-crimson .piece.hoverable:hover { box-shadow: inset 0 0 0.75rem rgba(255, 255, 255, 0.3), 0 0.4rem 1rem rgba(0, 0, 0, 0.8); /* Responsive shadow */ } body.piece-style-crimson .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 0.75rem rgba(0, 0, 0, 0.2), 0 0.4rem 1rem rgba(0, 0, 0, 0.5); /* Responsive shadow */ }
+        body.piece-style-azure .piece { border: 0.0625rem solid rgba(0,0,0,0.3); box-shadow: none; } body.piece-style-azure .piece.black-piece { background: #1976d2; border-color: #0d47a1; } body.piece-style-azure .piece.white-piece { background: #e3f2fd; border-color: #90caf9; } body.piece-style-azure .piece.selected { box-shadow: 0 0 0 0.3rem rgba(66, 165, 245, 0.8) !important; /* Responsive shadow */ } body.piece-style-azure .piece.hoverable:hover { transform: translate(-50%, -50%) translateY(-0.2rem) scale(1.04); opacity: 0.9; } /* Responsive transform */
+        body.piece-style-forest .piece.black-piece { background: linear-gradient(to bottom right, #388e3c 0%, #1b5e20 100%); box-shadow: inset 0 0 0.6rem rgba(255, 255, 255, 0.2), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.7); border-color: rgba(0, 50, 0, 0.3); } body.piece-style-forest .piece.white-piece { background: linear-gradient(to bottom right, #f5f5dc 0%, #d2b48c 100%); box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.15), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.4); border-color: rgba(180, 160, 130, 0.4); } body.piece-style-forest .piece.selected { box-shadow: inset 0 0 0.6rem rgba(255, 255, 255, 0.3), 0 0.25rem 0.75rem rgba(0, 0, 0, 0.9), 0 0 0 0.3rem rgba(102, 187, 106, 0.8) !important; /* Responsive shadow */ } body.piece-style-forest .piece.white-piece.selected { box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.2), 0 0.25rem 0.75rem rgba(0, 0, 0, 0.5), 0 0 0 0.3rem rgba(102, 187, 106, 0.8) !important; /* Responsive shadow */ } body.piece-style-forest .piece.hoverable:hover { box-shadow: inset 0 0 0.75rem rgba(255, 255, 255, 0.3), 0 0.4rem 1rem rgba(0, 0, 0, 0.8); /* Responsive shadow */ } body.piece-style-forest .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 0.75rem rgba(0, 0, 0, 0.2), 0 0.4rem 1rem rgba(0, 0, 0, 0.5); /* Responsive shadow */ }
+        body.piece-style-royal .piece.black-piece { background: linear-gradient(to bottom right, #6a1b9a 0%, #4a148c 100%); box-shadow: inset 0 0 0.6rem rgba(255, 255, 255, 0.25), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.7); border-color: rgba(30, 0, 50, 0.4); } body.piece-style-royal .piece.white-piece { background: linear-gradient(to bottom right, #fff59d 0%, #ffee58 100%); box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.1), 0 0.25rem 0.5rem rgba(0, 0, 0, 0.4); border-color: rgba(190, 180, 100, 0.5); } body.piece-style-royal .piece.selected { box-shadow: inset 0 0 0.6rem rgba(255, 255, 255, 0.3), 0 0.25rem 0.75rem rgba(0, 0, 0, 0.9), 0 0 0 0.3rem rgba(255, 238, 88, 0.8) !important; /* Responsive shadow */ } body.piece-style-royal .piece.white-piece.selected { box-shadow: inset 0 0 0.6rem rgba(0, 0, 0, 0.2), 0 0.25rem 0.75rem rgba(0, 0, 0, 0.5), 0 0 0 0.3rem rgba(255, 238, 88, 0.8) !important; /* Responsive shadow */ } body.piece-style-royal .piece.hoverable:hover { box-shadow: inset 0 0 0.75rem rgba(255, 255, 255, 0.3), 0 0.4rem 1rem rgba(0, 0, 0, 0.8); /* Responsive shadow */ } body.piece-style-royal .piece.white-piece.hoverable:hover { box-shadow: inset 0 0 0.75rem rgba(0, 0, 0, 0.2), 0 0.4rem 1rem rgba(0, 0, 0, 0.5); /* Responsive shadow */ }
+
+        /* --- General Piece Modifiers --- */
+        .selected { z-index: 20; transform: translate(-50%, -50%) scale(1.05); outline-width: 0px !important; animation: none !important; }
+        .possible-move::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 255, 0, 0.15); border: 0.125rem solid rgba(0, 255, 0, 0.4); /* Responsive border */ border-radius: 50%; pointer-events: none; z-index: 5; box-sizing: border-box; animation: pulsePossible 1.8s infinite ease-in-out; }
+        @keyframes pulsePossible { 0% { transform: scale(0.5); opacity: 0.5; } 50% { transform: scale(0.7); opacity: 0.8; } 100% { transform: scale(0.5); opacity: 0.5; } }
+        .hint-piece-suggestion { outline: 0.25rem dashed #ffdd00 !important; /* Responsive outline */ outline-offset: 0.2rem; /* Responsive outline-offset */ animation: hintPulseYellow 1s infinite !important; z-index: 22 !important; }
+        .hint-move-suggestion::before { background-color: rgba(255, 221, 0, 0.3) !important; border-color: #ffdd00 !important; animation: pulsePossible 1s infinite ease-in-out !important; z-index: 6 !important; }
+        @keyframes hintPulseYellow { 0%, 100% { outline-color: #ffdd00; } 50% { outline-color: #fff3a0; } }
+        .piece.hoverable:hover { transform: translate(-50%, -50%) translateY(-0.2rem) scale(1.04); /* Responsive transform */ }
+
+        /* --- Game Over Screen --- */
+        #game-over-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; opacity: 0; transition: opacity 0.6s ease-in-out; } #game-over-screen.visible { display: flex; opacity: 1; }
+        #game-over-content {
+            background-color: rgba(60, 40, 20, 0.8);
+            padding: 2rem 2.5rem; /* Responsive padding */
+            border-radius: 1rem; /* Responsive border-radius */
+            box-shadow: 0 0.3rem 1.2rem rgba(0,0,0,0.6); /* Responsive shadow */
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border: 0.0625rem solid #a07551; /* Responsive border */
+            box-sizing: border-box; /* Added */
+            max-width: 95%; /* Added max-width */
+            width: auto; /* Added width auto */
+        }
+        #game-over-screen.visible #game-over-content { transform: scale(1); }
+        #game-over-message {
+            font-size: clamp(1.8em, 5vh, 2.2em); /* Keep: good responsive units */
+            color: #fff;
+            text-shadow: 0.0625rem 0.0625rem 0px #ffeb3b, 0.2rem 0.2rem 0.3rem rgba(0,0,0,0.7); /* Responsive shadow */
+            margin-bottom: 1.5rem; /* Responsive margin */
+            font-weight: 700;
+            line-height: 1.4; /* Adjusted line height */
+        }
+        #game-over-message::before { content: '🏆'; display: block; font-size: 2em; margin-bottom: 0.6rem; /* Responsive margin */ text-shadow: 0 0 0.6rem #ffd700; /* Responsive shadow */ }
+        #back-to-menu-button {
+             font-family: 'Roboto', 'Cairo', sans-serif;
+             font-size: 1.1em; /* Keep: relative */
+             padding: 0.6rem 1.5rem; /* Responsive padding */
+             cursor: pointer;
+             border: none;
+             border-radius: 0.5rem; /* Responsive border-radius */
+             background: linear-gradient(to bottom, #e0d6c8, #c1b2a3);
+             color: #321e06;
+             font-weight: bold;
+             box-shadow: 0 0.2rem 0.3rem rgba(0,0,0,0.25), inset 0 -0.125rem 0.0625rem rgba(0,0,0,0.1); /* Responsive shadows */
+             transition: all 0.2s ease;
+        }
+        #back-to-menu-button:hover { background: linear-gradient(to bottom, #f7f2e8, #e8e0d0); box-shadow: 0 0.25rem 0.4rem rgba(0,0,0,0.3), inset 0 -0.125rem 0.0625rem rgba(0,0,0,0.1); /* Responsive shadows */ transform: translateY(-0.0625rem); /* Responsive transform */ }
+        #back-to-menu-button:active { transform: translateY(0px); box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.25), inset 0 -0.0625rem 0.0625rem rgba(0,0,0,0.15); /* Responsive shadows */ }
+
+        /* --- Settings Button & Panel Styles --- */
+        #settings-button {
+             position: fixed;
+             top: 1rem; right: 1rem; /* Responsive position */
+             z-index: 110;
+             font-size: 1.8em; /* Keep: relative */
+             background: none;
+             border: none;
+             color: rgba(255, 255, 255, 0.7);
+             cursor: pointer;
+             padding: 0.3rem; /* Responsive padding */
+             transition: color 0.2s ease, transform 0.2s ease;
+        }
+        #settings-button:hover { color: rgba(255, 255, 255, 1); transform: rotate(15deg); }
+        #settings-panel {
+            position: fixed;
+            top: 4rem; right: 1rem; /* Responsive position */
+            transform: none;
+            background-color: rgba(40, 25, 10, 0.95); /* Slightly less transparent */
+            padding: 1rem; /* Responsive padding */
+            border-radius: 0.6rem; /* Responsive border-radius */
+            box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.4); /* Responsive shadow */
+            z-index: 115;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem; /* Responsive gap */
+            border: 0.0625rem solid #7a542e; /* Responsive border */
+            max-height: calc(100vh - 5rem); /* Responsive max-height */
+            overflow-y: auto;
+            box-sizing: border-box; /* Added */
+        }
+        #settings-panel.visible { display: flex; }
+        #settings-overlay {
+             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+             background-color: transparent;
+             z-index: 114;
+             display: none;
+        }
+        #settings-overlay.visible { display: block; } /* Added class for visibility control */
+
+        .settings-icon-button {
+             display: flex; align-items: center; justify-content: center;
+             width: 2.8rem; height: 2.8rem; /* Responsive size */
+             font-size: 1.3em; /* Keep: relative */
+             border: none;
+             border-radius: 0.5rem; /* Responsive border-radius */
+             cursor: pointer;
+             background: linear-gradient(to bottom, #966f4d, #7a542e);
+             color: #ffffff;
+             box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.3); /* Responsive shadow */
+             transition: all 0.2s ease;
+             text-align: center;
+             flex-shrink: 0;
+        }
+        .settings-icon-button:hover { background: linear-gradient(to bottom, #a07551, #8b5e3c); box-shadow: 0 0.2rem 0.4rem rgba(0,0,0,0.4); /* Responsive shadow */ transform: translateY(-0.0625rem); /* Responsive transform */ }
+        .settings-icon-button:active { transform: translateY(0); box-shadow: 0 0.0625rem 0.2rem rgba(0,0,0,0.3); /* Responsive shadow */ }
+        .settings-icon-button:disabled { background: #aaa; color: #666; cursor: not-allowed; box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.2); /* Responsive shadow */ transform: none; }
+        #sound-toggle-button.sound-off { background: linear-gradient(to bottom, #c1b2a3, #a39588); color: #321e06; }
+        #sound-toggle-button.sound-off:hover { background: linear-gradient(to bottom, #d0c5b8, #b8a99a); }
+        #timer-toggle-button.timer-off { background: linear-gradient(to bottom, #c1b2a3, #a39588); color: #321e06; }
+        #timer-toggle-button.timer-off:hover { background: linear-gradient(to bottom, #d0c5b8, #b8a99a); }
+
+        /* --- Overlay Screen Styles (Board/Piece selection, Confirmation) --- */
+        .overlay-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 150;
+            opacity: 0; transition: opacity 0.4s ease-in-out;
+            padding: 1.5rem; /* Responsive padding */
+            box-sizing: border-box;
+            overflow-y: auto; /* Changed to auto to prevent overflow issues on smaller screens */
+        }
+        .overlay-screen.visible { display: flex; opacity: 1; }
+        .selection-content {
+            background-color: rgba(60, 40, 20, 0.9);
+            padding: 1.5rem 2rem; /* Responsive padding */
+            border-radius: 1rem; /* Responsive border-radius */
+            box-shadow: 0 0.4rem 1.5rem rgba(0,0,0,0.6); /* Responsive shadow */
+            text-align: center;
+            max-width: 95%; /* Responsive max-width */
+            width: auto; /* Changed width to auto for flexibility */
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border: 0.0625rem solid #966f4d; /* Responsive border */
+            margin: 0.6rem auto; /* Responsive margin and centering */
+            display: flex; flex-direction: column;
+            max-height: 85vh; /* Keep: good responsive unit */
+            box-sizing: border-box; /* Added */
+        }
+        #confirmation-modal .selection-content {
+            width: auto;
+            max-width: 28rem; /* Responsive max-width */
+            padding: 2rem 2.5rem; /* Responsive padding */
+            border-width: 0.125rem; /* Responsive border */
+            border-color: #b58863;
+            background-color: #4a311c;
+            box-shadow: 0 0.6rem 1.8rem rgba(0,0,0,0.6); /* Responsive shadow */
+            max-height: none;
+            display: block; /* Changed to block for simpler content */
+        }
+        .overlay-screen.visible .selection-content { transform: scale(1); }
+        .selection-content h2 {
+            font-size: 1.8em; /* Keep: relative */
+            color: #f0e5d1;
+            margin-top: 0;
+            margin-bottom: 1.2rem; /* Responsive margin */
+            text-shadow: 0.0625rem 0.0625rem 0.2rem rgba(0,0,0,0.5); /* Responsive shadow */
+            flex-shrink: 0;
+        }
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); /* Responsive grid with rem */
+            gap: 1.2rem; /* Responsive gap */
+            margin-bottom: 1.2rem; /* Responsive margin */
+            overflow-y: auto;
+            flex-shrink: 1;
+            flex-grow: 1;
+            padding-left: 0.3rem; /* Responsive padding */
+            padding-right: 1rem; /* Responsive padding */
+            padding-bottom: 1rem; /* Responsive padding */
+            scrollbar-width: thin;
+            scrollbar-color: #966f4d rgba(0,0,0,0.2);
+        }
+        .options-container::-webkit-scrollbar { width: 0.5rem; /* Responsive scrollbar width */ }
+        .options-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 0.25rem; /* Responsive border-radius */ }
+        .options-container::-webkit-scrollbar-thumb { background-color: #966f4d; border-radius: 0.25rem; /* Responsive border-radius */ border: 0.125rem solid transparent; /* Responsive border */ background-clip: content-box;}
+        .option-button {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            cursor: pointer;
+            border: 0.125rem solid #7a542e; /* Responsive border */
+            border-radius: 0.5rem; /* Responsive border-radius */
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 0.6rem; /* Responsive padding */
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #e0d6c8;
+            font-size: 1em; /* Keep: relative */
+            min-height: 6rem; /* Responsive min-height */
+            justify-content: space-between;
+        }
+        .option-button:hover { background-color: rgba(255, 255, 255, 0.15); border-color: #a07551; transform: translateY(-0.2rem); /* Responsive transform */ box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.3); /* Responsive shadow */ }
+        .option-button.selected-style { border-color: #ffd700; background-color: rgba(255, 215, 0, 0.15); box-shadow: 0 0 0.6rem rgba(255, 215, 0, 0.4); /* Responsive shadow */ }
+        .close-selection-button {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            font-size: 1.1em; /* Keep: relative */
+            padding: 0.8rem 1.8rem; /* Responsive padding */
+            cursor: pointer;
+            border: none;
+            border-radius: 0.6rem; /* Responsive border-radius */
+            background: linear-gradient(to bottom, #e0d6c8, #c1b2a3);
+            color: #321e06;
+            font-weight: bold;
+            box-shadow: 0 0.2rem 0.3rem rgba(0,0,0,0.25), inset 0 -0.125rem 0.0625rem rgba(0,0,0,0.1); /* Responsive shadows */
+            transition: all 0.2s ease;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+        #confirmation-buttons button { margin-top: 0; } /* Override */
+        .close-selection-button:hover { background: linear-gradient(to bottom, #f7f2e8, #e8e0d0); box-shadow: 0 0.25rem 0.4rem rgba(0,0,0,0.3), inset 0 -0.125rem 0.0625rem rgba(0,0,0,0.1); /* Responsive shadows */ transform: translateY(-0.125rem); /* Responsive transform */ }
+        .close-selection-button:active { transform: translateY(0px); box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.25), inset 0 -0.0625rem 0.0625rem rgba(0,0,0,0.15); /* Responsive shadows */ }
+
+        /* --- Board Selection Screen --- */
+        #board-options-container { } /* Keep grid properties from .options-container */
+        .board-option { } /* Keep flex properties from .option-button */
+        .board-preview {
+            width: 3rem; height: 3rem; /* Responsive size */
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            border: 0.0625rem solid rgba(0,0,0,0.3); /* Responsive border */
+            margin-bottom: 0.5rem; /* Responsive margin */
+            box-shadow: 0 0.0625rem 0.2rem rgba(0,0,0,0.2); /* Responsive shadow */
+            border-radius: 0.2rem; /* Responsive border-radius */
+            overflow: hidden;
+        }
+        .board-preview .sq { width: 100%; height: 100%; }
+        /* Board Preview Colors (using px for subtle shadows is fine) */
+        .board-preview-wood .light { background-color: #DEB887; } .board-preview-wood .dark { background-color: #A0522D; }
+        .board-preview-desert .light { background-color: #f4a460; } .board-preview-desert .dark { background-color: #8b4513; }
+        .board-preview-stone-path .light { background-color: #e0e0e0; } .board-preview-stone-path .dark { background-color: #616161; }
+        .board-preview-emerald .light { background-color: #e0f2f1; } .board-preview-emerald .dark { background-color: #00695c; }
+        .board-preview-volcano .light { background-color: #d3d3d3; } .board-preview-volcano .dark { background-color: #dc143c; }
+        .board-preview-royal .light { background-color: #fffacd; } .board-preview-royal .dark { background-color: #4b0082; }
+
+        /* --- Board Styles (Borders/Shadows converted) --- */
+        #board.board-style-wood { border: 0.625rem solid #8B4513; background-color: #A0522D; } #board.board-style-wood .light-square { background: #DEB887; box-shadow: inset 0.0625rem 0.0625rem 0.2rem rgba(255, 255, 255, 0.3); } #board.board-style-wood .dark-square { background: #A0522D; box-shadow: inset 0.0625rem 0.0625rem 0.25rem rgba(0, 0, 0, 0.6); cursor: pointer; } #board.board-style-wood .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: #b3623f; }
+        #board.board-style-desert { border: 0.625rem solid #a0522d; background-color: #cd853f; } #board.board-style-desert .light-square { background: linear-gradient(135deg, #f4a460 0%, #deb887 100%); box-shadow: inset 0.0625rem 0.0625rem 0.2rem rgba(255, 255, 255, 0.25); } #board.board-style-desert .dark-square { background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%); box-shadow: inset 0.0625rem 0.0625rem 0.25rem rgba(0, 0, 0, 0.5); cursor: pointer; } #board.board-style-desert .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #9e5624 0%, #b3623f 100%); }
+        #board.board-style-stone-path { border: 0.625rem solid #5d4037; background-color: #795548; } #board.board-style-stone-path .light-square { background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); box-shadow: inset 0.0625rem 0.0625rem 0.2rem rgba(255, 255, 255, 0.2); } #board.board-style-stone-path .dark-square { background: linear-gradient(135deg, #616161 0%, #424242 100%); box-shadow: inset 0.0625rem 0.0625rem 0.25rem rgba(0, 0, 0, 0.5); cursor: pointer; } #board.board-style-stone-path .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #757575 0%, #5a5a5a 100%); }
+        #board.board-style-emerald { border: 0.625rem solid #004d40; background-color: #00695c; } #board.board-style-emerald .light-square { background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%); box-shadow: inset 0.0625rem 0.0625rem 0.2rem rgba(0, 0, 0, 0.1); } #board.board-style-emerald .dark-square { background: linear-gradient(135deg, #00695c 0%, #004d40 100%); box-shadow: inset 0.0625rem 0.0625rem 0.25rem rgba(0, 0, 0, 0.6); cursor: pointer; } #board.board-style-emerald .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #00796b 0%, #005f51 100%); }
+        #board.board-style-volcano { border: 0.625rem solid #696969; background-color: #8B0000; } #board.board-style-volcano .light-square { background: linear-gradient(135deg, #d3d3d3 0%, #f5f5f5 100%); box-shadow: inset 0.0625rem 0.0625rem 0.125rem rgba(0, 0, 0, 0.1); } #board.board-style-volcano .dark-square { background: linear-gradient(135deg, #dc143c 0%, #b22222 100%); box-shadow: inset 0.0625rem 0.0625rem 0.25rem rgba(0, 0, 0, 0.5); cursor: pointer; } #board.board-style-volcano .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #e82e4f 0%, #c53030 100%); }
+        #board.board-style-royal { border: 0.625rem solid #483d8b; background-color: #6a5acd; } #board.board-style-royal .light-square { background: linear-gradient(135deg, #fffacd 0%, #eee8aa 100%); box-shadow: inset 0.0625rem 0.0625rem 0.2rem rgba(0, 0, 0, 0.15); } #board.board-style-royal .dark-square { background: linear-gradient(135deg, #4b0082 0%, #8a2be2 100%); box-shadow: inset 0.0625rem 0.0625rem 0.25rem rgba(0, 0, 0, 0.6); cursor: pointer; } #board.board-style-royal .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: linear-gradient(135deg, #5c1092 0%, #9d3fe5 100%); }
+
+        /* Piece Selection Screen specific styles */
+        #piece-options-container { grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr)); } /* Responsive grid with rem */
+        .piece-option { } /* Keep flex properties from .option-button */
+        .piece-preview-container { display: flex; justify-content: center; align-items: center; gap: 0.5rem; /* Responsive gap */ margin-bottom: 0.6rem; /* Responsive margin */ width: 100%; height: 2.8rem; /* Responsive height */ }
+        .piece-preview {
+             width: 2.2rem; height: 2.2rem; /* Responsive size */
+             border-radius: 50%;
+             border: 0.0625rem solid rgba(0,0,0,0.2); /* Responsive border */
+             box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.3); /* Responsive shadow */
+             position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+         /* Piece Preview Styles (Shadows/Borders converted) */
+         .piece-preview.black.classic { background: linear-gradient(to bottom right, #444 0%, #111 100%); box-shadow: inset 0 0 0.3rem rgba(255, 255, 255, 0.1), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.5); border-color: rgba(0, 0, 0, 0.2); } .piece-preview.white.classic { background: linear-gradient(to bottom right, #eee 0%, #ccc 100%); box-shadow: inset 0 0 0.3rem rgba(0, 0, 0, 0.1), 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.3); }
+         .piece-preview.black.flat { background: #2c2c2c; border: 0.0625rem solid #555; box-shadow: none; } .piece-preview.white.flat { background: #f0f0f0; border: 0.0625rem solid #ccc; box-shadow: none; }
+         .piece-preview.black.crimson { background: linear-gradient(to bottom right, #b71c1c 0%, #7f0000 100%); border-color: rgba(50, 0, 0, 0.3); } .piece-preview.white.crimson { background: linear-gradient(to bottom right, #fffde7 0%, #fff8e1 100%); border-color: rgba(200, 190, 170, 0.4); }
+         .piece-preview.black.azure { background: #1976d2; border-color: #0d47a1; box-shadow: none; } .piece-preview.white.azure { background: #e3f2fd; border-color: #90caf9; box-shadow: none; }
+         .piece-preview.black.forest { background: linear-gradient(to bottom right, #388e3c 0%, #1b5e20 100%); border-color: rgba(0, 50, 0, 0.3); } .piece-preview.white.forest { background: linear-gradient(to bottom right, #f5f5dc 0%, #d2b48c 100%); border-color: rgba(180, 160, 130, 0.4); }
+         .piece-preview.black.royal { background: linear-gradient(to bottom right, #6a1b9a 0%, #4a148c 100%); border-color: rgba(30, 0, 50, 0.4); } .piece-preview.white.royal { background: linear-gradient(to bottom right, #fff59d 0%, #ffee58 100%); border-color: rgba(190, 180, 100, 0.5); }
+
+        /* Confirmation Modal Styles */
+        #confirmation-modal .selection-content {
+            width: auto;
+            max-width: 28rem; /* Responsive max-width */
+            padding: 2rem 2.5rem; /* Responsive padding */
+            border-width: 0.125rem; /* Responsive border */
+            border-color: #b58863;
+            background-color: #4a311c;
+            box-shadow: 0 0.6rem 1.8rem rgba(0,0,0,0.6); /* Responsive shadow */
+            max-height: none;
+            display: block;
+            margin: auto; /* Centering */
+        }
+        #confirmation-message {
+            font-size: 1.3em; /* Keep: relative */
+            color: #f0e5d1;
+            margin-bottom: 1.5rem; /* Responsive margin */
+            line-height: 1.6;
+            text-shadow: 0.0625rem 0.0625rem 0.2rem rgba(0,0,0,0.6); /* Responsive shadow */
+        }
+        #confirmation-buttons { display: flex; flex-direction: column; align-items: center; margin-top: 1.2rem; /* Responsive margin */ gap: 1rem; /* Responsive gap */ }
+        #confirmation-buttons button { width: 80%; max-width: 16rem; /* Responsive max-width */ margin-top: 0; }
+        #confirm-logout-button { background: linear-gradient(to bottom, #b75656, #913434); color: #ffffff; text-shadow: 0.0625rem 0.0625rem 0.125rem rgba(0,0,0,0.4); /* Responsive shadow */ border: 0.0625rem solid #7a2a2a; /* Responsive border */ }
+        #confirm-logout-button:hover { background: linear-gradient(to bottom, #c96e6e, #a04a4a); border-color: #8b3a3a; }
+        #cancel-logout-button { /* Style already inherited from .close-selection-button */ }
+
+        /* ---------------------------------------------------------- */
+        /* --- Media Queries (Refined Units) --- */
+        /* ---------------------------------------------------------- */
+
+         /* Adjustments for mid-size screens/heights */
+         @media (max-height: 53.125rem), (max-width: 43.75rem) { /* Corresponds to ~850px height, ~700px width */
+             #board { --square-size: clamp(2.5rem, 9vmin, 4rem); } /* Responsive square size */
+             .selection-content {
+                  width: auto; /* Make it flexible */
+                  max-width: 95%; /* Limit max width */
+                  max-height: 80vh;
+             }
+             .options-container {
+                  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr)); /* Responsive grid */
+                  gap: 1rem; /* Responsive gap */
+             }
+             #status-bar { width: var(--board-size); } /* Keep board size width */
+         }
+
+         /* Adjustments for smaller screens/heights */
+         @media (max-height: 42.5rem), (max-width: 34.375rem) { /* Corresponds to ~680px height, ~550px width */
+             #board { --square-size: clamp(2.5rem, 8.5vmin, 3.75rem); } /* Responsive square size */
+             .selection-content {
+                  padding: 1.2rem; /* Responsive padding */
+                  max-height: 80vh;
+             }
+             #confirmation-modal .selection-content {
+                  max-width: 90%;
+                  padding: 1.5rem 1.2rem; /* Responsive padding */
+                  max-height: none;
+             }
+             .options-container {
+                  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr)); /* Responsive grid */
+                  gap: 1rem; /* Responsive gap */
+             }
+             .option-button {
+                  min-height: 5.5rem; /* Responsive min-height */
+                  font-size: 0.95em;
+             }
+             .board-preview { width: 2.5rem; height: 2.5rem; } /* Responsive size */
+             .piece-preview { width: 1.75rem; height: 1.75rem; } /* Responsive size */
+             .piece-preview-container { height: 2.2rem; } /* Responsive height */
+             .selection-content h2 { font-size: 1.5em; margin-bottom: 1rem; } /* Responsive margin */
+             .close-selection-button { font-size: 1em; padding: 0.6rem 1.5rem; } /* Responsive padding */
+             #status-bar { width: var(--board-size); flex-direction: row; align-items: center; } /* Ensure row layout if needed */
+             #turn-indicators { order: 2; }
+         }
+
+         /* Adjustments for very small screens/heights */
+         @media (max-height: 37.5rem), (max-width: 28.125rem) { /* Corresponds to ~600px height, ~450px width */
+             #board { --square-size: clamp(2.2rem, 8vmin, 3.4rem); } /* Responsive square size */
+             .selection-content {
+                 padding: 1rem; /* Responsive padding */
+                 max-height: 80vh;
+             }
+             .options-container {
+                  grid-template-columns: repeat(2, 1fr); /* Simpler grid for very small */
+                  gap: 0.6rem; /* Responsive gap */
+                  padding-left: 0.3rem; padding-right: 0.5rem; padding-bottom: 0.6rem; /* Responsive padding */
+             }
+             .option-button {
+                 padding: 0.4rem; /* Responsive padding */
+                 font-size: 0.9em;
+                 min-height: 5rem; /* Responsive min-height */
+             }
+             .board-preview { width: 2.2rem; height: 2.2rem; } /* Responsive size */
+             .piece-preview { width: 1.5rem; height: 1.5rem; } /* Responsive size */
+             .piece-preview-container { height: 1.8rem; /* Responsive height */ gap: 0.3rem; /* Responsive gap */ }
+             .selection-content h2 { font-size: 1.3em; margin-bottom: 0.6rem;} /* Responsive margin */
+             .close-selection-button { font-size: 0.9em; padding: 0.5rem 1.2rem;} /* Responsive padding */
+             #confirmation-modal .selection-content { padding: 1.2rem 1rem; max-height: none;} /* Responsive padding */
+             #confirmation-message { font-size: 1.1em; margin-bottom: 1.2rem; } /* Responsive margin */
+             #confirmation-buttons button { font-size: 0.9em; padding: 0.5rem 1.1rem;} /* Responsive padding */
+             #status-bar { width: var(--board-size); flex-direction: column; align-items: center; } /* Allow stacking on very small screens */
+              /* Re-order and center status sections */
+             .status-section.capture-count.white { order: 1; flex-basis: 100%; text-align: center; justify-content: center; }
+             #turn-indicators { order: 2; flex-basis: 100%; justify-content: center; }
+             .status-section.capture-count.black { order: 3; flex-basis: 100%; text-align: center; justify-content: center; }
+             .status-section.capture-count.white .timer-display,
+             .status-section.capture-count.black .timer-display { margin: 0 0.5rem; } /* Adjust timer spacing */
+         }
+
+
+    </style>
+</head>
+<body class="piece-style-classic">
+
+     <!-- Message to rotate device -->
+     <div id="rotate-device-message">
+         <p>Please rotate your device to landscape mode to play.</p>
+         <div class="rotate-icon"></div>
+     </div>
+
+    <!-- Settings Button -->
+    <button id="settings-button" title="Settings"> <i class="fas fa-cog"></i> </button>
+
+    <!-- Settings Overlay -->
+    <div id="settings-overlay"></div>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel">
+        <button id="sound-toggle-button" class="settings-icon-button" title="Toggle Sound"> <i class="fas fa-volume-up"></i> </button>
+        <button id="timer-toggle-button" class="settings-icon-button" title="Toggle Turn Timer"> <i class="fas fa-clock"></i> </button>
+        <button id="undo-button" class="settings-icon-button" title="Undo Move" disabled> <i class="fas fa-undo"></i> </button>
+        <button id="hint-button" class="settings-icon-button" title="Hint"> <i class="fas fa-lightbulb"></i> </button>
+        <button id="change-board-button" class="settings-icon-button" title="Change Board Design"> <i class="fas fa-chess-board"></i> </button>
+        <button id="change-piece-style-button" class="settings-icon-button" title="Change Piece Style"> <i class="fas fa-puzzle-piece"></i> </button>
+        <button id="logout-button" class="settings-icon-button" title="Back to Main Menu"> <i class="fas fa-sign-out-alt"></i> </button>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1 id="main-title">Checkers Game</h1>
+        <h2 id="start-subtitle">Select Play Mode</h2>
+        <div id="start-options">
+            <button id="vs-human-button" class="start-button">Play vs Friend</button>
+            <button id="vs-ai-button" class="start-button">Play vs Computer</button>
+        </div>
+    </div>
+
+    <!-- AI Difficulty Selector -->
+    <div id="ai-difficulty-selector-container">
+        <button id="close-difficulty-selector" title="Close"><i class="fas fa-times"></i></button>
+        <h3>Select Difficulty Level</h3>
+        <div class="difficulty-control">
+            <button id="difficulty-prev" class="difficulty-arrow-button" title="Previous"> <i class="fas fa-chevron-left"></i> </button>
+            <span id="difficulty-display">Medium</span>
+            <button id="difficulty-next" class="difficulty-arrow-button" title="Next"> <i class="fas fa-chevron-right"></i> </button>
+        </div>
+        <button id="confirm-difficulty-button" class="start-button">Start Game</button>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container">
+        <div id="status-bar">
+            <div class="status-section capture-count white">
+                <i class="fas fa-chess-pawn status-icon" style="color: #eee;"></i>
+                <span>Captured:</span> <span id="captured-by-black">0</span>
+                <div id="white-timer" class="timer-display">--:--</div>
+            </div>
+            <div id="turn-indicators">
+                <div id="white-indicator" class="turn-indicator"><div class="piece-visual white piece white-piece"></div></div>
+                <div id="black-indicator" class="turn-indicator"><div class="piece-visual black piece black-piece"></div></div>
+            </div>
+            <div class="status-section capture-count black">
+                <div id="black-timer" class="timer-display">--:--</div>
+                <span>Captured:</span> <span id="captured-by-white">0</span>
+                <i class="fas fa-chess-pawn status-icon" style="color: #444;"></i>
+            </div>
+        </div>
+        <div id="board"></div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen">
+        <div id="game-over-content">
+            <div id="game-over-message"></div>
+            <button id="back-to-menu-button" class="close-selection-button">Back to Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Board Selection Screen -->
+    <div id="board-selection-screen" class="overlay-screen">
+        <div id="board-selection-content" class="selection-content">
+            <h2>Choose Your Preferred Board Design</h2>
+            <div id="board-options-container" class="options-container">
+                <button class="board-option option-button" data-style="wood" title="Wood"><div class="board-preview board-preview-wood"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Wood</span></button>
+                <button class="board-option option-button" data-style="desert" title="Desert"><div class="board-preview board-preview-desert"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Desert</span></button>
+                <button class="board-option option-button" data-style="stone-path" title="Stone Path"><div class="board-preview board-preview-stone-path"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Stone Path</span></button>
+                <button class="board-option option-button" data-style="emerald" title="Emerald"><div class="board-preview board-preview-emerald"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Emerald</span></button>
+                <button class="board-option option-button" data-style="volcano" title="Volcano"><div class="board-preview board-preview-volcano"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Volcano</span></button>
+                <button class="board-option option-button" data-style="royal" title="Royal"><div class="board-preview board-preview-royal"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Royal</span></button>
+             </div>
+            <button id="close-board-selection" class="close-selection-button">Close</button>
+        </div>
+    </div>
+
+    <!-- Piece Style Selection Screen -->
+    <div id="piece-style-selection-screen" class="overlay-screen">
+        <div id="piece-style-selection-content" class="selection-content">
+            <h2>Choose Your Preferred Piece Style</h2>
+            <div id="piece-options-container" class="options-container">
+                <button class="piece-option option-button" data-style="classic" title="Classic"><div class="piece-preview-container"><div class="piece-preview white classic"></div> <div class="piece-preview black classic"></div></div> <span>Classic</span></button>
+                <button class="piece-option option-button" data-style="flat" title="Flat"><div class="piece-preview-container"><div class="piece-preview white flat"></div> <div class="piece-preview black flat"></div></div> <span>Flat</span></button>
+                <button class="piece-option option-button" data-style="crimson" title="Crimson"><div class="piece-preview-container"><div class="piece-preview white crimson"></div> <div class="piece-preview black crimson"></div></div> <span>Crimson</span></button>
+                <button class="piece-option option-button" data-style="azure" title="Azure"><div class="piece-preview-container"><div class="piece-preview white azure"></div> <div class="piece-preview black azure"></div></div> <span>Azure</span></button>
+                <button class="piece-option option-button" data-style="forest" title="Forest"><div class="piece-preview-container"><div class="piece-preview white forest"></div> <div class="piece-preview black forest"></div></div> <span>Forest</span></button>
+                <button class="piece-option option-button" data-style="royal" title="Royal"><div class="piece-preview-container"><div class="piece-preview white royal"></div> <div class="piece-preview black royal"></div></div> <span>Royal</span></button>
+             </div>
+            <button id="close-piece-selection" class="close-selection-button">Close</button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="overlay-screen">
+        <div id="confirmation-content" class="selection-content">
+            <p id="confirmation-message">Are you sure you want to return to the main menu? Your current game progress will be lost.</p>
+            <div id="confirmation-buttons">
+                <button id="confirm-logout-button" class="close-selection-button">Yes, Confirm</button>
+                <button id="cancel-logout-button" class="close-selection-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Element References ---
+        const bodyElement = document.body;
+        const startScreen = document.getElementById('start-screen');
+        const mainTitle = document.getElementById('main-title');
+        const startSubtitle = document.getElementById('start-subtitle');
+        const startOptions = document.getElementById('start-options');
+        const vsHumanButton = document.getElementById('vs-human-button');
+        const vsAiButton = document.getElementById('vs-ai-button');
+        const aiDifficultySelectorContainer = document.getElementById('ai-difficulty-selector-container');
+        const difficultyPrevButton = document.getElementById('difficulty-prev');
+        const difficultyNextButton = document.getElementById('difficulty-next');
+        const difficultyDisplay = document.getElementById('difficulty-display');
+        const confirmDifficultyButton = document.getElementById('confirm-difficulty-button');
+        const gameContainer = document.getElementById('game-container');
+        const statusBar = document.getElementById('status-bar');
+        const whiteCapturedDisplay = document.getElementById('captured-by-black');
+        const blackCapturedDisplay = document.getElementById('captured-by-white');
+        const whiteTimerDisplay = document.getElementById('white-timer');
+        const blackTimerDisplay = document.getElementById('black-timer');
+        const boardElement = document.getElementById('board');
+        const whiteIndicator = document.getElementById('white-indicator');
+        const blackIndicator = document.getElementById('black-indicator');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const backToMenuButton = document.getElementById('back-to-menu-button');
+        const settingsButton = document.getElementById('settings-button');
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsOverlay = document.getElementById('settings-overlay'); // Added reference
+        const soundToggleButton = document.getElementById('sound-toggle-button');
+        const timerToggleButton = document.getElementById('timer-toggle-button');
+        const undoButton = document.getElementById('undo-button');
+        const hintButton = document.getElementById('hint-button');
+        const logoutButton = document.getElementById('logout-button');
+        const changeBoardButton = document.getElementById('change-board-button');
+        const changePieceStyleButton = document.getElementById('change-piece-style-button');
+        const boardSelectionScreen = document.getElementById('board-selection-screen');
+        const boardOptionsContainer = document.getElementById('board-options-container');
+        const closeBoardSelectionButton = document.getElementById('close-board-selection');
+        const pieceStyleSelectionScreen = document.getElementById('piece-style-selection-screen');
+        const pieceOptionsContainer = document.getElementById('piece-options-container');
+        const closePieceSelectionButton = document.getElementById('close-piece-selection');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmLogoutButton = document.getElementById('confirm-logout-button');
+        const cancelLogoutButton = document.getElementById('cancel-logout-button');
+        const closeDifficultySelectorButton = document.getElementById('close-difficulty-selector');
+        const rotateDeviceMessage = document.getElementById('rotate-device-message'); // Added reference
+
+        // --- Audio ---
+        let audioCtx; function getAudioContext() { if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { console.error("Web Audio API not supported", e); } } return audioCtx; }
+        let isSoundEnabled = localStorage.getItem('isSoundEnabled') !== 'false';
+        function playSound(type, options = {}) { if (!isSoundEnabled) return; const ctx = getAudioContext(); if (!ctx) return; if (ctx.state === 'suspended') { ctx.resume().then(() => { if (ctx.state === 'running') playSoundInternal(ctx, type, options); }).catch(e => console.error("Error resuming AudioContext:", e)); return; } if (ctx.state === 'running') { playSoundInternal(ctx, type, options); } }
+        function playSoundInternal(ctx, type, options) { try { const time = ctx.currentTime; const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(options.volume || 0.2, time); switch (type) { case 'select': osc.type = 'triangle'; osc.frequency.setValueAtTime(1500, time); gain.gain.setValueAtTime(options.volume || 0.15, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.05); osc.start(time); osc.stop(time + 0.05); break; case 'move': osc.type = 'sine'; osc.frequency.setValueAtTime(600, time); osc.frequency.linearRampToValueAtTime(400, time + 0.08); gain.gain.setValueAtTime(options.volume || 0.2, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.08); osc.start(time); osc.stop(time + 0.08); break; case 'capture': osc.type = 'square'; osc.frequency.setValueAtTime(500, time); gain.gain.setValueAtTime(options.volume || 0.25, time); gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12); osc.start(time); osc.stop(time + 0.12); break; case 'king': osc.type = 'sine'; gain.gain.setValueAtTime(options.volume || 0.25, time); osc.frequency.setValueAtTime(880, time); osc.frequency.linearRampToValueAtTime(1318.51, time + 0.15); gain.gain.linearRampToValueAtTime(0.001, time + 0.2); osc.start(time); osc.stop(time + 0.2); break; case 'win': gain.gain.setValueAtTime(options.volume || 0.3, time); osc.frequency.setValueAtTime(523.25, time); osc.start(time); osc.stop(time + 0.15); const osc2 = ctx.createOscillator(); const gain2 = ctx.createGain(); osc2.connect(gain2); gain2.connect(ctx.destination); gain2.gain.setValueAtTime(options.volume || 0.3, time + 0.15); osc2.type = 'sine'; osc2.frequency.setValueAtTime(783.99, time + 0.15); gain2.gain.linearRampToValueAtTime(0.001, time + 0.4); osc2.start(time + 0.15); osc2.stop(time + 0.4); break; case 'undo': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, time); osc.frequency.linearRampToValueAtTime(500, time + 0.1); gain.gain.setValueAtTime(options.volume || 0.15, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.1); osc.start(time); osc.stop(time + 0.1); break; case 'hint': osc.type = 'sine'; osc.frequency.setValueAtTime(1200, time); gain.gain.setValueAtTime(options.volume || 0.1, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.08); osc.start(time); osc.stop(time + 0.08); break; case 'timer_tick': osc.type = 'sine'; osc.frequency.setValueAtTime(900, time); gain.gain.setValueAtTime(options.volume || 0.05, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.05); osc.start(time); osc.stop(time + 0.05); break; case 'timeout': osc.type = 'square'; osc.frequency.setValueAtTime(440, time); gain.gain.setValueAtTime(options.volume || 0.3, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.3); osc.start(time); osc.stop(time + 0.3); break; default: console.warn("Unknown sound type:", type); } } catch (e) { console.error("Error playing sound:", type, e); } }
+
+        // --- Game Constants & State ---
+        const BOARD_SIZE = 8; const PLAYER_BLACK = 'black'; const PLAYER_WHITE = 'white'; const AI_PLAYER = PLAYER_WHITE;
+        const DIFFICULTIES = { EASY: 'easy', MEDIUM: 'medium', HARD: 'hard' }; const MINIMAX_DEPTH = { MEDIUM: 3, HARD: 5 }; const TIMER_DURATION = 60;
+        const difficultyLevels = [DIFFICULTIES.EASY, DIFFICULTIES.MEDIUM, DIFFICULTIES.HARD];
+        const difficultyLabels = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+        let currentDifficultyIndex = 1;
+        let chosenAiDifficulty = difficultyLevels[currentDifficultyIndex];
+        let boardState = []; let currentPlayer = PLAYER_BLACK; let selectedPiece = null; let possibleMoves = []; let continuousJumpPossible = false; let gameMode = 'human'; let aiDifficulty = chosenAiDifficulty; let isAiThinking = false; let isGameOver = false; let isSettingsPanelVisible = false; let currentBoardStyle = localStorage.getItem('boardStyle') || 'wood';
+        let currentPieceStyle = localStorage.getItem('pieceStyle') || 'classic';
+        let capturedByBlack = 0; let capturedByWhite = 0; let moveHistory = []; let isTimerEnabled = localStorage.getItem('isTimerEnabled') === 'true'; let currentTurnTimeRemaining = TIMER_DURATION; let timerIntervalId = null; let hintTimeoutId = null;
+
+        // --- Utility Functions ---
+        function isValidSquare(row, col) { return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE; }
+        function deepCopyBoard(board) { return JSON.parse(JSON.stringify(board)); }
+        function getOpponent(player) { return player === PLAYER_BLACK ? PLAYER_WHITE : PLAYER_BLACK; }
+         // Helper to check if device is currently in portrait orientation
+        function isPortrait() {
+            return window.innerHeight > window.innerWidth;
+        }
+
+
+        // --- UI Update Functions ---
+        function updateSoundButtonIcon() {
+            const icon = soundToggleButton.querySelector('i');
+            if (isSoundEnabled) {
+                icon.classList.remove('fa-volume-mute'); icon.classList.add('fa-volume-up');
+                soundToggleButton.classList.remove('sound-off'); soundToggleButton.title = "Toggle Sound (On)";
+            } else {
+                icon.classList.remove('fa-volume-up'); icon.classList.add('fa-volume-mute');
+                soundToggleButton.classList.add('sound-off'); soundToggleButton.title = "Toggle Sound (Off)";
+            }
+        }
+        function updateTimerButtonIcon() {
+            const icon = timerToggleButton.querySelector('i');
+            if (isTimerEnabled) {
+                icon.classList.remove('fa-stopwatch'); icon.classList.add('fa-clock');
+                timerToggleButton.classList.remove('timer-off'); timerToggleButton.title = "Toggle Turn Timer (On)";
+            } else {
+                icon.classList.remove('fa-clock'); icon.classList.add('fa-stopwatch');
+                timerToggleButton.classList.add('timer-off'); timerToggleButton.title = "Toggle Turn Timer (Off)";
+            }
+        }
+        function updateTurnIndicatorVisuals() { const whiteVisual = whiteIndicator.querySelector('.piece-visual'); const blackVisual = blackIndicator.querySelector('.piece-visual'); whiteVisual.style = ''; blackVisual.style = ''; whiteVisual.className = `piece-visual white piece white-piece`; blackVisual.className = `piece-visual black piece black-piece`; }
+        function updateCapturedCounters() { whiteCapturedDisplay.textContent = capturedByBlack; blackCapturedDisplay.textContent = capturedByWhite; }
+        function updateUndoButton() { undoButton.disabled = moveHistory.length === 0 || isAiThinking || isGameOver || (gameMode === 'ai' && currentPlayer !== AI_PLAYER && moveHistory.length < 1); }
+        function updateHintButton() { hintButton.disabled = isAiThinking || isGameOver || (gameMode === 'ai' && currentPlayer === AI_PLAYER); }
+        function formatTime(seconds) { if (seconds < 0) seconds = 0; const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; }
+        function updateTimerDisplay() { if (!isTimerEnabled) { whiteTimerDisplay.textContent = '--:--'; blackTimerDisplay.textContent = '--:--'; return; } const display = currentPlayer === PLAYER_WHITE ? whiteTimerDisplay : blackTimerDisplay; const otherDisplay = currentPlayer === PLAYER_WHITE ? blackTimerDisplay : whiteTimerDisplay; display.textContent = formatTime(currentTurnTimeRemaining); otherDisplay.textContent = formatTime(TIMER_DURATION); }
+        function updateDifficultySelectorDisplay() { chosenAiDifficulty = difficultyLevels[currentDifficultyIndex]; difficultyDisplay.textContent = difficultyLabels[chosenAiDifficulty]; }
+
+        // --- Timer Logic ---
+        function stopTurnTimer() { if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; } }
+        function startTurnTimer() { stopTurnTimer(); if (!isTimerEnabled || isGameOver || isSettingsPanelVisible || confirmationModal.classList.contains('visible') || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || isPortrait()) { updateTimerDisplay(); return; } currentTurnTimeRemaining = TIMER_DURATION; updateTimerDisplay(); timerIntervalId = setInterval(() => { currentTurnTimeRemaining--; updateTimerDisplay(); if (currentTurnTimeRemaining <= 5 && currentTurnTimeRemaining > 0) { playSound('timer_tick', { volume: 0.1 }); } if (currentTurnTimeRemaining <= 0) { handleTimeout(); } }, 1000); }
+        function handleTimeout() {
+            stopTurnTimer(); if (isGameOver) return; playSound('timeout');
+            const winner = getOpponent(currentPlayer); const winnerText = winner === PLAYER_BLACK ? "Black" : "White";
+            endGame(`${winnerText} Wins (Opponent ran out of time)!`);
+        }
+
+        // --- Game Flow Functions ---
+        function initGame() {
+            stopTurnTimer(); isGameOver = false; gameOverScreen.classList.remove('visible');
+            // settingsOverlay.style.display = 'none'; // Changed to use class
+            settingsOverlay.classList.remove('visible');
+            document.querySelectorAll('.dark-square').forEach(sq => { sq.style.cursor = 'pointer'; }); // Cursors handled better by CSS classes now
+            boardState = createInitialBoardState(); currentPlayer = PLAYER_BLACK; selectedPiece = null; possibleMoves = []; continuousJumpPossible = false;
+            isAiThinking = false; isSettingsPanelVisible = false; settingsPanel.classList.remove('visible');
+            boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible'); confirmationModal.classList.remove('visible');
+            capturedByBlack = 0; capturedByWhite = 0; moveHistory = [];
+            loadBoardStyle(); loadPieceStyle(); updateTurnIndicatorVisuals(); createBoardUI(); renderBoard(); updateStatus(); updateCapturedCounters();
+            updateUndoButton(); updateHintButton(); settingsButton.style.display = 'block'; startTurnTimer();
+        }
+        function startGame(mode) {
+            playSound('select', { volume: 0.4 }); gameMode = mode;
+            if (gameMode === 'human') {
+                aiDifficulty = DIFFICULTIES.EASY; startScreen.classList.add('hidden-completely');
+                aiDifficultySelectorContainer.classList.remove('visible'); gameContainer.style.display = 'flex'; initGame();
+            } else { showDifficultySelector(); }
+        }
+        function startAiGame() {
+            playSound('select', { volume: 0.4 }); gameMode = 'ai'; aiDifficulty = chosenAiDifficulty;
+            startScreen.classList.add('hidden-completely'); aiDifficultySelectorContainer.classList.remove('visible');
+            gameContainer.style.display = 'flex'; settingsButton.style.display = 'block'; initGame();
+        }
+        function returnToStartScreen() {
+            playSound('select'); stopTurnTimer(); gameOverScreen.classList.remove('visible'); gameContainer.style.display = 'none';
+            startScreen.classList.remove('hidden-completely'); aiDifficultySelectorContainer.classList.remove('visible');
+            settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible'); settingsOverlay.classList.remove('visible'); // Use class
+            isSettingsPanelVisible = false; boardState = []; currentPlayer = PLAYER_BLACK; selectedPiece = null; possibleMoves = []; continuousJumpPossible = false; isAiThinking = false;
+            isGameOver = true; capturedByBlack = 0; capturedByWhite = 0; moveHistory = [];
+            whiteIndicator.classList.remove('active-turn'); blackIndicator.classList.remove('active-turn');
+            updateStatus(""); updateCapturedCounters(); updateUndoButton(); updateHintButton(); updateTimerDisplay();
+            // Ensure start screen elements are visible for the fade-in animation if needed
+            // These might need adjustment if fade animation should replay
+            // mainTitle.style.opacity = 0; // Example to replay fade
+            // startSubtitle.style.opacity = 0; // Example to replay fade
+            // startOptions.style.opacity = 0; // Example to replay fade
+            startSubtitle.textContent = "Select Play Mode";
+        }
+        function endGame(message) {
+            if (isGameOver) return; isGameOver = true; stopTurnTimer(); playSound('win'); isAiThinking = false;
+            gameOverMessage.textContent = message; gameOverScreen.classList.add('visible');
+            settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible'); settingsOverlay.classList.remove('visible'); // Use class
+            boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible'); confirmationModal.classList.remove('visible');
+            updateStatus(); updateUndoButton(); updateHintButton(); renderBoard();
+        }
+
+        // --- Modal/Overlay Functions ---
+        function showConfirmationModal() { if (isGameOver) return; stopTurnTimer(); settingsPanel.classList.remove('visible'); settingsOverlay.classList.remove('visible'); isSettingsPanelVisible = false; confirmationModal.classList.add('visible'); renderBoard(); } // Use class
+        function hideConfirmationModal() { confirmationModal.classList.remove('visible'); if (!isGameOver && !isSettingsPanelVisible && !boardSelectionScreen.classList.contains('visible') && !pieceStyleSelectionScreen.classList.contains('visible') && !isPortrait()) { startTurnTimer(); } renderBoard(); } // Added checks
+        function showOverlay(overlayElement) { if (isGameOver) return; stopTurnTimer(); settingsPanel.classList.remove('visible'); settingsOverlay.classList.remove('visible'); isSettingsPanelVisible = false; overlayElement.classList.add('visible'); renderBoard(); } // Use class
+        function hideOverlay(overlayElement) { overlayElement.classList.remove('visible'); if (!isGameOver && !isSettingsPanelVisible && !confirmationModal.classList.contains('visible') && !isPortrait()) { startTurnTimer(); } renderBoard(); } // Added checks
+
+        // --- Event Listeners ---
+        vsHumanButton.addEventListener('click', () => startGame('human'));
+        vsAiButton.addEventListener('click', () => { playSound('select'); showDifficultySelector(); });
+        difficultyPrevButton.addEventListener('click', () => { playSound('select', {volume: 0.1}); currentDifficultyIndex = (currentDifficultyIndex - 1 + difficultyLevels.length) % difficultyLevels.length; updateDifficultySelectorDisplay(); });
+        difficultyNextButton.addEventListener('click', () => { playSound('select', {volume: 0.1}); currentDifficultyIndex = (currentDifficultyIndex + 1) % difficultyLevels.length; updateDifficultySelectorDisplay(); });
+        confirmDifficultyButton.addEventListener('click', startAiGame);
+        closeDifficultySelectorButton.addEventListener('click', () => {
+             playSound('select'); aiDifficultySelectorContainer.classList.remove('visible'); startScreen.classList.remove('hidden-completely');
+        });
+        function showDifficultySelector() {
+            startScreen.classList.add('hidden-completely'); aiDifficultySelectorContainer.classList.add('visible'); updateDifficultySelectorDisplay();
+        }
+        backToMenuButton.addEventListener('click', returnToStartScreen);
+        logoutButton.addEventListener('click', () => { playSound('select'); showConfirmationModal(); });
+        confirmLogoutButton.addEventListener('click', () => { playSound('select'); hideConfirmationModal(); returnToStartScreen(); });
+        cancelLogoutButton.addEventListener('click', () => { playSound('select'); hideConfirmationModal(); });
+        // Close modal/overlay on click outside
+        confirmationModal.addEventListener('click', (event) => { if (event.target === confirmationModal) { playSound('select'); hideConfirmationModal(); } });
+        boardSelectionScreen.addEventListener('click', (event) => { if (event.target === boardSelectionScreen && !event.target.closest('.selection-content')) { playSound('select'); hideOverlay(boardSelectionScreen); } });
+        pieceStyleSelectionScreen.addEventListener('click', (event) => { if (event.target === pieceStyleSelectionScreen && !event.target.closest('.selection-content')) { playSound('select'); hideOverlay(pieceStyleSelectionScreen); } });
+
+
+        settingsButton.addEventListener('click', () => {
+             playSound('select');
+             const isOverlayOpen = boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible');
+             if (isOverlayOpen) return; // Prevent opening settings if another overlay is open
+
+             isSettingsPanelVisible = !isSettingsPanelVisible;
+             if (isSettingsPanelVisible && !isGameOver && !isPortrait()) { // Added portrait check
+                 stopTurnTimer();
+                 settingsPanel.classList.add('visible');
+                 settingsOverlay.classList.add('visible'); // Use class
+             } else {
+                  if (!isGameOver && !isPortrait()) startTurnTimer(); // Added portrait check
+                  settingsPanel.classList.remove('visible');
+                  settingsOverlay.classList.remove('visible'); // Use class
+             }
+             renderBoard(); // Re-render to update interactive state/cursors
+        });
+        settingsOverlay.addEventListener('click', () => {
+             if(isSettingsPanelVisible) {
+                  playSound('select');
+                  isSettingsPanelVisible = false;
+                  settingsPanel.classList.remove('visible');
+                  settingsOverlay.classList.remove('visible'); // Use class
+                  if (!isGameOver && !isPortrait()) startTurnTimer(); // Added portrait check
+                  renderBoard(); // Re-render to update interactive state/cursors
+             }
+        });
+        soundToggleButton.addEventListener('click', () => { isSoundEnabled = !isSoundEnabled; localStorage.setItem('isSoundEnabled', isSoundEnabled); updateSoundButtonIcon(); if (isSoundEnabled) { const ctx = getAudioContext(); if (ctx && ctx.state === 'suspended') { ctx.resume(); } playSound('select', { volume: 0.4 }); } });
+        timerToggleButton.addEventListener('click', () => { isTimerEnabled = !isTimerEnabled; localStorage.setItem('isTimerEnabled', isTimerEnabled); updateTimerButtonIcon(); playSound('select'); if (isTimerEnabled && !isGameOver && !isSettingsPanelVisible && !confirmationModal.classList.contains('visible') && !boardSelectionScreen.classList.contains('visible') && !pieceStyleSelectionScreen.classList.contains('visible') && !isPortrait()) { startTurnTimer(); } else { stopTurnTimer(); updateTimerDisplay(); } }); // Added checks
+        undoButton.addEventListener('click', () => { if (!undoButton.disabled) { playSound('undo'); undoMove(); } });
+        hintButton.addEventListener('click', () => { if (!hintButton.disabled) { playSound('hint'); showHint(); } });
+        changeBoardButton.addEventListener('click', () => { playSound('select'); updateSelectedBoardOption(); showOverlay(boardSelectionScreen); });
+        changePieceStyleButton.addEventListener('click', () => { playSound('select'); updateSelectedPieceOption(); showOverlay(pieceStyleSelectionScreen); });
+        closeBoardSelectionButton.addEventListener('click', () => { playSound('select'); hideOverlay(boardSelectionScreen); });
+        closePieceSelectionButton.addEventListener('click', () => { playSound('select'); hideOverlay(pieceStyleSelectionScreen); });
+        boardOptionsContainer.addEventListener('click', (event) => { const targetOption = event.target.closest('.board-option'); if (targetOption) { const selectedStyle = targetOption.dataset.style; if (selectedStyle && selectedStyle !== currentBoardStyle) { applyBoardStyle(selectedStyle); playSound('select'); } updateSelectedBoardOption(); } });
+        pieceOptionsContainer.addEventListener('click', (event) => { const targetOption = event.target.closest('.piece-option'); if (targetOption) { const selectedStyle = targetOption.dataset.style; if (selectedStyle && selectedStyle !== currentPieceStyle) { applyPieceStyle(selectedStyle); playSound('select'); } updateSelectedPieceOption(); } });
+
+        // --- Board Setup and Rendering ---
+        function createInitialBoardState() { const state = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null)); for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { if ((r + c) % 2 !== 0) { if (r < 3) { state[r][c] = { player: PLAYER_WHITE, isKing: false }; } else if (r > 4) { state[r][c] = { player: PLAYER_BLACK, isKing: false }; } } } } return state; }
+        function createBoardUI() { boardElement.innerHTML = ''; /* Removed calculating squareSize here, relying on CSS variable */ for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const sq = document.createElement('div'); sq.classList.add('square', (r + c) % 2 === 0 ? 'light-square' : 'dark-square'); sq.dataset.row = r; sq.dataset.col = c; /* Removed dataset.x/y as not used by CSS transforms */ if ((r + c) % 2 !== 0) { sq.addEventListener('click', handleSquareClick); } boardElement.appendChild(sq); } } } // Simplified createBoardUI
+        function getSquareElement(row, col) { if (!isValidSquare(row, col)) return null; return boardElement.querySelector(`.square[data-row="${row}"][data-col="${col}"]`); }
+        let renderTimeout; function requestRender() { clearTimeout(renderTimeout); renderTimeout = setTimeout(renderBoard, 0); }
+        function renderBoard() {
+             clearHintHighlights();
+             const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver) || isPortrait(); // Use isPortrait()
+
+             const allSquares = boardElement.querySelectorAll('.square');
+             allSquares.forEach(sq => {
+                  sq.classList.remove('possible-move');
+                  const isDarkSquare = sq.classList.contains('dark-square');
+                  // CSS now handles cursor based on classes like .interactive and .hoverable
+                  // sq.style.cursor = (isDarkSquare && !isInteractionBlocked && !isSettingsPanelVisible) ? 'pointer' : 'default'; // Removed direct style cursor
+                  const existingPiece = sq.querySelector('.piece');
+                  if (existingPiece && !existingPiece.classList.contains('moving')) {
+                       existingPiece.remove(); // Remove pieces unless they are actively moving
+                  }
+             });
+
+             const allPossibleJumps = !isInteractionBlocked ? getAllPossibleMoves(currentPlayer, true, boardState) : [];
+             const jumpIsPossibleAnywhere = allPossibleJumps.length > 0;
+
+             for (let r = 0; r < BOARD_SIZE; r++) {
+                  for (let c = 0; c < BOARD_SIZE; c++) {
+                       const pieceData = boardState[r][c];
+                       const square = getSquareElement(r, c);
+
+                       if (pieceData && square) {
+                            let pieceEl = square.querySelector(`.piece[data-piece-id="${r}-${c}"]`);
+                            if (!pieceEl) {
+                                 pieceEl = document.createElement('div');
+                                 pieceEl.dataset.pieceId = `${r}-${c}`;
+                                 // Use classes for player and king state
+                                 pieceEl.classList.add('piece', `${pieceData.player}-piece`);
+                                 if(pieceData.isKing) pieceEl.classList.add('king');
+
+                                 pieceEl.style.transform = `translate(-50%, -50%)`; // Initial position
+                                 square.appendChild(pieceEl);
+                            } else {
+                                 // Update classes if piece state changed (e.g., kinged)
+                                 pieceEl.classList.add('piece', `${pieceData.player}-piece`);
+                                  if(pieceData.isKing) pieceEl.classList.add('king');
+                            }
+
+                            // Determine if the piece should be interactive
+                            const canInteractPiece = !isInteractionBlocked && pieceData.player === currentPlayer && !(continuousJumpPossible && selectedPiece && (selectedPiece.row !== r || selectedPiece.col !== c));
+
+                            pieceEl.classList.toggle('interactive', canInteractPiece); // Add interactive class
+
+                            // Use CSS for cursor based on .interactive and .hoverable
+                            // pieceEl.style.cursor = (canInteractPiece && !isSettingsPanelVisible) ? 'grab' : 'default'; // Removed direct style cursor
+                            pieceEl.style.pointerEvents = (canInteractPiece && !isSettingsPanelVisible) ? 'auto' : 'none';
+
+                            // Add/remove click listener based on canInteractPiece (important for performance and correctness)
+                            if (canInteractPiece && !isSettingsPanelVisible) {
+                                 // Use a separate function to ensure correct event listener handling
+                                 addPieceClickListener(pieceEl, r, c);
+                            } else {
+                                 // Remove listener if interaction is blocked
+                                 removePieceClickListener(pieceEl);
+                            }
+
+                            pieceEl.classList.remove('jump-hint'); // Clear hint class first
+                            if (jumpIsPossibleAnywhere && !continuousJumpPossible && pieceData.player === currentPlayer) {
+                                 const thisPieceCanJump = allPossibleJumps.some(jump => jump.origin.r === r && jump.origin.c === c);
+                                 if (thisPieceCanJump) {
+                                      pieceEl.classList.add('jump-hint');
+                                 }
+                            }
+
+                            pieceEl.classList.toggle('selected', selectedPiece && selectedPiece.row === r && selectedPiece.col === c);
+                            if(selectedPiece && selectedPiece.row === r && selectedPiece.col === c){
+                                 selectedPiece.element = pieceEl; // Update element reference if board was re-rendered
+                            }
+                       }
+                  }
+             }
+
+             // Add possible move highlights *after* pieces are rendered
+             if (selectedPiece && !isInteractionBlocked) {
+                 const movesToHighlight = continuousJumpPossible ? calculateMovesForPiece(selectedPiece.row, selectedPiece.col, true, boardState) : calculateMovesForPiece(selectedPiece.row, selectedPiece.col, false, boardState);
+                 movesToHighlight.forEach(move => {
+                     const sq = getSquareElement(move.row, move.col);
+                     if (sq) {
+                         sq.classList.add('possible-move');
+                         // sq.style.cursor = 'pointer'; // Removed direct style cursor
+                     }
+                 });
+             }
+
+             // Manage hover effects based on interaction state
+             if (!isInteractionBlocked && !isSettingsPanelVisible) {
+                 addHoverEffects(); // Add hover class only to truly interactive pieces
+             } else {
+                 removeHoverEffects(); // Remove hover class
+             }
+             // Cursor for dark squares handled by CSS based on .dark-square and absence of .possible-move/.piece
+         }
+
+         // Helper functions to manage piece click listeners
+         const pieceClickListeners = new Map();
+         function addPieceClickListener(pieceEl, row, col) {
+             // Remove existing listener if any
+             removePieceClickListener(pieceEl);
+             const listener = (e) => { e.stopPropagation(); handlePieceClick(e); };
+             pieceEl.addEventListener('click', listener);
+             pieceClickListeners.set(pieceEl, listener);
+         }
+         function removePieceClickListener(pieceEl) {
+             const listener = pieceClickListeners.get(pieceEl);
+             if (listener) {
+                 pieceEl.removeEventListener('click', listener);
+                 pieceClickListeners.delete(pieceEl);
+             }
+         }
+
+
+        // --- Board & Piece Style Functions ---
+        function applyBoardStyle(styleName) {
+            const validStyles = ['wood', 'desert', 'stone-path', 'emerald', 'volcano', 'royal'];
+            if (!validStyles.includes(styleName)) styleName = 'wood';
+            const allPossibleStyles = ['classic', 'modern', 'wood', 'marble', 'minimal', 'stone', 'forest', 'ice', 'dark', 'desert', 'ocean', 'stone-path', 'emerald', 'volcano', 'royal']; // Keep list broad for class removal
+            boardElement.classList.remove(...allPossibleStyles.map(s => `board-style-${s}`));
+            boardElement.classList.add(`board-style-${styleName}`);
+            currentBoardStyle = styleName;
+            localStorage.setItem('boardStyle', styleName);
+        }
+        function updateSelectedBoardOption() { const options = boardOptionsContainer.querySelectorAll('.board-option'); options.forEach(option => { option.classList.toggle('selected-style', option.dataset.style === currentBoardStyle); }); }
+        function loadBoardStyle() {
+            let loadedStyle = localStorage.getItem('boardStyle') || 'wood';
+            const validStyles = ['wood', 'desert', 'stone-path', 'emerald', 'volcano', 'royal'];
+            if (!validStyles.includes(loadedStyle)) { loadedStyle = 'wood'; localStorage.setItem('boardStyle', loadedStyle); }
+            applyBoardStyle(loadedStyle);
+        }
+        function applyPieceStyle(styleName) {
+            const validStyles = ['classic', 'flat', 'crimson', 'azure', 'forest', 'royal'];
+            if (!validStyles.includes(styleName)) styleName = 'classic';
+            const allPossibleStyles = ['classic', 'flat', 'glossy', 'wood', 'metal', 'gemstone', 'stone', 'simple', 'marble', 'neon', 'glass', 'crimson', 'azure', 'forest', 'royal']; // Keep list broad for class removal
+            bodyElement.classList.remove(...allPossibleStyles.map(s => `piece-style-${s}`));
+            bodyElement.classList.add(`piece-style-${styleName}`);
+            currentPieceStyle = styleName;
+            localStorage.setItem('pieceStyle', styleName);
+            updateTurnIndicatorVisuals();
+            if (gameContainer.style.display === 'flex') { renderBoard(); } // Re-render pieces with new style
+        }
+        function updateSelectedPieceOption() { const options = pieceOptionsContainer.querySelectorAll('.piece-option'); options.forEach(option => { option.classList.toggle('selected-style', option.dataset.style === currentPieceStyle); }); }
+        function loadPieceStyle() {
+            let loadedStyle = localStorage.getItem('pieceStyle') || 'classic';
+            const validStyles = ['classic', 'flat', 'crimson', 'azure', 'forest', 'royal'];
+            if (!validStyles.includes(loadedStyle)) { loadedStyle = 'classic'; localStorage.setItem('pieceStyle', loadedStyle); }
+            applyPieceStyle(loadedStyle);
+        }
+
+        // --- Game Logic ---
+        function handlePieceClick(event) {
+             const pieceElement = event.target;
+             const squareElement = pieceElement.closest('.square');
+             if (!squareElement) return;
+             const row = parseInt(squareElement.dataset.row);
+             const col = parseInt(squareElement.dataset.col);
+
+             const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || isPortrait(); // Use isPortrait()
+
+             if (isInteractionBlocked) return;
+
+             const pieceData = boardState[row][col];
+             if (!pieceData || pieceData.player !== currentPlayer) return;
+
+             // If continuous jump is required, only allow selecting the piece that *can* jump again
+             if (continuousJumpPossible && selectedPiece && (selectedPiece.row !== row || selectedPiece.col !== col)) {
+                  return;
+             }
+
+             if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) {
+                  // If the same piece is clicked, deselect it
+                  deselectPiece();
+             } else {
+                  // Otherwise, select the clicked piece
+                  selectPiece(row, col, pieceElement);
+             }
+        }
+        function handleSquareClick(event) {
+             const targetSquare = event.target.closest('.square');
+             // Only dark squares are interactive for moves
+             if (!targetSquare || !targetSquare.classList.contains('dark-square')) return;
+
+             const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || isPortrait(); // Use isPortrait()
+
+             if (isInteractionBlocked) return;
+
+             const row = parseInt(targetSquare.dataset.row);
+             const col = parseInt(targetSquare.dataset.col);
+
+             // If a piece is selected and the clicked square is empty
+             if (selectedPiece && !boardState[row][col]) {
+                  let move = null;
+                  // Find the potential move in the list of possible moves for the selected piece
+                  const movesForSelected = continuousJumpPossible
+                      ? calculateMovesForPiece(selectedPiece.row, selectedPiece.col, true, boardState) // Must be a jump if continuous jump is pending
+                      : calculateMovesForPiece(selectedPiece.row, selectedPiece.col, false, boardState); // Can be any move otherwise
+
+                  move = movesForSelected.find(m => m.row === row && m.col === col);
+
+                  // If the clicked square is a valid move destination
+                  if (move) {
+                       saveCurrentStateToHistory(); // Save state BEFORE the move
+                       animateAndMovePiece(selectedPiece.row, selectedPiece.col, move);
+                  } else {
+                       // If the clicked square is not a valid move for the selected piece, deselect the piece
+                       deselectPiece();
+                  }
+             } else {
+                  // If no piece is selected, or if the clicked square is not empty, deselect any currently selected piece
+                  deselectPiece();
+             }
+        }
+
+         // Selects a piece at given row and col, highlights possible moves
+        function selectPiece(row, col, pieceElement) {
+             if (!boardState[row]?.[col] || boardState[row][col].player !== currentPlayer) return;
+
+             // Get all possible moves for the current player
+             const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState);
+             const mustJump = allPossibleJumps.length > 0;
+
+             // If a jump is available anywhere on the board, *only* allow selecting pieces that can jump
+             if (mustJump) {
+                  const pieceJumps = calculateMovesForPiece(row, col, true, boardState);
+                  if (pieceJumps.length === 0) {
+                       // If a jump is available elsewhere but THIS piece cannot jump, prevent selection
+                       console.log("Must jump with another piece.");
+                       return;
+                  }
+             }
+
+             // If a continuous jump was just made, only allow selecting the piece that just moved (if it can jump again)
+             if (continuousJumpPossible && (selectedPiece?.row !== row || selectedPiece?.col !== col)) {
+                  console.log("Must continue jump with the same piece.");
+                   // Maybe add a visual shake/hint to the piece that must move?
+                  return;
+             }
+
+             // Deselect any previously selected piece
+             deselectPiece();
+
+             // Select the new piece
+             selectedPiece = { row: row, col: col, player: currentPlayer, isKing: boardState[row][col].isKing, element: pieceElement };
+             pieceElement.classList.add('selected');
+             playSound('select');
+
+             // Calculate and highlight possible moves for the selected piece
+             possibleMoves = calculateMovesForPiece(row, col, mustJump || continuousJumpPossible, boardState); // If mustJump or continuousJumpPossible is true, only calculate jumps
+             requestRender(); // Re-render to show highlights
+        }
+
+        // Deselects the currently selected piece and clears highlights
+        function deselectPiece() {
+             if (selectedPiece && selectedPiece.element) {
+                  selectedPiece.element.classList.remove('selected');
+             }
+             selectedPiece = null;
+             possibleMoves = [];
+             requestRender(); // Re-render to remove highlights
+        }
+
+
+        function calculateMovesForPiece(r, c, onlyJumps = false, currentBoard = boardState) {
+             const piece = currentBoard[r]?.[c];
+             if (!piece) return [];
+
+             let movesFound = [];
+             const directions = [];
+             const playerDirection = (piece.player === PLAYER_BLACK) ? -1 : 1;
+             directions.push(playerDirection);
+             if (piece.isKing) directions.push(-playerDirection); // Kings move in both directions
+
+             for (const dir of directions) {
+                  for (const dc of [-1, 1]) { // Diagonal columns
+                       // Check for jumps
+                       const jumpedPieceRow = r + dir;
+                       const jumpedPieceCol = c + dc;
+                       const jumpLandingRow = r + dir * 2;
+                       const jumpLandingCol = c + dc * 2;
+
+                       if (isValidSquare(jumpLandingRow, jumpLandingCol) && !currentBoard[jumpLandingRow][jumpLandingCol]) { // Landing spot is empty and on board
+                            const jumpedPiece = isValidSquare(jumpedPieceRow, jumpedPieceCol) ? currentBoard[jumpedPieceRow][jumpedPieceCol] : null;
+                            if (jumpedPiece && jumpedPiece.player !== piece.player) { // There's an opponent piece to jump over
+                                 movesFound.push({
+                                      row: jumpLandingRow,
+                                      col: jumpLandingCol,
+                                      isJump: true,
+                                      captured: { row: jumpedPieceRow, col: jumpedPieceCol },
+                                      origin: { r, c }
+                                 });
+                            }
+                       }
+
+                       // Check for regular moves (only if not restricted to jumps)
+                       if (!onlyJumps) {
+                            const nr = r + dir;
+                            const nc = c + dc;
+                            if (isValidSquare(nr, nc) && !currentBoard[nr][nc]) { // Target square is empty and on board
+                                 movesFound.push({
+                                      row: nr,
+                                      col: nc,
+                                      isJump: false,
+                                      origin: { r, c }
+                                 });
+                            }
+                       }
+                  }
+             }
+
+             // If any jump moves were found, regular moves are not allowed from this piece,
+             // unless we explicitly asked for onlyJumps and found none.
+             if (movesFound.some(move => move.isJump)) {
+                  return movesFound.filter(move => move.isJump);
+             }
+
+             // Otherwise, return all found moves (either only jumps if requested and found, or jumps + regulars)
+             return movesFound;
+        }
+
+
+        function getAllPossibleMoves(player, onlyJumps = false, currentBoard = boardState) {
+             let allMoves = [];
+             let potentialJumps = [];
+
+             for (let r = 0; r < BOARD_SIZE; r++) {
+                  for (let c = 0; c < BOARD_SIZE; c++) {
+                       const piece = currentBoard[r][c];
+                       if (piece && piece.player === player) {
+                            const movesForPiece = calculateMovesForPieceInternal(r, c, false, currentBoard); // Calculate all moves for this piece first
+
+                            // Separate jumps from regular moves
+                            const jumps = movesForPiece.filter(m => m.isJump);
+                            const regulars = movesForPiece.filter(m => !m.isJump);
+
+                            if (jumps.length > 0) {
+                                 potentialJumps.push(...jumps);
+                            } else {
+                                 allMoves.push(...regulars); // Add regular moves only if no jumps found for this piece
+                            }
+                       }
+                  }
+             }
+
+             // If any jumps were found anywhere on the board, the player *must* jump.
+             // In this case, return only the jump moves found.
+             if (potentialJumps.length > 0) {
+                  return potentialJumps;
+             }
+
+             // If no jumps were found, and we were asked for onlyJumps, return empty.
+             // Otherwise, return all collected moves (which are only regular moves in this case).
+             if (onlyJumps) {
+                 return []; // No jumps were found anywhere
+             } else {
+                 return allMoves; // No jumps were found anywhere, return all regular moves
+             }
+        }
+
+
+        function calculateMovesForPieceInternal(r, c, onlyJumps, currentBoard) {
+             const piece = currentBoard[r]?.[c];
+             if (!piece) return [];
+
+             let moves = [];
+             const directions = [];
+             const playerDirection = (piece.player === PLAYER_BLACK) ? -1 : 1;
+             directions.push(playerDirection);
+             if (piece.isKing) directions.push(-playerDirection); // Kings move in both directions
+
+             for (const dir of directions) {
+                  for (const dc of [-1, 1]) { // Diagonal columns
+                       // Check for jumps
+                       const jumpedPieceRow = r + dir;
+                       const jumpedPieceCol = c + dc;
+                       const jumpLandingRow = r + dir * 2;
+                       const jumpLandingCol = c + dc * 2;
+
+                       // Ensure jumped piece square is valid before accessing boardState[jumpedPieceRow][jumpedPieceCol]
+                       if (isValidSquare(jumpLandingRow, jumpLandingCol) && !currentBoard[jumpLandingRow][jumpLandingCol]) { // Landing spot is empty and on board
+                             if (isValidSquare(jumpedPieceRow, jumpedPieceCol)) { // The square in between is valid
+                                 const jumpedPiece = currentBoard[jumpedPieceRow][jumpedPieceCol];
+                                 if (jumpedPiece && jumpedPiece.player !== piece.player) { // There's an opponent piece to jump over
+                                      moves.push({
+                                           row: jumpLandingRow,
+                                           col: jumpLandingCol,
+                                           isJump: true,
+                                           captured: { row: jumpedPieceRow, col: jumpedPieceCol },
+                                           origin: { r, c }
+                                      });
+                                 }
+                             }
+                       }
+
+                       // Check for regular moves (only if not restricted to jumps)
+                       if (!onlyJumps) {
+                            const nr = r + dir;
+                            const nc = c + dc;
+                            if (isValidSquare(nr, nc) && !currentBoard[nr][nc]) { // Target square is empty and on board
+                                 moves.push({
+                                      row: nr,
+                                      col: nc,
+                                      isJump: false,
+                                      origin: { r, c }
+                                 });
+                            }
+                       }
+                  }
+             }
+             return moves;
+        }
+
+
+        function animateAndMovePiece(fromRow, fromCol, move) {
+             const pieceData = boardState[fromRow][fromCol];
+             const movingPieceElement = getSquareElement(fromRow, fromCol)?.querySelector(`.piece[data-piece-id="${fromRow}-${fromCol}"]`);
+             const targetSquareElement = getSquareElement(move.row, move.col);
+
+             // If elements not found or portrait mode, skip animation and just update state
+             if (!pieceData || !movingPieceElement || !targetSquareElement || isPortrait()) {
+                  executeMoveLogic(fromRow, fromCol, move);
+                  // No animation, proceed directly to post-move checks
+                  handlePostMoveChecks(move);
+                  return;
+             }
+
+             // Animation sequence
+             movingPieceElement.classList.add('moving'); // Add class for potential CSS effects
+             const startRect = movingPieceElement.getBoundingClientRect();
+             const endRect = targetSquareElement.getBoundingClientRect();
+             const offsetX = endRect.left - startRect.left;
+             const offsetY = endRect.top - startRect.top;
+
+             // Apply final transform to move the piece visually
+             movingPieceElement.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
+
+             if (move.isJump) {
+                  playSound('capture');
+                  // Fade out the captured piece during the animation
+                  setTimeout(() => {
+                       const capturedSquare = getSquareElement(move.captured.row, move.captured.col);
+                       const capturedPieceEl = capturedSquare?.querySelector('.piece');
+                       if (capturedPieceEl) {
+                            capturedPieceEl.classList.add('captured-fade');
+                            // Remove the element after the fade animation
+                            setTimeout(() => capturedPieceEl.remove(), 400);
+                       }
+                  }, 100); // Start fade slightly into the move animation
+             } else {
+                  playSound('move');
+             }
+
+             deselectPiece(); // Deselect immediately visually
+
+             // After the animation completes (or slightly before)
+             setTimeout(() => {
+                  // Remove the 'moving' class
+                  movingPieceElement.classList.remove('moving');
+                  // Reset transform - the piece will now be positioned by being in the target square
+                  movingPieceElement.style.transform = 'translate(-50%, -50%)';
+
+                  // Update the actual game state and UI element's parent
+                  executeMoveLogic(fromRow, fromCol, move);
+                  targetSquareElement.appendChild(movingPieceElement);
+                  movingPieceElement.dataset.pieceId = `${move.row}-${move.col}`; // Update piece ID to new position
+
+                  // Check if the piece became a king and update its class
+                  const finalPieceData = boardState[move.row][move.col];
+                  if(finalPieceData?.isKing && !movingPieceElement.classList.contains('king')) {
+                      movingPieceElement.classList.add('king');
+                  }
+
+
+                  // Proceed to post-move checks (continuous jumps, next turn, win condition)
+                  handlePostMoveChecks(move);
+
+             }, 300); // Duration should match the CSS transition duration
+        }
+
+        function executeMoveLogic(fromRow, fromCol, move) {
+             const pieceData = boardState[fromRow][fromCol];
+             if (!pieceData) {
+                  console.error("Attempted to move a piece that doesn't exist:", fromRow, fromCol);
+                  return;
+             }
+
+             const toRow = move.row;
+             const toCol = move.col;
+
+             // Move the piece data in the state board
+             boardState[toRow][toCol] = pieceData;
+             boardState[fromRow][fromCol] = null;
+
+             // Handle captured piece
+             if (move.isJump && move.captured) {
+                  const capR = move.captured.row;
+                  const capC = move.captured.col;
+                   // Check if the captured square is valid and actually contains a piece
+                  if (isValidSquare(capR, capC) && boardState[capR][capC]) {
+                       if (boardState[capR][capC].player === PLAYER_WHITE) {
+                            capturedByWhite++;
+                       } else {
+                            capturedByBlack++;
+                       }
+                       boardState[capR][capC] = null; // Remove the captured piece from the state
+                       updateCapturedCounters(); // Update the display
+                  } else {
+                       // This case shouldn't happen if move generation is correct, but good for debugging
+                       console.warn("Attempted to capture an empty or invalid square:", capR, capC);
+                  }
+             }
+
+             // Check if the moved piece becomes a king
+             checkForKing(toRow, toCol);
+        }
+
+        function handlePostMoveChecks(move) {
+            const toRow = move.row;
+            const toCol = move.col;
+            const movedPieceData = boardState[toRow][toCol];
+
+            if (move.isJump && movedPieceData) {
+                 // Check if the piece that just jumped has more jumps available
+                 const nextJumps = calculateMovesForPieceInternal(toRow, toCol, true, boardState);
+
+                 if (nextJumps.length > 0) {
+                     // If more jumps are possible, the player must continue the jump
+                     continuousJumpPossible = true;
+                     // Re-select the piece that just moved to highlight its next possible jumps
+                     const pieceElement = getSquareElement(toRow, toCol)?.querySelector('.piece');
+                     if(pieceElement) { // Ensure element exists before passing
+                         selectPiece(toRow, toCol, pieceElement); // This will highlight next jumps
+                     } else {
+                          // This is an edge case, maybe force end turn or handle error
+                          console.error("Moved piece element not found for continuous jump check.");
+                          continuousJumpPossible = false; // Can't continue if element is missing
+                          endTurn();
+                          return;
+                     }
+
+
+                     updateStatus("Complete the jump!");
+                     requestRender(); // Ensure the piece remains selected and highlights appear
+
+                     // If it's the AI's turn and it must continue jumping
+                     if (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver) {
+                         isAiThinking = true;
+                         renderBoard(); // Update UI to show AI is thinking
+                         // Add a slight delay before the AI makes the next jump
+                         setTimeout(makeAiMove, 500 + Math.random() * 50); // Reduced delay for continuous jumps
+                     }
+                     return; // Don't end the turn yet
+                 }
+            }
+
+            // If no more continuous jumps are possible, end the turn
+            continuousJumpPossible = false;
+            endTurn();
+        }
+
+        function checkForKing(row, col) { const piece = boardState[row]?.[col]; if (!piece || piece.isKing) return false; if ((piece.player === PLAYER_BLACK && row === 0) || (piece.player === PLAYER_WHITE && row === BOARD_SIZE - 1)) { piece.isKing = true; playSound('king'); return true; } return false; }
+        function endTurn() { deselectPiece(); if (checkWinCondition()) { return; } switchPlayer(); }
+        function switchPlayer() { currentPlayer = getOpponent(currentPlayer); continuousJumpPossible = false; updateStatus(); startTurnTimer(); requestRender(); if (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver && !isPortrait()) { isAiThinking = true; updateUndoButton(); updateHintButton(); renderBoard(); requestAnimationFrame(() => { setTimeout(makeAiMove, 1000 + Math.random() * 50); }); } else { isAiThinking = false; updateUndoButton(); updateHintButton(); } } // Added portrait check
+        function updateStatus(message = null) { whiteIndicator.classList.remove('active-turn'); blackIndicator.classList.remove('active-turn'); if (!isGameOver) { if (currentPlayer === PLAYER_WHITE) whiteIndicator.classList.add('active-turn'); else blackIndicator.classList.add('active-turn'); } /* No console log by default */ if(message) { /* Optionally display message somewhere else */ console.log("Game Status:", message); } }
+        function checkWinCondition() {
+            if (isGameOver) return true; let blackPieces = 0; let whitePieces = 0;
+            const blackMoves = getAllPossibleMoves(PLAYER_BLACK, false, boardState);
+            const whiteMoves = getAllPossibleMoves(PLAYER_WHITE, false, boardState);
+            const blackCanMove = blackMoves.length > 0;
+            const whiteCanMove = whiteMoves.length > 0;
+
+            for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { if (boardState[r][c]?.player === PLAYER_BLACK) blackPieces++; if (boardState[r][c]?.player === PLAYER_WHITE) whitePieces++; } }
+
+            let gameOverTriggered = false; let winMessage = "";
+            if (whitePieces === 0) { winMessage = "Black Wins (No White pieces left)!"; gameOverTriggered = true; }
+            else if (blackPieces === 0) { winMessage = "White Wins (No Black pieces left)!"; gameOverTriggered = true; }
+            else if (currentPlayer === PLAYER_BLACK && !blackCanMove) { winMessage = "White Wins (Black has no moves)!"; gameOverTriggered = true; }
+            else if (currentPlayer === PLAYER_WHITE && !whiteCanMove) { winMessage = "Black Wins (White has no moves)!"; gameOverTriggered = true; }
+            // Check if the game can possibly end in a draw due to repeated states or 50-move rule (optional complexity)
+
+            if (gameOverTriggered) { endGame(winMessage); return true; }
+            return false;
+        }
+        function saveCurrentStateToHistory() { const stateToSave = { boardState: deepCopyBoard(boardState), currentPlayer: currentPlayer, capturedByBlack: capturedByBlack, capturedByWhite: capturedByWhite, continuousJumpPossible: continuousJumpPossible, }; moveHistory.push(stateToSave); updateUndoButton(); }
+        function undoMove() {
+            if (moveHistory.length === 0 || isAiThinking || isPortrait()) return; // Added portrait check
+            stopTurnTimer();
+            // If in AI game mode and the player is trying to undo the AI's move (which is the last move),
+            // we need to undo two moves to get back to the player's turn before the AI moved.
+             if (gameMode === 'ai' && currentPlayer !== AI_PLAYER && moveHistory.length >= 2) {
+                 moveHistory.pop(); // Undo AI's move
+                 const playerMoveState = moveHistory.pop(); // Undo player's move before AI
+                 boardState = playerMoveState.boardState;
+                 currentPlayer = playerMoveState.currentPlayer;
+                 capturedByBlack = playerMoveState.capturedByBlack;
+                 capturedByWhite = playerMoveState.capturedByWhite;
+                 continuousJumpPossible = playerMoveState.continuousJumpPossible;
+
+             } else if (moveHistory.length > 0) {
+                 // In human mode, or if AI hasn't moved yet, just undo the last move
+                 const previousState = moveHistory.pop();
+                 boardState = previousState.boardState;
+                 currentPlayer = previousState.currentPlayer;
+                 capturedByBlack = previousState.capturedByBlack;
+                 capturedByWhite = previousState.capturedByWhite;
+                 continuousJumpPossible = previousState.continuousJumpPossible;
+
+             } else {
+                 // Should not happen due to button disabled state, but safe check
+                 return;
+             }
+
+
+            selectedPiece = null;
+            isGameOver = false;
+            gameOverScreen.classList.remove('visible');
+            updateCapturedCounters();
+            updateStatus();
+            updateUndoButton();
+            updateHintButton();
+            createBoardUI(); // Recreate UI elements as piece IDs might change after undo
+            renderBoard(); // Render the board from the restored state
+            startTurnTimer(); // Restart timer for the correct player
+            isAiThinking = false; // Ensure AI thinking state is off
+        }
+        function clearHintHighlights() { if (hintTimeoutId) { clearTimeout(hintTimeoutId); hintTimeoutId = null; } document.querySelectorAll('.hint-piece-suggestion, .hint-move-suggestion').forEach(el => { el.classList.remove('hint-piece-suggestion', 'hint-move-suggestion'); }); document.querySelectorAll('.square.possible-move.hint-move-suggestion').forEach(sq => { sq.classList.remove('hint-move-suggestion'); }); }
+        function showHint() {
+            clearHintHighlights();
+            if (isGameOver || isAiThinking || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || isPortrait()) { // Added portrait check
+                return;
+            }
+
+            // Calculate all possible moves for the current player
+            const allPossibleMoves = getAllPossibleMoves(currentPlayer, false, boardState);
+            if (allPossibleMoves.length === 0) {
+                 console.log("No moves available for hint.");
+                 return; // No moves to hint
+            }
+
+            let hintMove;
+            const possibleJumps = allPossibleMoves.filter(move => move.isJump);
+
+            if (possibleJumps.length > 0) {
+                 // If jumps are required, hint a random jump
+                 hintMove = possibleJumps[Math.floor(Math.random() * possibleJumps.length)];
+            } else {
+                 // If no jumps, hint a random regular move
+                 hintMove = allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
+            }
+
+             if (hintMove) {
+                 const pieceSquare = getSquareElement(hintMove.origin.r, hintMove.origin.c);
+                 const targetSquare = getSquareElement(hintMove.row, hintMove.col);
+                 const pieceElement = pieceSquare?.querySelector(`.piece[data-piece-id="${hintMove.origin.r}-${hintMove.origin.c}"]`); // Ensure correct piece element
+
+                 if (pieceElement && targetSquare) {
+                      pieceElement.classList.add('hint-piece-suggestion');
+                      targetSquare.classList.add('hint-move-suggestion');
+                      // Add possible-move class temporarily if it's not already there
+                      if (!targetSquare.classList.contains('possible-move')) {
+                           targetSquare.classList.add('possible-move');
+                           targetSquare.dataset.tempPossibleMove = 'true'; // Mark it as temporary
+                      }
+
+                      hintTimeoutId = setTimeout(() => {
+                          clearHintHighlights();
+                          // Remove the temporary possible-move class if added
+                          if(targetSquare.dataset.tempPossibleMove) {
+                              targetSquare.classList.remove('possible-move');
+                              delete targetSquare.dataset.tempPossibleMove;
+                          }
+                          renderBoard(); // Re-render to ensure state is correct after hint removal
+                      }, 2500); // Hint duration
+                 }
+            }
+        }
+
+
+        // --- AI Logic ---
+        function makeAiMove() {
+            // Check game state and if AI should move (and if not in portrait mode)
+            if (isGameOver || currentPlayer !== AI_PLAYER || isPortrait()) {
+                isAiThinking = false; // Ensure AI thinking state is off
+                requestRender(); // Update UI if needed (e.g., to remove thinking indicator)
+                return;
+            }
+
+            let bestMoveResult;
+
+            // If continuous jump is required for the AI's current piece
+            if (continuousJumpPossible && selectedPiece && selectedPiece.player === AI_PLAYER) {
+                // Find jumps *only* from the piece that just moved
+                const nextJumps = calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState);
+                if (nextJumps.length > 0) {
+                    // Select one of the available jumps (e.g., the first one or use simple heuristic)
+                     // For AI, maybe pick the jump that captures the most important piece (King > Man)? Or just the first one for simplicity.
+                     // Let's just pick the first one for easy difficulty, or evaluate slightly for medium/hard
+                     if (aiDifficulty === DIFFICULTIES.EASY) {
+                         bestMoveResult = { move: nextJumps[0], score: 0 }; // Simple pick
+                     } else {
+                         // For Medium/Hard, do a limited lookahead just for the next jump options
+                         let bestJumpScore = -Infinity;
+                         let bestJump = nextJumps[0]; // Default in case scores are all -Infinity or something
+                         for(const jump of nextJumps) {
+                             const tempBoard = deepCopyBoard(boardState);
+                             simulateMove(tempBoard, jump);
+                             // Evaluate the board after this *single* jump
+                             // Use a shallow evaluation or minimax with depth 1 or 2 from here
+                             const scoreAfterJump = evaluateBoard(tempBoard, AI_PLAYER, 1); // Shallow lookahead
+                             if (scoreAfterJump > bestJumpScore) {
+                                 bestJumpScore = scoreAfterJump;
+                                 bestJump = jump;
+                             }
+                         }
+                         bestMoveResult = { move: bestJump, score: bestJumpScore };
+                     }
+
+                } else {
+                    // This case should ideally not happen if continuousJumpPossible is true and the piece is still on the board and is the current player's
+                    console.error("AI was required to jump but found no valid jumps from the piece.");
+                    continuousJumpPossible = false; // Reset state just in case
+                    bestMoveResult = findBestMoveForAI(); // Fallback to full move search
+                }
+            } else {
+                // If no continuous jump required, find the best move from all possibilities
+                continuousJumpPossible = false; // Ensure this is false for a regular turn
+                bestMoveResult = findBestMoveForAI();
+            }
+
+            // Execute the chosen move
+            if (bestMoveResult && bestMoveResult.move) {
+                const chosenMove = bestMoveResult.move;
+                 saveCurrentStateToHistory(); // Save state BEFORE AI move
+                // Select the piece visually for the animation (optional but nice)
+                const aiPieceSquare = getSquareElement(chosenMove.origin.r, chosenMove.origin.c);
+                const aiPieceElement = aiPieceSquare?.querySelector(`.piece[data-piece-id="${chosenMove.origin.r}-${chosenMove.origin.c}"]`);
+                if (aiPieceElement) { // Ensure element exists
+                     // Temporarily select the piece for animation purposes
+                     selectedPiece = { row: chosenMove.origin.r, col: chosenMove.origin.c, player: AI_PLAYER, element: aiPieceElement };
+                     aiPieceElement.classList.add('selected'); // Add selected class temporarily
+
+                     // Animate and move the piece
+                     animateAndMovePiece(chosenMove.origin.r, chosenMove.origin.c, chosenMove);
+                } else {
+                     // If element not found, execute move logic directly (less visual)
+                     console.error("AI piece element not found for animation.");
+                     executeMoveLogic(chosenMove.origin.r, chosenMove.origin.c, chosenMove);
+                     handlePostMoveChecks(chosenMove); // Manually trigger post-move checks
+                }
+
+            } else {
+                // If AI found no moves, it means the game should have ended or there's an issue.
+                 console.warn("AI found no moves. Checking win condition.");
+                isAiThinking = false; // Stop thinking state
+                // Check win condition just in case
+                if (!checkWinCondition()) {
+                     // If game didn't end, maybe it's a stalemate or rule issue. Force end turn?
+                     console.error("AI has no moves but game not over. Forcing turn end.");
+                     endTurn(); // This will switch player and check win condition again
+                }
+                renderBoard(); // Update UI
+            }
+        }
+
+
+        function findBestMoveForAI() {
+             const allPossibleMoves = getAllPossibleMoves(AI_PLAYER, false, boardState);
+             if (allPossibleMoves.length === 0) {
+                  return { move: null, score: 0 }; // No moves available
+             }
+
+             if (aiDifficulty === DIFFICULTIES.EASY) {
+                  // For Easy, just pick a random move
+                  const randomMove = allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
+                  return { move: randomMove, score: 0 };
+             } else {
+                  // For Medium/Hard, use Minimax
+                  const depth = (aiDifficulty === DIFFICULTIES.HARD) ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM;
+                  let bestScore = -Infinity;
+                  let bestMove = null;
+
+                   // Prioritize jumps in minimax if available
+                   const possibleJumps = allPossibleMoves.filter(m => m.isJump);
+                   const movesToEvaluate = possibleJumps.length > 0 ? possibleJumps : allPossibleMoves; // If jumps exist, only evaluate jumps
+
+                  for (const move of movesToEvaluate) {
+                       const tempBoard = deepCopyBoard(boardState);
+                       simulateMove(tempBoard, move);
+
+                       let currentMoveScore;
+                       if (move.isJump) {
+                            // Special handling for jumps: simulate subsequent forced jumps
+                            let finalBoardAfterJumpSequence = deepCopyBoard(tempBoard); // Start with board after the first jump
+                            let currentJumpPiecePos = { r: move.row, c: move.col };
+                            let nextForcedJumps = calculateMovesForPieceInternal(currentJumpPiecePos.r, currentJumpPiecePos.c, true, finalBoardAfterJumpSequence);
+
+                            // While there are forced jumps, apply them in simulation
+                            while (nextForcedJumps.length > 0) {
+                                 // For simplicity in simulation, just take the first available forced jump
+                                 const nextJump = nextForcedJumps[0]; // Or apply a simple heuristic here too
+                                 simulateMove(finalBoardAfterJumpSequence, nextJump);
+                                 currentJumpPiecePos = { r: nextJump.row, c: nextJump.col };
+                                 nextForcedJumps = calculateMovesForPieceInternal(currentJumpPiecePos.r, currentJumpPiecePos.c, true, finalBoardAfterJumpSequence);
+                            }
+                            // Now evaluate the board state *after* the full simulated jump sequence
+                            currentMoveScore = minimax(finalBoardAfterJumpSequence, depth - 1, -Infinity, Infinity, false, getOpponent(AI_PLAYER), AI_PLAYER);
+
+                       } else {
+                            // For regular moves, proceed directly to minimax
+                            currentMoveScore = minimax(tempBoard, depth - 1, -Infinity, Infinity, false, getOpponent(AI_PLAYER), AI_PLAYER);
+                       }
+
+
+                       // Minimax finds the best score for the maximizing player (AI_PLAYER)
+                       if (currentMoveScore > bestScore) {
+                            bestScore = currentMoveScore;
+                            bestMove = move;
+                       }
+                  }
+
+                  // If minimax didn't find a 'best' move (e.g., all scores were -Infinity in a losing state,
+                  // or there was only one move), just pick the first move if bestMove is still null.
+                  // This shouldn't happen with a correct minimax implementation returning *a* score,
+                  // but as a fallback.
+                  if (!bestMove && allPossibleMoves.length > 0) {
+                       console.warn("Minimax did not select a move, picking first available.");
+                       bestMove = allPossibleMoves[0];
+                  }
+
+                  return { move: bestMove, score: bestScore };
+             }
+        }
+
+
+        function minimax(currentBoard, depth, alpha, beta, isMaximizingPlayer, currentPlayerMM, originalPlayer) {
+            // Base case: Depth reached or game over in simulation
+            const simulationGameOverResult = checkGameOverSimulated(currentBoard, currentPlayerMM);
+            if (depth === 0 || simulationGameOverResult) {
+                return evaluateBoard(currentBoard, originalPlayer, depth); // Pass originalPlayer to evaluate from that perspective
+            }
+
+             // Get moves for the current player in the simulation (currentPlayerMM)
+             const possibleMoves = getAllPossibleMoves(currentPlayerMM, false, currentBoard);
+
+             // If the current player in simulation has no moves, the game is over from their perspective
+             if (possibleMoves.length === 0) {
+                 return evaluateBoard(currentBoard, originalPlayer, depth);
+             }
+
+            if (isMaximizingPlayer) { // AI_PLAYER is maximizing
+                let maxEval = -Infinity;
+                for (const move of possibleMoves) {
+                    const tempBoard = deepCopyBoard(currentBoard);
+                    simulateMove(tempBoard, move);
+
+                    let evalScore;
+                     // Check for forced jumps in the simulated move
+                     const nextForcedJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard);
+
+                     if (nextForcedJumps.length > 0) {
+                         // If a jump leads to another forced jump, stay on the same player's turn (currentPlayerMM)
+                         // and continue evaluating that jump sequence within the same depth level or with reduced depth
+                         // For simplicity here, let's just recurse but indicate it's still the same turn's evaluation continuation
+                         // A more complex AI might handle this with a loop or specific state.
+                         // For this implementation, we'll rely on the simulateMove + evaluateBoard logic
+                         // If simulating a full jump sequence here:
+                         let boardAfterSequence = deepCopyBoard(tempBoard);
+                         let currentJumpPos = { r: move.row, c: move.col };
+                         let forcedJumps = calculateMovesForPieceInternal(currentJumpPos.r, currentJumpPos.c, true, boardAfterSequence);
+                         while(forcedJumps.length > 0) {
+                             const nextJ = forcedJumps[0]; // Take the first forced jump
+                             simulateMove(boardAfterSequence, nextJ);
+                             currentJumpPos = { r: nextJ.row, c: nextJ.col };
+                             forcedJumps = calculateMovesForPieceInternal(currentJumpPos.r, currentJumpPos.c, true, boardAfterSequence);
+                         }
+                         // Evaluate after the sequence, then switch player for the next recursion level
+                         evalScore = minimax(boardAfterSequence, depth - 1, alpha, beta, false, getOpponent(currentPlayerMM), originalPlayer);
+
+                     } else {
+                         // No forced jumps after this move, switch player for the next recursion level
+                         evalScore = minimax(tempBoard, depth - 1, alpha, beta, false, getOpponent(currentPlayerMM), originalPlayer);
+                     }
+
+
+                    maxEval = Math.max(maxEval, evalScore);
+                    alpha = Math.max(alpha, evalScore);
+                    if (beta <= alpha) break; // Alpha-beta pruning
+                }
+                return maxEval;
+            } else { // Opponent is minimizing
+                let minEval = Infinity;
+                for (const move of possibleMoves) {
+                    const tempBoard = deepCopyBoard(currentBoard);
+                    simulateMove(tempBoard, move);
+
+                    let evalScore;
+                     // Check for forced jumps in the simulated move
+                     const nextForcedJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard);
+
+                     if (nextForcedJumps.length > 0) {
+                         // Simulate the forced jump sequence for the opponent
+                          let boardAfterSequence = deepCopyBoard(tempBoard);
+                         let currentJumpPos = { r: move.row, c: move.col };
+                         let forcedJumps = calculateMovesForPieceInternal(currentJumpPos.r, currentJumpPos.c, true, boardAfterSequence);
+                         while(forcedJumps.length > 0) {
+                             const nextJ = forcedJumps[0]; // Take the first forced jump
+                             simulateMove(boardAfterSequence, nextJ);
+                             currentJumpPos = { r: nextJ.row, c: nextJ.col };
+                             forcedJumps = calculateMovesForPieceInternal(currentJumpPos.r, currentJumpPos.c, true, boardAfterSequence);
+                         }
+                         // Evaluate after the sequence, then switch player for the next recursion level (back to maximizing)
+                         evalScore = minimax(boardAfterSequence, depth - 1, alpha, beta, true, getOpponent(currentPlayerMM), originalPlayer);
+
+                     } else {
+                         // No forced jumps, switch player for the next recursion level (back to maximizing)
+                         evalScore = minimax(tempBoard, depth - 1, alpha, beta, true, getOpponent(currentPlayerMM), originalPlayer);
+                     }
+
+                    minEval = Math.min(minEval, evalScore);
+                    beta = Math.min(beta, minEval);
+                    if (beta <= alpha) break; // Alpha-beta pruning
+                }
+                return minEval;
+            }
+        }
+
+        function evaluateBoard(currentBoard, player, depth = 0) {
+             // Evaluation is from the perspective of the 'player' passed into this function (originalPlayer)
+             let score = 0;
+             const opponent = getOpponent(player);
+
+             const WIN_SCORE = 1000;
+             const KING_VALUE = 2.5; // Kings are more valuable
+             const PIECE_VALUE = 1;
+             const ADVANCEMENT_VALUE = 0.05; // Value for advancing pieces (less for kings)
+             const CENTER_CONTROL_VALUE = 0.02; // Value for controlling central squares (optional)
+             const EDGE_PENALTY = 0.05; // Penalty for pieces on the edge (more vulnerable)
+             const TEMPO_VALUE = 0.1; // Value for having more moves available
+
+             let myPieces = 0, oppPieces = 0;
+             let myKings = 0, oppKings = 0;
+             let mySafePieces = 0, oppSafePieces = 0; // Pieces protected by another piece
+             let myAdvanceScore = 0, oppAdvanceScore = 0;
+             let myCenterControl = 0, oppCenterControl = 0;
+
+             // Calculate pieces, kings, advancement, and edge penalty
+             for (let r = 0; r < BOARD_SIZE; r++) {
+                  for (let c = 0; c < BOARD_SIZE; c++) {
+                       const piece = currentBoard[r][c];
+                       if (piece) {
+                            if (piece.player === player) {
+                                 myPieces++;
+                                 if (piece.isKing) {
+                                      myKings++;
+                                      score += KING_VALUE;
+                                 } else {
+                                      score += PIECE_VALUE;
+                                      // Advancement score: closer to opponent's king row is better
+                                      myAdvanceScore += (player === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r));
+                                 }
+                                  // Edge penalty
+                                 if (c === 0 || c === BOARD_SIZE - 1) {
+                                      score -= EDGE_PENALTY;
+                                 }
+                                  // Simple check for safety (having a friendly piece behind/beside it - this is a simplification)
+                                 const safetyDirections = (piece.player === PLAYER_WHITE) ? [{dr: -1, dc: -1}, {dr: -1, dc: 1}] : [{dr: 1, dc: -1}, {dr: 1, dc: 1}];
+                                  let isSafe = false;
+                                  if(piece.isKing) safetyDirections.push({dr: -1, dc: -1}, {dr: -1, dc: 1}, {dr: 1, dc: -1}, {dr: 1, dc: 1}); // King can be safe from all diagonal attacks
+                                 for(const dir of safetyDirections){
+                                     const sr = r + dir.dr;
+                                     const sc = c + dir.dc;
+                                     if(isValidSquare(sr, sc) && currentBoard[sr][sc]?.player === player){
+                                          isSafe = true;
+                                          break;
+                                     }
+                                 }
+                                 if(isSafe) mySafePieces++;
+
+
+                            } else { // Opponent's piece
+                                 oppPieces++;
+                                 if (piece.isKing) {
+                                      oppKings++;
+                                      score -= KING_VALUE;
+                                 } else {
+                                      score -= PIECE_VALUE;
+                                      oppAdvanceScore += (opponent === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r));
+                                 }
+                                  // Edge penalty for opponent
+                                 if (c === 0 || c === BOARD_SIZE - 1) {
+                                      score += EDGE_PENALTY; // Penalty for opponent is good for us
+                                 }
+                                 // Simple check for opponent safety
+                                  const safetyDirections = (piece.player === PLAYER_WHITE) ? [{dr: -1, dc: -1}, {dr: -1, dc: 1}] : [{dr: 1, dc: -1}, {dr: 1, dc: 1}];
+                                  let isSafe = false;
+                                   if(piece.isKing) safetyDirections.push({dr: -1, dc: -1}, {dr: -1, dc: 1}, {dr: 1, dc: -1}, {dr: 1, dc: 1});
+                                 for(const dir of safetyDirections){
+                                     const sr = r + dir.dr;
+                                     const sc = c + dir.dc;
+                                     if(isValidSquare(sr, sc) && currentBoard[sr][sc]?.player === opponent){
+                                          isSafe = true;
+                                          break;
+                                     }
+                                 }
+                                  if(isSafe) oppSafePieces++; // Count opponent safe pieces
+                            }
+
+                            // Center control (e.g., squares c=2,3,4,5 in rows r=2,3,4,5)
+                            if (r >= 2 && r <= 5 && c >= 2 && c <= 5) {
+                                 if (piece.player === player) myCenterControl++;
+                                 else oppCenterControl++;
+                            }
+                       }
+                  }
+             }
+
+             // Terminal conditions (Win/Loss) - Checked early in minimax, but good to have here too.
+             // Re-calculate move possibilities at this state to check for stalemates/no moves.
+             const myCanMove = getAllPossibleMoves(player, false, currentBoard).length > 0;
+             const oppCanMove = getAllPossibleMoves(opponent, false, currentBoard).length > 0;
+
+             // Adjust score based on piece difference (core material evaluation)
+             score += (myPieces - oppPieces) * PIECE_VALUE;
+             score += (myKings - oppKings) * (KING_VALUE - PIECE_VALUE); // Add extra value for kings
+
+             // Adjust score based on advancement (more important for non-kings)
+             score += (myAdvanceScore - oppAdvanceScore) * ADVANCEMENT_VALUE;
+
+             // Adjust score based on safety (simplified)
+             score += (mySafePieces - oppSafePieces) * 0.1; // Slight bonus for protected pieces
+
+            // Adjust score based on center control
+             score += (myCenterControl - oppCenterControl) * CENTER_CONTROL_VALUE;
+
+
+            // Check for terminal states again in case minimax didn't catch it or for draws
+             if (oppPieces === 0 || !oppCanMove) {
+                  // Player wins - high score, add depth bonus (favors quicker wins)
+                  return WIN_SCORE + (MINIMAX_DEPTH.HARD - depth); // Max depth - current depth
+             }
+             if (myPieces === 0 || !myCanMove) {
+                  // Player loses - low score, subtract depth penalty (favors quicker losses)
+                  return -WIN_SCORE - (MINIMAX_DEPTH.HARD - depth);
+             }
+
+             // Add bonus for having more moves available (Tempo)
+             // This requires calculating moves here, which can be expensive.
+             // Let's skip this for simplicity or calculate outside and pass if needed.
+             // For now, let's just use the counts we got for the terminal state check.
+             // const myTempo = getAllPossibleMoves(player, false, currentBoard).length;
+             // const oppTempo = getAllPossibleMoves(opponent, false, currentBoard).length;
+             // score += (myTempo - oppTempo) * TEMPO_VALUE;
+
+
+             return score; // Return the calculated score
+        }
+
+        function simulateMove(board, move) {
+             // Simulates a single move on a temporary board state
+             const pieceData = board[move.origin.r][move.origin.c];
+             if (!pieceData) return; // Should not happen in correct logic
+
+             // Move the piece
+             board[move.row][move.col] = pieceData;
+             board[move.origin.r][move.origin.c] = null;
+
+             // Remove captured piece if it's a jump
+             if (move.isJump && move.captured) {
+                 // Ensure the captured square is valid and contains a piece before nulling
+                 if (isValidSquare(move.captured.row, move.captured.col) && board[move.captured.row][move.captured.col]) {
+                     board[move.captured.row][move.captured.col] = null;
+                 }
+             }
+
+             // Simulate kinging
+             if (!pieceData.isKing) {
+                 if ((pieceData.player === PLAYER_BLACK && move.row === 0) || (pieceData.player === PLAYER_WHITE && move.row === BOARD_SIZE - 1)) {
+                     pieceData.isKing = true;
+                 }
+             }
+             // Note: We don't update captured counts here as it's a simulation.
+        }
+
+        function checkGameOverSimulated(board, playerToCheck) {
+            // Check if the playerToCheck has any pieces left or any valid moves
+            let pieces = 0;
+            let canMove = false;
+
+            for(let r=0; r<BOARD_SIZE; r++){
+                for(let c=0; c<BOARD_SIZE; c++){
+                    if(board[r][c]?.player === playerToCheck){
+                        pieces++;
+                        // Optimization: if we find at least one piece, check if *that* piece can move.
+                        // If it can, we know the player *can* move, no need to check others for the "canMove" status.
+                        // This is a simplification; a full check requires iterating all pieces until a move is found.
+                         if(!canMove && calculateMovesForPieceInternal(r, c, false, board).length > 0){
+                            canMove = true;
+                             // Once canMove is true, we don't need to check other pieces for moves for this player's turn in simulation
+                         }
+                    }
+                }
+            }
+             // Game over if player has no pieces OR player has pieces but no valid moves
+            return pieces === 0 || (!canMove && pieces > 0);
+        }
+
+        // --- Hover Effects ---
+        function addHoverEffects() {
+             // Remove any existing hoverable classes first
+             removeHoverEffects();
+
+             const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || isPortrait(); // Use isPortrait()
+
+             if (isInteractionBlocked) return;
+
+             // Find all pieces belonging to the current player that are not already selected
+             boardElement.querySelectorAll(`.piece.${currentPlayer}-piece:not(.selected)`).forEach(piece => {
+                  const square = piece.closest('.square');
+                  if (!square) return;
+
+                  const r = parseInt(square.dataset.row);
+                  const c = parseInt(square.dataset.col);
+
+                  // A piece is hoverable if:
+                  // 1. No piece is currently selected, OR the currently selected piece is THIS piece.
+                  // 2. A continuous jump is NOT pending, OR a continuous jump IS pending AND THIS is the piece that must jump.
+                  // 3. The piece has at least one valid move (either regular or jump).
+
+                  const isThisTheSelectedPiece = selectedPiece && selectedPiece.row === r && selectedPiece.col === c;
+                  const canMoveThisPieceNow = !continuousJumpPossible || isThisTheSelectedPiece; // Can move if no continuous jump is required, or if it's the piece required to jump
+
+                  if (canMoveThisPieceNow) {
+                      const movesForThisPiece = calculateMovesForPiece(r, c, false, boardState); // Get all moves (jumps included if forced)
+                      if (movesForThisPiece.length > 0) {
+                          piece.classList.add('hoverable'); // Add the hoverable class
+                          // Cursor style is handled by CSS based on the .hoverable class
+                      } else {
+                          // If the piece cannot move, ensure cursor is default
+                          piece.style.cursor = 'default'; // Direct style for non-movable pieces
+                      }
+                  } else {
+                       // If the piece cannot be moved right now (e.g., must jump elsewhere), ensure cursor is default
+                       piece.style.cursor = 'default'; // Direct style for non-interactive pieces
+                  }
+             });
+
+              // Ensure the currently selected piece (if any) still has the grab cursor
+             if (selectedPiece && selectedPiece.element && boardElement.contains(selectedPiece.element)) {
+                 selectedPiece.element.style.cursor = 'grab'; // Direct style for selected piece cursor
+             }
+
+             // Cursor for dark squares based on CSS :hover and absence of pieces/possible moves
+        }
+
+        function removeHoverEffects() {
+            // Remove the 'hoverable' class from all pieces
+            document.querySelectorAll('.piece.hoverable').forEach(p => p.classList.remove('hoverable'));
+            // Reset cursor style for all pieces to default
+            document.querySelectorAll('.piece').forEach(p => p.style.cursor = 'default');
+             // Reset cursor style for all dark squares to default (will be reapplied by CSS hover if interactive)
+             document.querySelectorAll('.dark-square').forEach(sq => sq.style.cursor = 'default');
+
+        }
+
+
+        // --- Initialization on Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM Loaded. Initializing...");
+
+            // --- Orientation Handling ---
+             // This is a user experience suggestion, not a strict lock.
+             // The CSS media query is what actually hides/shows content.
+             // We don't need to manually lock here, but the CSS handling portrait is key.
+             // Add listener for orientation changes to re-render/update state checks
+             window.addEventListener('orientationchange', handleOrientationChange);
+             window.addEventListener('resize', handleOrientationChange); // Resize can also indicate orientation change or split screen
+
+             function handleOrientationChange() {
+                 console.log("Orientation changed or window resized. Is portrait:", isPortrait());
+                 // CSS handles showing/hiding the rotate message and game content
+                 // JS needs to react by stopping timers, closing overlays, and ensuring interaction is blocked
+                 if (isPortrait()) {
+                      stopTurnTimer();
+                      settingsPanel.classList.remove('visible'); settingsOverlay.classList.remove('visible');
+                      boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible');
+                      confirmationModal.classList.remove('visible');
+                      isSettingsPanelVisible = false; // Update JS state
+                      deselectPiece(); // Ensure no piece is left selected in portrait
+                      renderBoard(); // Re-render to update cursor/interactive states
+                 } else {
+                      // When returning to landscape
+                      // If a game is active and no overlays/modals are explicitly open, restart timer
+                      if (gameContainer.style.display === 'flex' && !isGameOver && !isSettingsPanelVisible && !confirmationModal.classList.contains('visible') && !boardSelectionScreen.classList.contains('visible') && !pieceStyleSelectionScreen.classList.contains('visible')) {
+                           startTurnTimer();
+                      }
+                      renderBoard(); // Re-render to re-enable interaction and hover effects
+                 }
+             }
+
+
+            updateSoundButtonIcon(); updateTimerButtonIcon();
+            settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible');
+            settingsOverlay.classList.remove('visible'); // Use class
+            boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible'); confirmationModal.classList.remove('visible');
+            gameContainer.style.display = 'none'; gameOverScreen.classList.remove('visible');
+            startScreen.classList.remove('hidden-completely');
+            aiDifficultySelectorContainer.classList.remove('visible');
+            isSettingsPanelVisible = false; isGameOver = true;
+            loadBoardStyle(); loadPieceStyle();
+            updateTurnIndicatorVisuals(); updateUndoButton(); updateHintButton(); updateCapturedCounters(); updateTimerDisplay();
+            updateDifficultySelectorDisplay();
+
+            // Check initial orientation on load
+            handleOrientationChange();
+
+            console.log("Initialization Complete. Ready.");
+        });
+
+    </script>
+
+</body>
+</html>
