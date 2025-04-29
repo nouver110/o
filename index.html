@@ -1,1 +1,2563 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Enhanced Checkers - Mobile Drag & Drop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Base Styles --- */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            overflow: hidden; /* Prevent accidental scrolling, important for touch games */
+        }
 
+        body {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Ensure it fills the viewport height */
+            background-color: #321e06;
+            color: #e0d6c8;
+            position: relative;
+            touch-action: none; /* Disable browser gestures like pan and zoom */
+            -webkit-touch-callout: none; /* Disable iOS callout */
+            -webkit-user-select: none; /* Disable text selection on iOS */
+            user-select: none; /* Disable text selection */
+        }
+
+        /* --- Start Screen --- */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4a3b31, #321e06, #4a3b31);
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+            text-align: center;
+            z-index: 120;
+            box-sizing: border-box;
+            padding: 5vh 20px;
+            transition: opacity 0.3s ease-out, visibility 0s linear 0.3s;
+            opacity: 1;
+            visibility: visible;
+            touch-action: auto; /* Allow touch on start screen */
+        }
+        #start-screen.hidden-completely {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-out, visibility 0s linear 0.3s;
+        }
+
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        #main-title {
+            font-size: clamp(3.5em, 13vh, 7em); /* Mobile-friendly font sizing */
+            color: #e8d5b7;
+            font-weight: 700;
+            margin-bottom: clamp(30px, 7vh, 60px);
+            text-shadow: 0 0 7px #fff, 0 0 14px #ffd700, 5px 5px 5px rgba(0,0,0,0.6);
+            letter-spacing: 2px; /* Slightly reduced for mobile */
+            font-family: 'Roboto', 'Cairo', Impact, sans-serif;
+            opacity: 0;
+            animation: fadeInTitle 1s ease-out 0.5s forwards;
+            flex-shrink: 0;
+        }
+        @keyframes fadeInTitle { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        #start-screen h2#start-subtitle {
+            font-size: clamp(1.6em, 5vh, 2.5em); /* Mobile-friendly font sizing */
+            color: #f0e5d1;
+            margin-top: 0;
+            margin-bottom: clamp(25px, 5vh, 40px);
+            opacity: 0;
+            animation: fadeInSubtitle 1s ease-out 1s forwards;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+        @keyframes fadeInSubtitle { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #start-options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%; /* Allow options to take full width */
+            max-width: 400px; /* Constrain max width on larger screens */
+            opacity: 1;
+            flex-shrink: 0;
+        }
+
+        .start-button {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            font-size: clamp(1.2em, 4vh, 1.8em); /* Adjusted size for mobile tap targets */
+            padding: clamp(15px, 3vh, 25px) clamp(30px, 6vw, 50px); /* Increased padding for tap area */
+            margin: clamp(8px, 1.5vh, 15px); /* Adjusted margin */
+            min-width: clamp(200px, 60vw, 300px); /* Ensure decent width on mobile */
+            cursor: pointer;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(to bottom, #966f4d, #7a542e);
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.2); /* Adjusted shadow */
+            transition: all 0.2s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUpButton 0.6s ease-out forwards;
+            flex-shrink: 0;
+            touch-action: manipulation; /* Improve button responsiveness on touch */
+        }
+        #vs-human-button { animation-delay: 1.3s; }
+        #vs-ai-button { animation-delay: 1.5s; }
+        @keyframes fadeInUpButton { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .start-button:hover { background: linear-gradient(to bottom, #a07551, #8b5e3c); box-shadow: 0 7px 14px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.2); transform: translateY(-2px); /* Reduced hover effect */ }
+        .start-button:active { transform: translateY(0px); box-shadow: 0 3px 6px rgba(0,0,0,0.4), inset 0 1px 2px rgba(0,0,0,0.25); }
+
+        /* --- AI Difficulty Selector --- */
+        #ai-difficulty-selector-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: clamp(280px, 80vw, 400px); /* Adjusted clamp for mobile */
+            padding: 25px 20px; /* Adjusted padding */
+            background-color: #3a281a;
+            border-radius: 15px;
+            border: 1px solid #6b4f3b;
+            z-index: 130;
+            opacity: 0;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95); /* Slight adjustment */
+            transition: opacity 0.3s ease-out 0.1s, transform 0.3s ease-out 0.1s;
+            visibility: hidden;
+            touch-action: auto; /* Allow touch within the selector */
+        }
+        #ai-difficulty-selector-container.visible {
+            display: flex;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            visibility: visible;
+        }
+        #ai-difficulty-selector-container h3 {
+            color: #f0e5d1;
+            margin-top: 0;
+            margin-bottom: 25px; /* Adjusted margin */
+            font-size: clamp(1.3em, 3.5vh, 1.7em); /* Adjusted font size */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+        }
+        .difficulty-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px; /* Adjusted gap */
+            width: 100%;
+            margin-bottom: 30px; /* Adjusted margin */
+        }
+        .difficulty-arrow-button {
+            background: linear-gradient(to bottom, #966f4d, #7a542e);
+            border: none;
+            color: white;
+            font-size: 1.5em; /* Adjusted size */
+            padding: 12px 18px; /* Adjusted padding for tap area */
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3); /* Adjusted shadow */
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        .difficulty-arrow-button:hover { background: linear-gradient(to bottom, #a07551, #8b5e3c); transform: scale(1.03); /* Reduced hover effect */ }
+        .difficulty-arrow-button:active { transform: scale(0.97); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        #difficulty-display {
+            font-size: clamp(1.5em, 4vh, 2em); /* Adjusted font size */
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+            min-width: 100px; /* Adjusted min-width */
+            text-align: center;
+        }
+        #confirm-difficulty-button {
+             /* Inherits .start-button styles */
+             font-size: clamp(1.1em, 3.5vh, 1.6em); /* Adjusted size */
+             padding: clamp(12px, 3vh, 20px) clamp(20px, 5vw, 40px); /* Adjusted padding */
+             min-width: clamp(200px, 55vw, 300px); /* Adjusted min-width */
+             margin-top: 10px; /* Adjusted margin */
+         }
+         #close-difficulty-selector {
+            position: absolute;
+            top: 10px; /* Adjusted position */
+            right: 10px; /* Adjusted position */
+            background: none;
+            border: none;
+            font-size: 1.4em; /* Adjusted size */
+            color: #e0d6c8;
+            cursor: pointer;
+            padding: 8px; /* Increased padding for tap area */
+            transition: color 0.2s ease, transform 0.2s ease;
+            z-index: 131;
+            touch-action: manipulation;
+        }
+        #close-difficulty-selector:hover { color: #ffffff; transform: scale(1.1); }
+        #difficulty-prev i { transform: none; } /* Correct left arrow */
+        #difficulty-next i { transform: none; } /* Correct right arrow */
+
+
+        /* --- Game Container --- */
+        #game-container {
+            display: none; /* Controlled by JS */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Changed to center */
+            width: 100%;
+            height: 100%;
+            padding: clamp(8px, 2vh, 15px); /* Adjusted padding */
+            gap: clamp(8px, 2vh, 15px); /* Adjusted gap */
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden; /* Prevent board overflow */
+        }
+
+        /* --- Status Bar --- */
+        #status-bar {
+            display: flex;
+            justify-content: space-around; /* Changed to space-around */
+            align-items: center;
+            width: var(--board-size); /* Match board width */
+            max-width: 95vmin; /* Match board max width */
+            margin: 0 auto clamp(8px, 1vh, 15px); /* Adjusted bottom margin */
+            padding: clamp(5px, 1vh, 8px) clamp(8px, 1.5vw, 15px); /* Adjusted padding */
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            gap: clamp(5px, 1vh, 10px); /* Adjusted gap */
+            flex-shrink: 0;
+            box-sizing: border-box;
+            min-height: 40px; /* Ensure minimum height */
+        }
+
+        .status-section {
+             display: flex;
+             align-items: center;
+             gap: 6px; /* Adjusted gap */
+             font-size: clamp(0.7em, 2vh, 0.9em); /* Adjusted font size */
+             flex-shrink: 0;
+             min-width: 100px; /* Ensure min width to prevent excessive wrapping */
+        }
+        .status-section.capture-count { min-width: 120px; } /* Slightly wider for text + count */
+        .status-section.capture-count.white { order: 1; justify-content: flex-start; } /* Align left */
+        #turn-indicators { order: 2; flex-grow: 1; justify-content: center; display: flex; align-items: center; } /* Allow indicators to take space, center them */
+        .status-section.capture-count.black { order: 3; text-align: right; justify-content: flex-end; } /* Align right */
+
+
+        .status-icon { font-size: 1em; width: 18px; text-align: center; } /* Adjusted icon size */
+        .timer-display {
+            min-width: 40px; /* Adjusted min width */
+            text-align: right;
+            background-color: rgba(0,0,0,0.3);
+            padding: 2px 4px; /* Adjusted padding */
+            border-radius: 4px;
+            font-variant-numeric: tabular-nums;
+            font-size: 1.1em; /* Slightly larger font for timer */
+        }
+         .status-section.capture-count.white .timer-display { order: 4; margin-left: 8px; margin-right: 0; }
+        .status-section.capture-count.black .timer-display { order: 5; margin-right: 8px; margin-left: 0; }
+
+        #turn-indicators { height: 30px; } /* Adjusted height */
+        .turn-indicator { width: 25px; height: 25px; border-width: 1px; margin: 0 5px; /* Adjusted size and margin */ }
+        .turn-indicator .piece-visual { width: 90%; height: 90%; } /* Make visual slightly larger */
+
+        /* --- Board & Piece Styles --- */
+        #board {
+            display: grid;
+            --square-size: clamp(40px, 10vmin, 75px); /* Adjusted clamp for mobile */
+            --board-size: calc(var(--square-size) * 8);
+            grid-template-columns: repeat(8, var(--square-size));
+            grid-template-rows: repeat(8, var(--square-size));
+            width: var(--board-size);
+            height: var(--board-size);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 0 8px rgba(0,0,0,0.3); /* Adjusted shadow */
+            border-radius: 8px;
+            position: relative;
+            margin: 0 auto;
+            max-width: 95vmin;
+            max-height: 95vmin;
+            aspect-ratio: 1 / 1;
+            flex-shrink: 1;
+            border: 2px solid transparent;
+            background-color: #4a311c;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+            user-select: none;
+            touch-action: none; /* Pieces inside handle touch */
+        }
+
+        .square {
+            width: var(--square-size);
+            height: var(--square-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: background-color 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+            overflow: visible;
+            box-sizing: border-box; /* Include border in square size */
+        }
+
+        .piece {
+            width: 85%; /* Size relative to square */
+            height: 85%;
+            border-radius: 50%;
+            /* cursor: grab; REMOVED - mobile doesn't use cursors */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white; /* Crown color might override */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.3s ease, border-color 0.3s ease, outline-color 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.15); /* Slightly more visible border */
+            overflow: hidden;
+            animation: none;
+            outline: 0px solid transparent;
+            outline-offset: 2px;
+            will-change: transform;
+            touch-action: none; /* Essential for drag-and-drop on touch */
+        }
+
+        .piece.interactive {
+             /* cursor: grab; REMOVED for mobile */
+             /* Add any touch-specific feedback if needed, though selected/dragging handle most */
+        }
+
+        .piece.dragging {
+            /* cursor: grabbing; REMOVED */
+            z-index: 1000 !important;
+            transform: translate(-50%, -50%) scale(1.15); /* Slightly larger scale */
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6) !important; /* Stronger shadow */
+            opacity: 0.9; /* Slightly less transparent */
+            transition: none !important; /* Override transitions during drag */
+            will-change: transform, left, top; /* Optimize for dragging */
+        }
+
+        .piece.ghost { opacity: 0.4 !important; } /* Slightly more visible ghost */
+
+        .piece.captured-fade { animation: fadeOutPiece 0.4s ease-out forwards; z-index: 5; }
+        @keyframes fadeOutPiece { from { opacity: 1; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } }
+
+        /* --- King Crown Style --- */
+        .piece.king::after {
+            content: '♛'; /* Use solid crown */
+            position: absolute;
+            font-size: calc(var(--square-size) * 0.4); /* Slightly larger crown */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none; /* Important: Don't interfere with piece touch events */
+            z-index: 11;
+            opacity: 1;
+            line-height: 1;
+            text-align: center;
+             font-weight: normal; /* Crown icon usually doesn't need bold */
+        }
+        .piece.king.white-piece::after { color: #000000; text-shadow: 0 0 2px rgba(255, 255, 255, 0.7); }
+        .piece.king.black-piece::after { color: #FFD700; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); } /* Gold */
+
+
+        /* --- Piece Style Variations (Keep existing styles, ensure they look good scaled) --- */
+        /* Example: body.piece-style-classic */
+        body.piece-style-classic .piece.black-piece { background: linear-gradient(to bottom right, #444 0%, #111 100%); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.7); border-color: rgba(0, 0, 0, 0.2); }
+        body.piece-style-classic .piece.white-piece { background: linear-gradient(to bottom right, #eee 0%, #ccc 100%); box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.3); }
+        body.piece-style-classic .piece.selected { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 0 5px rgba(52, 152, 219, 0.8) !important; }
+        body.piece-style-classic .piece.white-piece.selected { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 5px rgba(52, 152, 219, 0.8) !important; }
+        /* Removed hover effects from pieces as drag/select is the primary interaction */
+
+
+        /* Flat Style */
+        body.piece-style-flat .piece { border: 1px solid rgba(0,0,0,0.3); box-shadow: none; }
+        body.piece-style-flat .piece.black-piece { background: #2c2c2c; }
+        body.piece-style-flat .piece.white-piece { background: #f0f0f0; }
+        body.piece-style-flat .piece.selected { box-shadow: 0 0 0 5px rgba(52, 152, 219, 0.8) !important; border-color: transparent; /* Prevent double border */ }
+
+        /* Crimson Style */
+        body.piece-style-crimson .piece.black-piece { background: linear-gradient(to bottom right, #b71c1c 0%, #7f0000 100%); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.25), 0 4px 8px rgba(0, 0, 0, 0.7); border-color: rgba(50, 0, 0, 0.3); }
+        body.piece-style-crimson .piece.white-piece { background: linear-gradient(to bottom right, #fffde7 0%, #fff8e1 100%); box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.4); border-color: rgba(200, 190, 170, 0.4); }
+        body.piece-style-crimson .piece.selected { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 0 5px rgba(255, 82, 82, 0.8) !important; }
+        body.piece-style-crimson .piece.white-piece.selected { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 5px rgba(255, 82, 82, 0.8) !important; }
+
+        /* Azure Style */
+        body.piece-style-azure .piece { border: 1px solid rgba(0,0,0,0.3); box-shadow: none; }
+        body.piece-style-azure .piece.black-piece { background: #1976d2; border-color: #0d47a1; }
+        body.piece-style-azure .piece.white-piece { background: #e3f2fd; border-color: #90caf9; }
+        body.piece-style-azure .piece.selected { box-shadow: 0 0 0 5px rgba(66, 165, 245, 0.8) !important; border-color: transparent; }
+
+        /* Forest Style */
+        body.piece-style-forest .piece.black-piece { background: linear-gradient(to bottom right, #388e3c 0%, #1b5e20 100%); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.7); border-color: rgba(0, 50, 0, 0.3); }
+        body.piece-style-forest .piece.white-piece { background: linear-gradient(to bottom right, #f5f5dc 0%, #d2b48c 100%); box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.4); border-color: rgba(180, 160, 130, 0.4); }
+        body.piece-style-forest .piece.selected { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 0 5px rgba(102, 187, 106, 0.8) !important; }
+        body.piece-style-forest .piece.white-piece.selected { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 5px rgba(102, 187, 106, 0.8) !important; }
+
+        /* Royal Style */
+        body.piece-style-royal .piece.black-piece { background: linear-gradient(to bottom right, #6a1b9a 0%, #4a148c 100%); box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.25), 0 4px 8px rgba(0, 0, 0, 0.7); border-color: rgba(30, 0, 50, 0.4); }
+        body.piece-style-royal .piece.white-piece { background: linear-gradient(to bottom right, #fff59d 0%, #ffee58 100%); box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.4); border-color: rgba(190, 180, 100, 0.5); }
+        body.piece-style-royal .piece.selected { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 0 5px rgba(255, 238, 88, 0.8) !important; }
+        body.piece-style-royal .piece.white-piece.selected { box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 5px rgba(255, 238, 88, 0.8) !important; }
+
+
+        /* --- General Piece Modifiers --- */
+        .selected { z-index: 20; transform: translate(-50%, -50%) scale(1.08); outline-width: 0px !important; animation: none !important; }
+        .possible-move::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.7); /* Adjust size */
+            width: 80%; height: 80%; /* Use percentage for size relative to square */
+            background-color: rgba(0, 255, 0, 0.15);
+            border: 2px solid rgba(0, 255, 0, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            box-sizing: border-box;
+            animation: pulsePossible 1.8s infinite ease-in-out;
+        }
+        @keyframes pulsePossible { 0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.6; } 50% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.9; } 100% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.6; } }
+
+        .hint-piece-suggestion { outline: 4px dashed #ffdd00 !important; outline-offset: 3px; animation: hintPulseYellow 1s infinite !important; z-index: 22 !important; }
+        .hint-move-suggestion::before {
+             background-color: rgba(255, 221, 0, 0.3) !important;
+             border-color: #ffdd00 !important;
+             animation: pulsePossibleHint 1s infinite ease-in-out !important; /* Use a slightly different animation for hint */
+             z-index: 6 !important;
+        }
+         @keyframes pulsePossibleHint { 0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.8; } 50% { transform: translate(-50%, -50%) scale(0.85); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.8; } }
+
+        @keyframes hintPulseYellow { 0%, 100% { outline-color: #ffdd00; } 50% { outline-color: #fff3a0; } }
+
+        /* Removed .piece.hoverable:hover as it's less relevant for touch */
+
+        /* --- Game Over Screen --- */
+        #game-over-screen {
+             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+             background: radial-gradient(circle, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.95) 100%); /* Slightly darker */
+             display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center;
+             opacity: 0; transition: opacity 0.6s ease-in-out;
+             touch-action: auto; /* Allow touch */
+        }
+        #game-over-screen.visible { display: flex; opacity: 1; }
+
+        #game-over-content {
+             background-color: rgba(60, 40, 20, 0.9); /* Slightly less transparent */
+             padding: 30px 25px; /* Adjusted padding */
+             border-radius: 15px;
+             box-shadow: 0 8px 25px rgba(0,0,0,0.7); /* Stronger shadow */
+             transform: scale(0.9); /* Slightly less initial scale */
+             transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+             border: 1px solid #a07551;
+             max-width: 90%; /* Max width */
+             box-sizing: border-box;
+         }
+        #game-over-screen.visible #game-over-content { transform: scale(1); }
+
+        #game-over-message {
+             font-size: clamp(1.6em, 4vh, 2em); /* Adjusted font size */
+             color: #fff;
+             text-shadow: 1px 1px 0px #ffeb3b, 3px 3px 5px rgba(0,0,0,0.7);
+             margin-bottom: 20px; /* Adjusted margin */
+             font-weight: 700;
+         }
+        #game-over-message::before { content: '🏆'; display: block; font-size: 1.8em; margin-bottom: 8px; text-shadow: 0 0 8px #ffd700; } /* Adjusted size and margin */
+
+        #back-to-menu-button {
+             font-family: 'Roboto', 'Cairo', sans-serif;
+             font-size: clamp(1em, 3vh, 1.4em); /* Adjusted font size */
+             padding: clamp(10px, 2.5vh, 15px) clamp(20px, 5vw, 30px); /* Adjusted padding */
+             cursor: pointer;
+             border: none;
+             border-radius: 8px;
+             background: linear-gradient(to bottom, #e0d6c8, #c1b2a3);
+             color: #321e06;
+             font-weight: bold;
+             box-shadow: 0 3px 5px rgba(0,0,0,0.25), inset 0 -2px 1px rgba(0,0,0,0.1);
+             transition: all 0.2s ease;
+             touch-action: manipulation;
+         }
+        #back-to-menu-button:hover { background: linear-gradient(to bottom, #f7f2e8, #e8e0d0); box-shadow: 0 4px 7px rgba(0,0,0,0.3), inset 0 -2px 1px rgba(0,0,0,0.1); transform: translateY(-1px); }
+        #back-to-menu-button:active { transform: translateY(0px); box-shadow: 0 2px 4px rgba(0,0,0,0.25), inset 0 -1px 1px rgba(0,0,0,0.15); }
+
+
+        /* --- Settings Button & Panel Styles --- */
+        #settings-button {
+             position: fixed; top: 12px; right: 12px; /* Adjusted position */
+             z-index: 110; font-size: 1.6em; /* Adjusted size */
+             background: none; border: none;
+             color: rgba(255, 255, 255, 0.8); /* Slightly more opaque */
+             cursor: pointer;
+             padding: 10px; /* Increased padding for tap area */
+             transition: color 0.2s ease, transform 0.2s ease;
+             touch-action: manipulation;
+        }
+        #settings-button:hover { color: rgba(255, 255, 255, 1); transform: rotate(15deg); }
+
+        #settings-panel {
+            position: fixed;
+            top: 60px;
+            right: 12px; /* Adjusted position */
+            background-color: rgba(40, 25, 10, 0.95); /* More opaque */
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+            z-index: 115;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px; /* Adjusted gap */
+            border: 1px solid #7a542e;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            touch-action: auto; /* Allow touch/scroll on panel */
+        }
+        #settings-panel.visible { display: flex; }
+
+        #settings-overlay {
+             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+             background-color: transparent; /* Overlay is just for clicks */
+             z-index: 114; display: none;
+         }
+
+        .settings-icon-button {
+            display: flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; /* Ensure minimum tap size */
+            font-size: 1.2em; /* Adjusted size */
+            border: none; border-radius: 8px; cursor: pointer;
+            background: linear-gradient(to bottom, #966f4d, #7a542e);
+            color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.2s ease; text-align: center; flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        .settings-icon-button:hover { background: linear-gradient(to bottom, #a07551, #8b5e3c); box-shadow: 0 3px 6px rgba(0,0,0,0.4); transform: translateY(-1px); }
+        .settings-icon-button:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .settings-icon-button:disabled { background: #aaa; color: #666; cursor: not-allowed; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transform: none; opacity: 0.7; /* Dim disabled buttons */ }
+
+        #sound-toggle-button.sound-off { background: linear-gradient(to bottom, #c1b2a3, #a39588); color: #321e06; }
+        #sound-toggle-button.sound-off:hover { background: linear-gradient(to bottom, #d0c5b8, #b8a99a); }
+        #timer-toggle-button.timer-off { background: linear-gradient(to bottom, #c1b2a3, #a39588); color: #321e06; }
+        #timer-toggle-button.timer-off:hover { background: linear-gradient(to bottom, #d0c5b8, #b8a99a); }
+
+
+        /* --- Overlay Screen Styles (Board/Piece selection, Confirmation) --- */
+        .overlay-screen {
+             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+             background-color: rgba(0, 0, 0, 0.9); /* Slightly darker overlay */
+             display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 150;
+             opacity: 0; transition: opacity 0.4s ease-in-out;
+             padding: 15px; /* Adjusted padding */
+             box-sizing: border-box;
+             overflow-y: hidden; /* Controlled by content scroll */
+             touch-action: auto; /* Allow touch on the overlay background */
+        }
+        .overlay-screen.visible { display: flex; opacity: 1; }
+
+        .selection-content {
+            background-color: rgba(60, 40, 20, 0.95); /* More opaque */
+            padding: 20px; /* Adjusted padding */
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7); /* Stronger shadow */
+            text-align: center;
+            max-width: 95%; /* Increased max width for better mobile use */
+            width: 600px; /* Target width on larger screens */
+            transform: scale(0.95); /* Slight adjustment */
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border: 1px solid #966f4d;
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+            box-sizing: border-box;
+            touch-action: auto; /* Allow touch/scroll within content */
+        }
+        #confirmation-modal .selection-content {
+             width: auto; max-width: 350px; /* Adjusted max width for confirmation */
+             max-height: none; display: block; padding: 25px 20px; /* Adjusted padding */
+         }
+        .overlay-screen.visible .selection-content { transform: scale(1); }
+
+        .selection-content h2 {
+            font-size: clamp(1.5em, 4vh, 1.8em); /* Adjusted font size */
+            color: #f0e5d1;
+            margin-top: 0;
+            margin-bottom: 15px; /* Adjusted margin */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Adjusted minmax */
+            gap: 15px; /* Adjusted gap */
+            margin-bottom: 15px; /* Adjusted margin */
+            overflow-y: auto; /* Enable scrolling */
+            flex-shrink: 1;
+            flex-grow: 1;
+            padding-right: 5px; /* Add padding for scrollbar */
+            padding-bottom: 10px; /* Add padding at bottom */
+            scrollbar-width: thin;
+            scrollbar-color: #966f4d rgba(0,0,0,0.2);
+        }
+        .options-container::-webkit-scrollbar { width: 8px; }
+        .options-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        .options-container::-webkit-scrollbar-thumb { background-color: #966f4d; border-radius: 4px; border: 2px solid transparent; background-clip: content-box;}
+
+
+        .option-button {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            cursor: pointer;
+            border: 2px solid #7a542e;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #e0d6c8;
+            font-size: 0.95em; /* Adjusted font size */
+            min-height: 90px; /* Ensure minimum tap size */
+            justify-content: space-between;
+            touch-action: manipulation;
+        }
+        .option-button:hover { background-color: rgba(255, 255, 255, 0.15); border-color: #a07551; transform: translateY(-2px); /* Reduced hover effect */ box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+        .option-button:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .option-button.selected-style { border-color: #ffd700; background-color: rgba(255, 215, 0, 0.15); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+
+
+        .close-selection-button {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            font-size: clamp(1em, 3vh, 1.4em); /* Adjusted font size */
+            padding: clamp(10px, 2.5vh, 15px) clamp(20px, 5vw, 30px); /* Adjusted padding */
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(to bottom, #e0d6c8, #c1b2a3);
+            color: #321e06;
+            font-weight: bold;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.25), inset 0 -2px 1px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+            margin-top: auto;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        #confirmation-buttons button { margin-top: 0; } /* Remove extra margin for buttons within confirmation */
+        .close-selection-button:hover { background: linear-gradient(to bottom, #f7f2e8, #e8e0d0); box-shadow: 0 4px 7px rgba(0,0,0,0.3), inset 0 -2px 1px rgba(0,0,0,0.1); transform: translateY(-1px); }
+        .close-selection-button:active { transform: translateY(0px); box-shadow: 0 2px 4px rgba(0,0,0,0.25), inset 0 -1px 1px rgba(0,0,0,0.15); }
+
+
+        /* --- Board Selection Screen --- */
+        .board-preview { width: 50px; height: 50px; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); border: 1px solid rgba(0,0,0,0.3); margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); border-radius: 3px; overflow: hidden; }
+        .board-preview .sq { width: 100%; height: 100%; }
+        .board-preview-wood .light { background-color: #DEB887; } .board-preview-wood .dark { background-color: #A0522D; }
+        .board-preview-desert .light { background-color: #f4a460; } .board-preview-desert .dark { background-color: #8b4513; }
+        .board-preview-stone-path .light { background-color: #e0e0e0; } .board-preview-stone-path .dark { background-color: #616161; }
+        .board-preview-emerald .light { background-color: #e0f2f1; } .board-preview-emerald .dark { background-color: #00695c; }
+        .board-preview-volcano .light { background-color: #d3d3d3; } .board-preview-volcano .dark { background-color: #dc143c; }
+        .board-preview-royal .light { background-color: #fffacd; } .board-preview-royal .dark { background-color: #4b0082; }
+
+        /* --- Board Styles (Keep existing styles) --- */
+        #board.board-style-wood { border: 10px solid #8B4513; background-color: #A0522D; }
+        #board.board-style-wood .light-square { background: #DEB887; box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.3); }
+        #board.board-style-wood .dark-square { background: #A0522D; box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); } /* Removed cursor pointer/hover */
+        #board.board-style-desert { border: 10px solid #a0522d; background-color: #cd853f; }
+        #board.board-style-desert .light-square { background: linear-gradient(135deg, #f4a460 0%, #deb887 100%); box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.25); }
+        #board.board-style-desert .dark-square { background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); } /* Removed cursor pointer/hover */
+        #board.board-style-stone-path { border: 10px solid #5d4037; background-color: #795548; }
+        #board.board-style-stone-path .light-square { background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.2); }
+        #board.board-style-stone-path .dark-square { background: linear-gradient(135deg, #616161 0%, #424242 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); } /* Removed cursor pointer/hover */
+        #board.board-style-emerald { border: 10px solid #004d40; background-color: #00695c; }
+        #board.board-style-emerald .light-square { background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%); box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1); }
+        #board.board-style-emerald .dark-square { background: linear-gradient(135deg, #00695c 0%, #004d40 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); } /* Removed cursor pointer/hover */
+        #board.board-style-volcano { border: 10px solid #696969; background-color: #8B0000; }
+        #board.board-style-volcano .light-square { background: linear-gradient(135deg, #d3d3d3 0%, #f5f5f5 100%); box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.1); }
+        #board.board-style-volcano .dark-square { background: linear-gradient(135deg, #dc143c 0%, #b22222 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5); } /* Removed cursor pointer/hover */
+        #board.board-style-royal { border: 10px solid #483d8b; background-color: #6a5acd; }
+        #board.board-style-royal .light-square { background: linear-gradient(135deg, #fffacd 0%, #eee8aa 100%); box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15); }
+        #board.board-style-royal .dark-square { background: linear-gradient(135deg, #4b0082 0%, #8a2be2 100%); box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6); } /* Removed cursor pointer/hover */
+        /* Remove :hover styles from squares as click/drag is primary interaction */
+        .dark-square:hover:not(:has(.piece)):not(.possible-move) { background: inherit; }
+
+
+        /* Piece Selection Screen specific styles */
+        #piece-options-container { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* Adjusted minmax */ }
+        .piece-preview-container { display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 8px; /* Adjusted gap and margin */ width: 100%; height: 40px; /* Adjusted height */ }
+        .piece-preview { width: 30px; height: 30px; /* Adjusted size */ border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.3); position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+         /* Piece preview styles (Keep existing, ensure they scale) */
+         .piece-preview.black.classic { background: linear-gradient(to bottom right, #444 0%, #111 100%); box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1), 0 2px 4px rgba(0, 0, 0, 0.5); border-color: rgba(0, 0, 0, 0.2); } .piece-preview.white.classic { background: linear-gradient(to bottom right, #eee 0%, #ccc 100%); box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.3); }
+         .piece-preview.black.flat { background: #2c2c2c; border: 1px solid #555; box-shadow: none; } .piece-preview.white.flat { background: #f0f0f0; border: 1px solid #ccc; box-shadow: none; }
+         .piece-preview.black.crimson { background: linear-gradient(to bottom right, #b71c1c 0%, #7f0000 100%); border-color: rgba(50, 0, 0, 0.3); } .piece-preview.white.crimson { background: linear-gradient(to bottom right, #fffde7 0%, #fff8e1 100%); border-color: rgba(200, 190, 170, 0.4); }
+         .piece-preview.black.azure { background: #1976d2; border-color: #0d47a1; box-shadow: none; } .piece-preview.white.azure { background: #e3f2fd; border-color: #90caf9; box-shadow: none; }
+         .piece-preview.black.forest { background: linear-gradient(to bottom right, #388e3c 0%, #1b5e20 100%); border-color: rgba(0, 50, 0, 0.3); } .piece-preview.white.forest { background: linear-gradient(to bottom right, #f5f5dc 0%, #d2b48c 100%); border-color: rgba(180, 160, 130, 0.4); }
+         .piece-preview.black.royal { background: linear-gradient(to bottom right, #6a1b9a 0%, #4a148c 100%); border-color: rgba(30, 0, 50, 0.4); } .piece-preview.white.royal { background: linear-gradient(to bottom right, #fff59d 0%, #ffee58 100%); border-color: rgba(190, 180, 100, 0.5); }
+
+
+        /* Confirmation Modal Styles */
+        #confirmation-modal .selection-content {
+             width: auto; max-width: 350px; padding: 25px 20px; border-width: 2px; border-color: #b58863; background-color: #4a311c;
+             box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-height: none; display: block;
+         }
+        #confirmation-message { font-size: 1.2em; /* Adjusted font size */ color: #f0e5d1; margin-bottom: 25px; line-height: 1.5; /* Adjusted line height */ text-shadow: 1px 1px 3px rgba(0,0,0,0.6); }
+        #confirmation-buttons { display: flex; flex-direction: column; align-items: center; margin-top: 15px; gap: 10px; /* Adjusted gap */ }
+        #confirmation-buttons button { width: 90%; /* Increased button width */ max-width: 250px; margin-top: 0; }
+
+        #confirm-logout-button { background: linear-gradient(to bottom, #b75656, #913434); color: #ffffff; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); border: 1px solid #7a2a2a; }
+        #confirm-logout-button:hover { background: linear-gradient(to bottom, #c96e6e, #a04a4a); border-color: #8b3a3a; }
+
+
+        /* --- Media Queries (Simplified/Adjusted for Mobile Range) --- */
+         /* No need for extensive queries if using clamp and vmin effectively */
+         /* Keeping some base adjustments might still be useful */
+         @media (max-height: 700px), (max-width: 500px) {
+             #board { --square-size: clamp(35px, 11vmin, 60px); } /* Adjust board size more aggressively on smaller screens */
+             .selection-content { padding: 15px; max-width: 98%; }
+             .selection-content h2 { font-size: 1.4em; margin-bottom: 10px; }
+             .options-container { gap: 10px; padding-right: 3px; }
+             .option-button { min-height: 80px; font-size: 0.9em; padding: 8px; }
+             .board-preview { width: 40px; height: 40px; margin-bottom: 5px; }
+             .piece-preview-container { height: 35px; gap: 5px; margin-bottom: 5px; }
+             .piece-preview { width: 28px; height: 28px; }
+             .close-selection-button { font-size: 1em; padding: 10px 20px; }
+             #confirmation-modal .selection-content { padding: 20px 15px; max-width: 95%; }
+             #confirmation-message { font-size: 1.1em; margin-bottom: 15px; }
+             #confirmation-buttons button { width: 100%; }
+             #status-bar { padding: 5px 8px; gap: 8px; }
+             .status-section { font-size: 0.8em; min-width: 90px;}
+             .status-section.capture-count { min-width: 110px; }
+             .timer-display { min-width: 35px; font-size: 1em; }
+             #turn-indicators { height: 25px; }
+             .turn-indicator { width: 20px; height: 20px; margin: 0 3px; }
+         }
+
+
+    </style>
+</head>
+<body class="piece-style-classic">
+
+    <!-- Settings Button -->
+    <button id="settings-button" title="Settings"> <i class="fas fa-cog"></i> </button>
+
+    <!-- Settings Overlay (for click-to-close) -->
+    <div id="settings-overlay"></div>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel">
+        <button id="sound-toggle-button" class="settings-icon-button" title="Toggle Sound"> <i class="fas fa-volume-up"></i> </button>
+        <button id="timer-toggle-button" class="settings-icon-button" title="Toggle Turn Timer"> <i class="fas fa-clock"></i> </button>
+        <button id="undo-button" class="settings-icon-button" title="Undo Move" disabled> <i class="fas fa-undo"></i> </button>
+        <button id="hint-button" class="settings-icon-button" title="Hint"> <i class="fas fa-lightbulb"></i> </button>
+        <button id="change-board-button" class="settings-icon-button" title="Change Board Design"> <i class="fas fa-chess-board"></i> </button>
+        <button id="change-piece-style-button" class="settings-icon-button" title="Change Piece Style"> <i class="fas fa-puzzle-piece"></i> </button>
+        <button id="logout-button" class="settings-icon-button" title="Back to Main Menu"> <i class="fas fa-sign-out-alt"></i> </button>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1 id="main-title">Checkers Game</h1>
+        <h2 id="start-subtitle">Select Play Mode</h2>
+        <div id="start-options">
+            <button id="vs-human-button" class="start-button">Play vs Friend</button>
+            <button id="vs-ai-button" class="start-button">Play vs Computer</button>
+        </div>
+    </div>
+
+    <!-- AI Difficulty Selector -->
+    <div id="ai-difficulty-selector-container">
+        <button id="close-difficulty-selector" title="Close"><i class="fas fa-times"></i></button>
+        <h3>Select Difficulty Level</h3>
+        <div class="difficulty-control">
+            <button id="difficulty-prev" class="difficulty-arrow-button" title="Previous"> <i class="fas fa-chevron-left"></i> </button>
+            <span id="difficulty-display">Medium</span>
+            <button id="difficulty-next" class="difficulty-arrow-button" title="Next"> <i class="fas fa-chevron-right"></i> </button>
+        </div>
+        <button id="confirm-difficulty-button" class="start-button">Start Game</button>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container">
+        <div id="status-bar">
+            <div class="status-section capture-count white">
+                <i class="fas fa-chess-pawn status-icon" style="color: #eee;"></i>
+                <span>Captured:</span> <span id="captured-by-black">0</span>
+            </div>
+            <div id="white-timer" class="timer-display">--:--</div>
+
+            <div id="turn-indicators">
+                <div id="white-indicator" class="turn-indicator"><div class="piece-visual white piece white-piece"></div></div>
+                <div id="black-indicator" class="turn-indicator"><div class="piece-visual black piece black-piece"></div></div>
+            </div>
+
+            <div id="black-timer" class="timer-display">--:--</div>
+            <div class="status-section capture-count black">
+                <span>Captured:</span> <span id="captured-by-white">0</span>
+                <i class="fas fa-chess-pawn status-icon" style="color: #444;"></i>
+            </div>
+        </div>
+        <div id="board"></div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen">
+        <div id="game-over-content">
+            <div id="game-over-message"></div>
+            <button id="back-to-menu-button" class="close-selection-button">Back to Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Board Selection Screen -->
+    <div id="board-selection-screen" class="overlay-screen">
+        <div id="board-selection-content" class="selection-content">
+            <h2>Choose Your Preferred Board Design</h2>
+            <div id="board-options-container" class="options-container">
+                <button class="board-option option-button" data-style="wood" title="Wood"><div class="board-preview board-preview-wood"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Wood</span></button>
+                <button class="board-option option-button" data-style="desert" title="Desert"><div class="board-preview board-preview-desert"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Desert</span></button>
+                <button class="board-option option-button" data-style="stone-path" title="Stone Path"><div class="board-preview board-preview-stone-path"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Stone Path</span></button>
+                <button class="board-option option-button" data-style="emerald" title="Emerald"><div class="board-preview board-preview-emerald"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Emerald</span></button>
+                <button class="board-option option-button" data-style="volcano" title="Volcano"><div class="board-preview board-preview-volcano"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Volcano</span></button>
+                <button class="board-option option-button" data-style="royal" title="Royal"><div class="board-preview board-preview-royal"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Royal</span></button>
+             </div>
+            <button id="close-board-selection" class="close-selection-button">Close</button>
+        </div>
+    </div>
+
+    <!-- Piece Style Selection Screen -->
+    <div id="piece-style-selection-screen" class="overlay-screen">
+        <div id="piece-style-selection-content" class="selection-content">
+            <h2>Choose Your Preferred Piece Style</h2>
+            <div id="piece-options-container" class="options-container">
+                <button class="piece-option option-button" data-style="classic" title="Classic"><div class="piece-preview-container"><div class="piece-preview white classic"></div> <div class="piece-preview black classic"></div></div> <span>Classic</span></button>
+                <button class="piece-option option-button" data-style="flat" title="Flat"><div class="piece-preview-container"><div class="piece-preview white flat"></div> <div class="piece-preview black flat"></div></div> <span>Flat</span></button>
+                <button class="piece-option option-button" data-style="crimson" title="Crimson"><div class="piece-preview-container"><div class="piece-preview white crimson"></div> <div class="piece-preview black crimson"></div></div> <span>Crimson</span></button>
+                <button class="piece-option option-button" data-style="azure" title="Azure"><div class="piece-preview-container"><div class="piece-preview white azure"></div> <div class="piece-preview black azure"></div></div> <span>Azure</span></button>
+                <button class="piece-option option-button" data-style="forest" title="Forest"><div class="piece-preview-container"><div class="piece-preview white forest"></div> <div class="piece-preview black forest"></div></div> <span>Forest</span></button>
+                <button class="piece-option option-button" data-style="royal" title="Royal"><div class="piece-preview-container"><div class="piece-preview white royal"></div> <div class="piece-preview black royal"></div></div> <span>Royal</span></button>
+             </div>
+            <button id="close-piece-selection" class="close-selection-button">Close</button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="overlay-screen">
+        <div id="confirmation-content" class="selection-content">
+            <p id="confirmation-message">Are you sure you want to return to the main menu? Your current game progress will be lost.</p>
+            <div id="confirmation-buttons">
+                <button id="confirm-logout-button" class="close-selection-button">Yes, Confirm</button>
+                <button id="cancel-logout-button" class="close-selection-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Element References ---
+        const bodyElement = document.body;
+        const startScreen = document.getElementById('start-screen');
+        const mainTitle = document.getElementById('main-title');
+        const startSubtitle = document.getElementById('start-subtitle');
+        const startOptions = document.getElementById('start-options');
+        const vsHumanButton = document.getElementById('vs-human-button');
+        const vsAiButton = document.getElementById('vs-ai-button');
+        const aiDifficultySelectorContainer = document.getElementById('ai-difficulty-selector-container');
+        const difficultyPrevButton = document.getElementById('difficulty-prev');
+        const difficultyNextButton = document.getElementById('difficulty-next');
+        const difficultyDisplay = document.getElementById('difficulty-display');
+        const confirmDifficultyButton = document.getElementById('confirm-difficulty-button');
+        const gameContainer = document.getElementById('game-container');
+        const statusBar = document.getElementById('status-bar');
+        const whiteCapturedDisplay = document.getElementById('captured-by-black');
+        const blackCapturedDisplay = document.getElementById('captured-by-white');
+        const whiteTimerDisplay = document.getElementById('white-timer');
+        const blackTimerDisplay = document.getElementById('black-timer');
+        const boardElement = document.getElementById('board');
+        const whiteIndicator = document.getElementById('white-indicator');
+        const blackIndicator = document.getElementById('black-indicator');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const backToMenuButton = document.getElementById('back-to-menu-button');
+        const settingsButton = document.getElementById('settings-button');
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsOverlay = document.getElementById('settings-overlay');
+        const soundToggleButton = document.getElementById('sound-toggle-button');
+        const timerToggleButton = document.getElementById('timer-toggle-button');
+        const undoButton = document.getElementById('undo-button');
+        const hintButton = document.getElementById('hint-button');
+        const logoutButton = document.getElementById('logout-button');
+        const changeBoardButton = document.getElementById('change-board-button');
+        const changePieceStyleButton = document.getElementById('change-piece-style-button');
+        const boardSelectionScreen = document.getElementById('board-selection-screen');
+        const boardOptionsContainer = document.getElementById('board-options-container');
+        const closeBoardSelectionButton = document.getElementById('close-board-selection');
+        const pieceStyleSelectionScreen = document.getElementById('piece-style-selection-screen');
+        const pieceOptionsContainer = document.getElementById('piece-options-container');
+        const closePieceSelectionButton = document.getElementById('close-piece-selection');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmLogoutButton = document.getElementById('confirm-logout-button');
+        const cancelLogoutButton = document.getElementById('cancel-logout-button');
+        const closeDifficultySelectorButton = document.getElementById('close-difficulty-selector');
+
+        // --- Audio ---
+        let audioCtx; function getAudioContext() { if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { console.error("Web Audio API not supported", e); } } return audioCtx; }
+        let isSoundEnabled = localStorage.getItem('isSoundEnabled') !== 'false';
+        function playSound(type, options = {}) { if (!isSoundEnabled) return; const ctx = getAudioContext(); if (!ctx) return; if (ctx.state === 'suspended') { ctx.resume().then(() => { if (ctx.state === 'running') playSoundInternal(ctx, type, options); }).catch(e => console.error("Error resuming AudioContext:", e)); return; } if (ctx.state === 'running') { playSoundInternal(ctx, type, options); } }
+        function playSoundInternal(ctx, type, options) { try { const time = ctx.currentTime; const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); gain.gain.setValueAtTime(options.volume || 0.2, time); switch (type) { case 'select': osc.type = 'triangle'; osc.frequency.setValueAtTime(1500, time); gain.gain.setValueAtTime(options.volume || 0.15, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.05); osc.start(time); osc.stop(time + 0.05); break; case 'move': osc.type = 'sine'; osc.frequency.setValueAtTime(600, time); osc.frequency.linearRampToValueAtTime(400, time + 0.08); gain.gain.setValueAtTime(options.volume || 0.2, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.08); osc.start(time); osc.stop(time + 0.08); break; case 'capture': osc.type = 'square'; osc.frequency.setValueAtTime(500, time); gain.gain.setValueAtTime(options.volume || 0.25, time); gain.gain.exponentialRampToValueAtTime(0.001, time + 0.12); osc.start(time); osc.stop(time + 0.12); break; case 'king': osc.type = 'sine'; gain.gain.setValueAtTime(options.volume || 0.25, time); osc.frequency.setValueAtTime(880, time); osc.frequency.linearRampToValueAtTime(1318.51, time + 0.15); gain.gain.linearRampToValueAtTime(0.001, time + 0.2); osc.start(time); osc.stop(time + 0.2); break; case 'win': gain.gain.setValueAtTime(options.volume || 0.3, time); osc.frequency.setValueAtTime(523.25, time); osc.start(time); osc.stop(time + 0.15); const osc2 = ctx.createOscillator(); const gain2 = ctx.createGain(); osc2.connect(gain2); gain2.connect(ctx.destination); gain2.gain.setValueAtTime(options.volume || 0.3, time + 0.15); osc2.type = 'sine'; osc2.frequency.setValueAtTime(783.99, time + 0.15); gain2.gain.linearRampToValueAtTime(0.001, time + 0.4); osc2.start(time + 0.15); osc2.stop(time + 0.4); break; case 'undo': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, time); osc.frequency.linearRampToValueAtTime(500, time + 0.1); gain.gain.setValueAtTime(options.volume || 0.15, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.1); osc.start(time); osc.stop(time + 0.1); break; case 'hint': osc.type = 'sine'; osc.frequency.setValueAtTime(1200, time); gain.gain.setValueAtTime(options.volume || 0.1, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.08); osc.start(time); osc.stop(time + 0.08); break; case 'timer_tick': osc.type = 'sine'; osc.frequency.setValueAtTime(900, time); gain.gain.setValueAtTime(options.volume || 0.05, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.05); osc.start(time); osc.stop(time + 0.05); break; case 'timeout': osc.type = 'square'; osc.frequency.setValueAtTime(440, time); gain.gain.setValueAtTime(options.volume || 0.3, time); gain.gain.linearRampToValueAtTime(0.001, time + 0.3); osc.start(time); osc.stop(time + 0.3); break; default: console.warn("Unknown sound type:", type); } } catch (e) { console.error("Error playing sound:", type, e); } }
+
+        // --- Game Constants & State ---
+        const BOARD_SIZE = 8; const PLAYER_BLACK = 'black'; const PLAYER_WHITE = 'white'; const AI_PLAYER = PLAYER_WHITE;
+        const DIFFICULTIES = { EASY: 'easy', MEDIUM: 'medium', HARD: 'hard' }; const MINIMAX_DEPTH = { MEDIUM: 3, HARD: 5 }; const TIMER_DURATION = 60;
+        const difficultyLevels = [DIFFICULTIES.EASY, DIFFICULTIES.MEDIUM, DIFFICULTIES.HARD];
+        const difficultyLabels = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+        let currentDifficultyIndex = 1;
+        let chosenAiDifficulty = difficultyLevels[currentDifficultyIndex];
+        let boardState = []; let currentPlayer = PLAYER_BLACK; let selectedPiece = null; let possibleMoves = []; let continuousJumpPossible = false; let gameMode = 'human'; let aiDifficulty = chosenAiDifficulty; let isAiThinking = false; let isGameOver = false; let isSettingsPanelVisible = false; let currentBoardStyle = localStorage.getItem('boardStyle') || 'wood';
+        let currentPieceStyle = localStorage.getItem('pieceStyle') || 'classic';
+        let capturedByBlack = 0; let capturedByWhite = 0; let moveHistory = []; let isTimerEnabled = localStorage.getItem('isTimerEnabled') === 'true'; let currentTurnTimeRemaining = TIMER_DURATION; let timerIntervalId = null; let hintTimeoutId = null;
+
+        // --- Utility Functions ---
+        function isValidSquare(row, col) { return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE; }
+        function deepCopyBoard(board) { return JSON.parse(JSON.stringify(board)); }
+        function getOpponent(player) { return player === PLAYER_BLACK ? PLAYER_WHITE : PLAYER_BLACK; }
+
+        // --- UI Update Functions ---
+        function updateSoundButtonIcon() {
+            const icon = soundToggleButton.querySelector('i');
+            if (isSoundEnabled) {
+                icon.classList.remove('fa-volume-mute'); icon.classList.add('fa-volume-up');
+                soundToggleButton.classList.remove('sound-off'); soundToggleButton.title = "Toggle Sound (On)";
+            } else {
+                icon.classList.remove('fa-volume-up'); icon.classList.add('fa-volume-mute');
+                soundToggleButton.classList.add('sound-off'); soundToggleButton.title = "Toggle Sound (Off)";
+            }
+        }
+        function updateTimerButtonIcon() {
+            const icon = timerToggleButton.querySelector('i');
+            if (isTimerEnabled) {
+                icon.classList.remove('fa-stopwatch'); icon.classList.add('fa-clock');
+                timerToggleButton.classList.remove('timer-off'); timerToggleButton.title = "Toggle Turn Timer (On)";
+            } else {
+                icon.classList.remove('fa-clock'); icon.classList.add('fa-stopwatch');
+                timerToggleButton.classList.add('timer-off'); timerToggleButton.title = "Toggle Turn Timer (Off)";
+            }
+        }
+        function updateTurnIndicatorVisuals() { const whiteVisual = whiteIndicator.querySelector('.piece-visual'); const blackVisual = blackIndicator.querySelector('.piece-visual'); whiteVisual.style = ''; blackVisual.style = ''; whiteVisual.className = `piece-visual white piece white-piece`; blackVisual.className = `piece-visual black piece black-piece`; }
+        function updateCapturedCounters() { whiteCapturedDisplay.textContent = capturedByBlack; blackCapturedDisplay.textContent = capturedByWhite; }
+        function updateUndoButton() { undoButton.disabled = moveHistory.length < (gameMode === 'ai' ? 2 : 1) || isAiThinking || isGameOver; } // Disable undo if not enough moves or AI is thinking
+        function updateHintButton() { hintButton.disabled = isAiThinking || isGameOver || (gameMode === 'ai' && currentPlayer === AI_PLAYER); }
+        function formatTime(seconds) { if (seconds < 0) seconds = 0; const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; }
+        function updateTimerDisplay() { if (!isTimerEnabled) { whiteTimerDisplay.textContent = '--:--'; blackTimerDisplay.textContent = '--:--'; return; } const display = currentPlayer === PLAYER_WHITE ? whiteTimerDisplay : blackTimerDisplay; const otherDisplay = currentPlayer === PLAYER_WHITE ? blackTimerDisplay : whiteTimerDisplay; display.textContent = formatTime(currentTurnTimeRemaining); otherDisplay.textContent = formatTime(TIMER_DURATION); }
+        function updateDifficultySelectorDisplay() { chosenAiDifficulty = difficultyLevels[currentDifficultyIndex]; difficultyDisplay.textContent = difficultyLabels[chosenAiDifficulty]; }
+
+        // --- Timer Logic ---
+        function stopTurnTimer() { if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; } }
+        function startTurnTimer() { stopTurnTimer(); if (!isTimerEnabled || isGameOver) { updateTimerDisplay(); return; } currentTurnTimeRemaining = TIMER_DURATION; updateTimerDisplay(); timerIntervalId = setInterval(() => { currentTurnTimeRemaining--; updateTimerDisplay(); if (currentTurnTimeRemaining <= 5 && currentTurnTimeRemaining > 0) { playSound('timer_tick', { volume: 0.1 }); } if (currentTurnTimeRemaining <= 0) { handleTimeout(); } }, 1000); }
+        function handleTimeout() {
+            stopTurnTimer(); if (isGameOver) return; playSound('timeout');
+            const winner = getOpponent(currentPlayer); const winnerText = winner === PLAYER_BLACK ? "Black" : "White";
+            endGame(`${winnerText} Wins (Opponent ran out of time)!`);
+        }
+
+        // --- Game Flow Functions ---
+        function initGame() {
+            stopTurnTimer(); isGameOver = false; gameOverScreen.classList.remove('visible');
+            settingsOverlay.style.display = 'none'; // document.querySelectorAll('.dark-square').forEach(sq => { sq.style.cursor = 'pointer'; }); // Cursor handled by CSS
+            boardState = createInitialBoardState(); currentPlayer = PLAYER_BLACK; selectedPiece = null; possibleMoves = []; continuousJumpPossible = false;
+            isAiThinking = false; isSettingsPanelVisible = false; settingsPanel.classList.remove('visible');
+            boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible'); confirmationModal.classList.remove('visible');
+            capturedByBlack = 0; capturedByWhite = 0; moveHistory = [];
+            loadBoardStyle(); loadPieceStyle(); updateTurnIndicatorVisuals(); createBoardUI(); renderBoard(); updateStatus(); updateCapturedCounters();
+            updateUndoButton(); updateHintButton(); settingsButton.style.display = 'block'; startTurnTimer();
+
+             // Start AI turn if gameMode is AI and white is first
+             if (gameMode === 'ai' && currentPlayer === AI_PLAYER) {
+                 isAiThinking = true;
+                 updateUndoButton(); updateHintButton(); renderBoard();
+                 requestAnimationFrame(() => {
+                    setTimeout(makeAiMove, 1500 + Math.random() * 500); // Add slight delay for AI start
+                 });
+             }
+        }
+        function startGame(mode) {
+            playSound('select', { volume: 0.4 }); gameMode = mode;
+            if (gameMode === 'human') {
+                aiDifficulty = DIFFICULTIES.EASY; // Default AI difficulty even in human mode (for hint logic)
+                startScreen.classList.add('hidden-completely');
+                aiDifficultySelectorContainer.classList.remove('visible');
+                gameContainer.style.display = 'flex';
+                initGame();
+            } else {
+                 showDifficultySelector();
+            }
+        }
+        function startAiGame() {
+            playSound('select', { volume: 0.4 }); gameMode = 'ai'; aiDifficulty = chosenAiDifficulty;
+            startScreen.classList.add('hidden-completely');
+            aiDifficultySelectorContainer.classList.remove('visible');
+            gameContainer.style.display = 'flex';
+            settingsButton.style.display = 'block';
+            initGame();
+        }
+        function returnToStartScreen() {
+            playSound('select'); stopTurnTimer(); gameOverScreen.classList.remove('visible'); gameContainer.style.display = 'none';
+            startScreen.classList.remove('hidden-completely'); aiDifficultySelectorContainer.classList.remove('visible');
+            settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible'); settingsOverlay.style.display = 'none';
+            isSettingsPanelVisible = false; boardState = []; currentPlayer = PLAYER_BLACK; selectedPiece = null; possibleMoves = []; continuousJumpPossible = false; isAiThinking = false;
+            isGameOver = true; capturedByBlack = 0; capturedByWhite = 0; moveHistory = [];
+            whiteIndicator.classList.remove('active-turn'); blackIndicator.classList.remove('active-turn');
+            updateStatus(""); updateCapturedCounters(); updateUndoButton(); updateHintButton(); updateTimerDisplay();
+
+            // Reset start screen animations
+            mainTitle.style.opacity = 0; mainTitle.style.transform = 'translateY(-20px)';
+            startSubtitle.style.opacity = 0; startSubtitle.style.transform = 'translateY(-10px)';
+            startOptions.querySelectorAll('.start-button').forEach(btn => {
+                 btn.style.opacity = 0; btn.style.transform = 'translateY(20px)';
+            });
+             // Re-apply animations after a short delay to allow display:none to process
+            setTimeout(() => {
+                 mainTitle.style.animation = ''; startSubtitle.style.animation = ''; startOptions.querySelectorAll('.start-button').forEach(btn => btn.style.animation = '');
+                 requestAnimationFrame(() => { // Force reflow to restart animations
+                    mainTitle.style.animation = 'fadeInTitle 1s ease-out 0.5s forwards';
+                    startSubtitle.style.animation = 'fadeInSubtitle 1s ease-out 1s forwards';
+                    document.getElementById('vs-human-button').style.animation = 'fadeInUpButton 0.6s ease-out 1.3s forwards';
+                    document.getElementById('vs-ai-button').style.animation = 'fadeInUpButton 0.6s ease-out 1.5s forwards';
+                 });
+            }, 10); // Small delay
+
+
+            startSubtitle.textContent = "Select Play Mode";
+        }
+        function endGame(message) {
+            if (isGameOver) return; isGameOver = true; stopTurnTimer(); playSound('win'); isAiThinking = false;
+            gameOverMessage.textContent = message; gameOverScreen.classList.add('visible');
+            settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible'); settingsOverlay.style.display = 'none';
+            boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible'); confirmationModal.classList.remove('visible');
+            updateStatus(); updateUndoButton(); updateHintButton(); renderBoard(); // Ensure board state is final
+        }
+
+        // --- Modal/Overlay Functions ---
+        function showConfirmationModal() { if (isGameOver || isAiThinking) return; stopTurnTimer(); settingsPanel.classList.remove('visible'); settingsOverlay.style.display = 'none'; isSettingsPanelVisible = false; confirmationModal.classList.add('visible'); renderBoard(); } // Render to clear potential selections/hints
+        function hideConfirmationModal() { confirmationModal.classList.remove('visible'); if (!isGameOver && !isSettingsPanelVisible) { startTurnTimer(); } renderBoard(); }
+        function showOverlay(overlayElement) { if (isGameOver || isAiThinking) return; stopTurnTimer(); settingsPanel.classList.remove('visible'); settingsOverlay.style.display = 'none'; isSettingsPanelVisible = false; overlayElement.classList.add('visible'); renderBoard(); } // Render to clear potential selections/hints
+        function hideOverlay(overlayElement) { overlayElement.classList.remove('visible'); if (!isGameOver && !isSettingsPanelVisible) { startTurnTimer(); } renderBoard(); }
+
+        // --- Event Listeners ---
+        vsHumanButton.addEventListener('click', () => startGame('human'));
+        vsAiButton.addEventListener('click', () => { playSound('select'); showDifficultySelector(); });
+        difficultyPrevButton.addEventListener('click', () => { playSound('select', {volume: 0.1}); currentDifficultyIndex = (currentDifficultyIndex - 1 + difficultyLevels.length) % difficultyLevels.length; updateDifficultySelectorDisplay(); });
+        difficultyNextButton.addEventListener('click', () => { playSound('select', {volume: 0.1}); currentDifficultyIndex = (currentDifficultyIndex + 1) % difficultyLevels.length; updateDifficultySelectorDisplay(); });
+        confirmDifficultyButton.addEventListener('click', startAiGame);
+        closeDifficultySelectorButton.addEventListener('click', () => {
+             playSound('select'); aiDifficultySelectorContainer.classList.remove('visible'); startScreen.classList.remove('hidden-completely');
+        });
+        function showDifficultySelector() {
+            startScreen.classList.add('hidden-completely'); aiDifficultySelectorContainer.classList.add('visible'); updateDifficultySelectorDisplay();
+        }
+        backToMenuButton.addEventListener('click', returnToStartScreen);
+        logoutButton.addEventListener('click', () => { playSound('select'); showConfirmationModal(); });
+        confirmLogoutButton.addEventListener('click', () => { playSound('select'); hideConfirmationModal(); returnToStartScreen(); });
+        cancelLogoutButton.addEventListener('click', () => { playSound('select'); hideConfirmationModal(); });
+        confirmationModal.addEventListener('click', (event) => { if (event.target === confirmationModal) { playSound('select'); hideConfirmationModal(); } });
+
+        settingsButton.addEventListener('click', () => {
+            playSound('select');
+            // Prevent opening settings if AI is thinking or game is over
+            if (isAiThinking || isGameOver) return;
+
+            isSettingsPanelVisible = !isSettingsPanelVisible;
+            if (isSettingsPanelVisible) {
+                stopTurnTimer();
+                settingsPanel.classList.add('visible');
+                settingsOverlay.style.display = 'block';
+                // Hide other overlays if open
+                boardSelectionScreen.classList.remove('visible');
+                pieceStyleSelectionScreen.classList.remove('visible');
+                confirmationModal.classList.remove('visible');
+            } else {
+                startTurnTimer(); // Resume timer if settings are closed and game is not over
+                settingsPanel.classList.remove('visible');
+                settingsOverlay.style.display = 'none';
+            }
+            renderBoard(); // Re-render to remove selection/hints when settings open/close
+        });
+
+        settingsOverlay.addEventListener('click', () => {
+            if(isSettingsPanelVisible) { // Only close if settings panel is actually visible via the toggle
+                playSound('select');
+                isSettingsPanelVisible = false;
+                settingsPanel.classList.remove('visible');
+                settingsOverlay.style.display = 'none';
+                if (!isGameOver && !isAiThinking) startTurnTimer(); // Resume timer if settings are closed and game is active
+                 renderBoard();
+            }
+        });
+
+
+        soundToggleButton.addEventListener('click', () => { isSoundEnabled = !isSoundEnabled; localStorage.setItem('isSoundEnabled', isSoundEnabled); updateSoundButtonIcon(); if (isSoundEnabled) { const ctx = getAudioContext(); if (ctx && ctx.state === 'suspended') { ctx.resume(); } playSound('select', { volume: 0.4 }); } });
+        timerToggleButton.addEventListener('click', () => { isTimerEnabled = !isTimerEnabled; localStorage.setItem('isTimerEnabled', isTimerEnabled); updateTimerButtonIcon(); playSound('select'); if (isTimerEnabled && !isGameOver && !isSettingsPanelVisible && !confirmationModal.classList.contains('visible')) { startTurnTimer(); } else { stopTurnTimer(); updateTimerDisplay(); } });
+        undoButton.addEventListener('click', () => { if (!undoButton.disabled) { playSound('undo'); undoMove(); } });
+        hintButton.addEventListener('click', () => { if (!hintButton.disabled) { playSound('hint'); showHint(); } });
+        changeBoardButton.addEventListener('click', () => { playSound('select'); updateSelectedBoardOption(); showOverlay(boardSelectionScreen); });
+        changePieceStyleButton.addEventListener('click', () => { playSound('select'); updateSelectedPieceOption(); showOverlay(pieceStyleSelectionScreen); });
+        closeBoardSelectionButton.addEventListener('click', () => { playSound('select'); hideOverlay(boardSelectionScreen); });
+        closePieceSelectionButton.addEventListener('click', () => { playSound('select'); hideOverlay(pieceStyleSelectionScreen); });
+
+         // Event delegation for style selection buttons
+        boardOptionsContainer.addEventListener('click', (event) => { const targetOption = event.target.closest('.board-option'); if (targetOption) { const selectedStyle = targetOption.dataset.style; if (selectedStyle) { applyBoardStyle(selectedStyle); playSound('select'); updateSelectedBoardOption(); } } });
+        pieceOptionsContainer.addEventListener('click', (event) => { const targetOption = event.target.closest('.piece-option'); if (targetOption) { const selectedStyle = targetOption.dataset.style; if (selectedStyle) { applyPieceStyle(selectedStyle); playSound('select'); updateSelectedPieceOption(); } } });
+
+        // --- Board Setup and Rendering ---
+        function createInitialBoardState() { const state = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null)); for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { if ((r + c) % 2 !== 0) { if (r < 3) { state[r][c] = { player: PLAYER_WHITE, isKing: false }; } else if (r > 4) { state[r][c] = { player: PLAYER_BLACK, isKing: false }; } } } } return state; }
+        function createBoardUI() { boardElement.innerHTML = ''; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const sq = document.createElement('div'); sq.classList.add('square', (r + c) % 2 === 0 ? 'light-square' : 'dark-square'); sq.dataset.row = r; sq.dataset.col = c; /* No need for x, y datasets for positioning pieces visually */ if ((r + c) % 2 !== 0) { /* Click handled by drag/drop logic */ } boardElement.appendChild(sq); } } }
+        function getSquareElement(row, col) { if (!isValidSquare(row, col)) return null; return boardElement.querySelector(`.square[data-row="${row}"][data-col="${col}"]`); }
+        let renderTimeout; function requestRender() { clearTimeout(renderTimeout); renderTimeout = setTimeout(renderBoard, 0); }
+        function renderBoard() {
+            clearHintHighlights();
+            const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible');
+
+            const allSquares = boardElement.querySelectorAll('.square');
+            allSquares.forEach(sq => {
+                sq.classList.remove('possible-move', 'drag-target'); // Also remove drag-target class
+                // Cursor is handled by CSS now, no need to set inline style here
+                // sq.style.cursor = (sq.classList.contains('dark-square') && !isInteractionBlocked && !isSettingsPanelVisible) ? 'pointer' : 'default';
+                const existingPiece = sq.querySelector('.piece');
+                if (existingPiece && !existingPiece.classList.contains('moving') && !existingPiece.classList.contains('dragging')) {
+                    existingPiece.remove(); // Clean up pieces not being moved or dragged
+                }
+            });
+
+            const allPossibleJumps = !isInteractionBlocked ? getAllPossibleMoves(currentPlayer, true, boardState) : [];
+            const jumpIsPossibleAnywhere = allPossibleJumps.length > 0;
+
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    const pieceData = boardState[r][c];
+                    const square = getSquareElement(r, c);
+
+                    if (pieceData && square) {
+                        let pieceEl = square.querySelector(`.piece[data-piece-id="${r}-${c}"]`);
+                        if (!pieceEl) {
+                            // Create new piece element
+                            pieceEl = document.createElement('div');
+                            pieceEl.dataset.pieceId = `${r}-${c}`;
+                            pieceEl.className = `piece ${pieceData.player}-piece ${pieceData.isKing ? 'king' : ''}`;
+                            pieceEl.style.transform = `translate(-50%, -50%)`; // Initial position
+                            square.appendChild(pieceEl);
+                        } else {
+                             // Update existing piece element classes
+                             pieceEl.className = `piece ${pieceData.player}-piece ${pieceData.isKing ? 'king' : ''}`;
+                        }
+
+                        // Determine if the piece can be interacted with (selected/dragged)
+                        const canInteractPiece = !isInteractionBlocked && pieceData.player === currentPlayer && !(continuousJumpPossible && selectedPiece && (selectedPiece.row !== r || selectedPiece.col !== c));
+                        pieceEl.classList.toggle('interactive', canInteractPiece);
+                        pieceEl.style.pointerEvents = (canInteractPiece && !isSettingsPanelVisible) ? 'auto' : 'none';
+                        // Piece click handled by drag start/end now, or should it still handle simple taps for selection?
+                        // Let's keep simple tap selection via click handler for non-drag scenarios or initial selection.
+                        pieceEl.onclick = (canInteractPiece && !isSettingsPanelVisible && !isTouchDevice) ? (e) => { e.stopPropagation(); handlePieceClick(e); } : null;
+
+
+                        // Add jump hint class
+                        pieceEl.classList.remove('jump-hint');
+                        if (jumpIsPossibleAnywhere && !continuousJumpPossible && pieceData.player === currentPlayer) {
+                            const thisPieceCanJump = allPossibleJumps.some(jump => jump.origin.r === r && jump.origin.c === c);
+                            if (thisPieceCanJump) {
+                                pieceEl.classList.add('jump-hint');
+                            }
+                        }
+
+                        // Apply selected class
+                        pieceEl.classList.toggle('selected', selectedPiece && selectedPiece.row === r && selectedPiece.col === c);
+
+                        // If this piece is the currently selected piece, ensure the selectedPiece object references the correct element
+                        if(selectedPiece && selectedPiece.row === r && selectedPiece.col === c){
+                           selectedPiece.element = pieceEl;
+                        }
+
+                    } else {
+                         // If board state shows no piece, remove any piece element in that square
+                         const pieceEl = square.querySelector('.piece');
+                         if(pieceEl && !pieceEl.classList.contains('moving') && !pieceEl.classList.contains('dragging')) {
+                             pieceEl.remove();
+                         }
+                    }
+                }
+            }
+
+            // Highlight possible moves for the selected piece
+            if (selectedPiece && !isInteractionBlocked) {
+                 // Recalculate moves based on current state and selection (might be continuous jump)
+                 possibleMoves = continuousJumpPossible ?
+                                 calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState) :
+                                 calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, false, boardState);
+
+                 possibleMoves.forEach(move => {
+                     const sq = getSquareElement(move.row, move.col);
+                     if (sq) {
+                         sq.classList.add('possible-move');
+                         // sq.style.cursor = 'pointer'; // Cursor handled by CSS
+                         // Add event listener to the square for non-drag move (tap-to-move)
+                         if (!isTouchDevice) { // Add click handler only for non-touch (mouse)
+                             sq.addEventListener('click', handleSquareClick);
+                         }
+                          // Keep touch handler on piece for drag, square tap is less common on mobile Checkers UIs
+                     }
+                 });
+            }
+            // Clean up click handlers on squares when piece is not selected or interaction is blocked
+            else {
+                 allSquares.forEach(sq => {
+                     if (!isTouchDevice && sq.classList.contains('dark-square')) {
+                         sq.removeEventListener('click', handleSquareClick);
+                     }
+                 });
+            }
+
+            // Hover effects are less relevant for touch, but keeping them for mouse might be okay
+            // addHoverEffects(); // Decide if mouse hover is needed or removed entirely
+        }
+
+
+        // --- Board & Piece Style Functions ---
+        function applyBoardStyle(styleName) {
+            const validStyles = ['wood', 'desert', 'stone-path', 'emerald', 'volcano', 'royal'];
+            if (!validStyles.includes(styleName)) styleName = 'wood';
+            const allPossibleStyles = ['classic', 'modern', 'wood', 'marble', 'minimal', 'stone', 'forest', 'ice', 'dark', 'desert', 'ocean', 'stone-path', 'emerald', 'volcano', 'royal']; // Keep existing for removal
+            boardElement.classList.remove(...allPossibleStyles.map(s => `board-style-${s}`));
+            boardElement.classList.add(`board-style-${styleName}`);
+            currentBoardStyle = styleName;
+            localStorage.setItem('boardStyle', styleName);
+        }
+        function updateSelectedBoardOption() { const options = boardOptionsContainer.querySelectorAll('.board-option'); options.forEach(option => { option.classList.toggle('selected-style', option.dataset.style === currentBoardStyle); }); }
+        function loadBoardStyle() {
+            let loadedStyle = localStorage.getItem('boardStyle') || 'wood';
+            const validStyles = ['wood', 'desert', 'stone-path', 'emerald', 'volcano', 'royal'];
+            if (!validStyles.includes(loadedStyle)) { loadedStyle = 'wood'; localStorage.setItem('boardStyle', loadedStyle); }
+            applyBoardStyle(loadedStyle);
+        }
+        function applyPieceStyle(styleName) {
+            const validStyles = ['classic', 'flat', 'crimson', 'azure', 'forest', 'royal'];
+            if (!validStyles.includes(styleName)) styleName = 'classic';
+            const allPossibleStyles = ['classic', 'flat', 'glossy', 'wood', 'metal', 'gemstone', 'stone', 'simple', 'marble', 'neon', 'glass', 'crimson', 'azure', 'forest', 'royal']; // Keep existing for removal
+            bodyElement.classList.remove(...allPossibleStyles.map(s => `piece-style-${s}`));
+            bodyElement.classList.add(`piece-style-${styleName}`);
+            currentPieceStyle = styleName;
+            localStorage.setItem('pieceStyle', styleName);
+            updateTurnIndicatorVisuals();
+            if (gameContainer.style.display === 'flex') { renderBoard(); }
+        }
+        function updateSelectedPieceOption() { const options = pieceOptionsContainer.querySelectorAll('.piece-option'); options.forEach(option => { option.classList.toggle('selected-style', option.dataset.style === currentPieceStyle); }); }
+        function loadPieceStyle() {
+            let loadedStyle = localStorage.getItem('pieceStyle') || 'classic';
+            const validStyles = ['classic', 'flat', 'crimson', 'azure', 'forest', 'royal'];
+            if (!validStyles.includes(loadedStyle)) { loadedStyle = 'classic'; localStorage.setItem('pieceStyle', loadedStyle); }
+            applyPieceStyle(loadedStyle);
+        }
+
+        // --- Game Logic ---
+         // Keep handlePieceClick and handleSquareClick for potential tap-to-move on non-touch or as fallback,
+         // but drag-and-drop JS will be the primary interaction on touch devices.
+         function handlePieceClick(event) {
+             // This handler is primarily for non-touch devices where tap-to-select is standard,
+             // or potentially as a fallback for complex touch interactions.
+             // The drag/drop startDrag handles the initial selection on touch.
+             if (isTouchDevice && currentDraggingPiece) return; // Ignore if drag is in progress on touch
+
+             const pieceElement = event.target.closest('.piece');
+             if (!pieceElement) return;
+             const squareElement = pieceElement.closest('.square');
+             if (!squareElement) return;
+
+             const row = parseInt(squareElement.dataset.row);
+             const col = parseInt(squareElement.dataset.col);
+
+             const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible');
+             if (isInteractionBlocked) return;
+
+             const pieceData = boardState[row][col];
+             if (!pieceData || pieceData.player !== currentPlayer) {
+                  deselectPiece(); // Deselect if clicking opponent's piece or empty square (though square click handles empty)
+                  return;
+             }
+
+             // If continuous jump is required, only allow selecting the piece that must jump
+             if (continuousJumpPossible && selectedPiece && (selectedPiece.row !== row || selectedPiece.col !== col)) {
+                 // Do nothing, cannot select a different piece
+                 return;
+             }
+
+             if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) {
+                 // Clicking the already selected piece -> Deselect
+                 deselectPiece();
+             } else {
+                 // Select the piece
+                 selectPiece(row, col, pieceElement);
+             }
+         }
+
+         function handleSquareClick(event) {
+             // This handler is primarily for non-touch devices where tap-to-move is standard,
+             // or potentially as a fallback. Drag end handles drops on touch devices.
+             if (isTouchDevice) return; // Ignore square clicks on touch devices (drag handles drop)
+
+             const targetSquare = event.target.closest('.square.dark-square');
+             if (!targetSquare) return; // Only dark squares are valid targets
+
+             const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible');
+             if (isInteractionBlocked) return;
+
+             const row = parseInt(targetSquare.dataset.row);
+             const col = parseInt(targetSquare.dataset.col);
+
+             // If a piece is selected, attempt to move it to this square
+             if (selectedPiece && !boardState[row][col]) {
+                 let move;
+                 // Find the valid move to this square among possible moves for the selected piece
+                 move = possibleMoves.find(m => m.row === row && m.col === col);
+
+                 if (move) {
+                     // Valid move found, execute it
+                     saveCurrentStateToHistory();
+                     animateAndMovePiece(selectedPiece.row, selectedPiece.col, move);
+                 } else {
+                     // Invalid square clicked, deselect the piece unless a continuous jump is required
+                     if (!continuousJumpPossible) {
+                         deselectPiece();
+                     }
+                     // If continuousJumpPossible is true and they clicked an invalid square, the piece remains selected
+                 }
+             } else {
+                 // Clicked on an empty square or a square with a piece (piece click handles piece-on-square)
+                 // If no piece was selected, or if continuous jump is required and this isn't the next jump square, deselect.
+                 if (!continuousJumpPossible) {
+                    deselectPiece();
+                 }
+             }
+         }
+
+
+        function calculateMovesForPieceInternal(r, c, onlyJumps, currentBoard) { const piece = currentBoard[r]?.[c]; if (!piece) return []; let moves = []; const directions = []; const playerDirection = (piece.player === PLAYER_BLACK) ? -1 : 1; directions.push(playerDirection); if (piece.isKing) directions.push(-playerDirection); for (const dir of directions) { for (const dc of [-1, 1]) { const jumpedPieceRow = r + dir; const jumpedPieceCol = c + dc; const jumpLandingRow = r + dir * 2; const jumpLandingCol = c + dc * 2; if (isValidSquare(jumpLandingRow, jumpLandingCol) && !currentBoard[jumpLandingRow][jumpLandingCol]) { const jumpedPiece = isValidSquare(jumpedPieceRow, jumpedPieceCol) ? currentBoard[jumpedPieceRow][jumpedPieceCol] : null; if (jumpedPiece && jumpedPiece.player !== piece.player) { moves.push({ row: jumpLandingRow, col: jumpLandingCol, isJump: true, captured: { row: jumpedPieceRow, col: jumpedPieceCol }, origin: { r, c } }); } } if (!onlyJumps) { const nr = r + dir; const nc = c + dc; if (isValidSquare(nr, nc) && !currentBoard[nr][nc]) { moves.push({ row: nr, col: nc, isJump: false, origin: { r, c } }); } } } } return moves; }
+        function getAllPossibleMoves(player, onlyJumps = false, currentBoard = boardState) { let allMoves = []; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = currentBoard[r][c]; if (piece && piece.player === player) { const movesForPiece = calculateMovesForPieceInternal(r, c, false, currentBoard); if (onlyJumps) { allMoves.push(...movesForPiece.filter(m => m.isJump)); } else { allMoves.push(...movesForPiece); } } } } return allMoves; }
+         // Updated calculateMovesForPiece to use the internal one
+         function calculateMovesForPiece(r, c, onlyJumps = false, currentBoard = boardState) {
+             return calculateMovesForPieceInternal(r, c, onlyJumps, currentBoard);
+         }
+
+
+        function animateAndMovePiece(fromRow, fromCol, move) {
+            const pieceData = boardState[fromRow][fromCol];
+            const movingPieceElement = getSquareElement(fromRow, fromCol)?.querySelector(`.piece[data-piece-id="${fromRow}-${fromCol}"]`);
+            const targetSquareElement = getSquareElement(move.row, move.col);
+
+            if (!pieceData || !movingPieceElement || !targetSquareElement) {
+                 console.error("Animation failed: Piece or square element not found.", {fromRow, fromCol, move});
+                 // Fallback to executing move logic without animation if elements are missing
+                 executeMoveLogic(fromRow, fromCol, move);
+                 handlePostMoveChecks(move);
+                 return;
+            }
+
+            // Ensure the piece is positioned absolutely within its original square before animation
+             movingPieceElement.style.position = 'absolute';
+             movingPieceElement.style.left = '50%';
+             movingPieceElement.style.top = '50%';
+             movingPieceElement.style.transform = 'translate(-50%, -50%)';
+
+
+            movingPieceElement.classList.add('moving');
+            movingPieceElement.style.zIndex = 100; // Ensure it's above other pieces during animation
+
+            // Use getBoundingClientRect for current and target positions
+            const startRect = movingPieceElement.getBoundingClientRect();
+            const targetRect = targetSquareElement.getBoundingClientRect();
+            const boardRect = boardElement.getBoundingClientRect();
+
+             // Calculate the target position relative to the piece's *original* square's top-left
+             // This is complex because translate(-50%, -50%) is applied.
+             // A simpler approach is to use fixed positioning for animation, similar to drag,
+             // or calculate the final square's center relative to the board container.
+
+             // Let's calculate the required change in position relative to its current, centered position
+             const targetCenterXRelativeToOriginalSquare = (targetRect.left + targetRect.width / 2) - (startRect.left + startRect.width / 2);
+             const targetCenterYRelativeToOriginalSquare = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
+
+
+            // Apply the transformation to move it from its centered start in the original square to the center of the target square
+             movingPieceElement.style.transition = 'transform 0.3s ease-in-out'; // Set transition property
+             movingPieceElement.style.transform = `translate(calc(-50% + ${targetCenterXRelativeToOriginalSquare}px), calc(-50% + ${targetCenterYRelativeToOriginalSquare}px))`;
+
+
+            if (move.isJump) {
+                playSound('capture');
+                // Animate captured piece fading out slightly before or during the move animation
+                const capturedSquare = getSquareElement(move.captured.row, move.captured.col);
+                const capturedPieceEl = capturedSquare?.querySelector('.piece');
+                if (capturedPieceEl) {
+                    capturedPieceEl.classList.add('captured-fade');
+                    setTimeout(() => capturedPieceEl.remove(), 400); // Remove after animation
+                }
+            } else {
+                playSound('move');
+            }
+
+             // Deselect *before* animation starts so UI updates immediately
+             deselectPiece();
+
+
+             // Use transitionend to know when the animation is complete
+             movingPieceElement.addEventListener('transitionend', function handleTransitionEnd() {
+                 movingPieceElement.removeEventListener('transitionend', handleTransitionEnd);
+
+                 // Reset transform and transition after animation
+                 movingPieceElement.style.transition = '';
+                 movingPieceElement.style.transform = 'translate(-50%, -50%)'; // Reset to standard centering
+
+                 // Execute the core game logic (updating boardState, capturing, kinging)
+                 executeMoveLogic(fromRow, fromCol, move);
+
+                 // Update piece's data-piece-id to reflect its new position
+                 movingPieceElement.dataset.pieceId = `${move.row}-${move.col}`;
+
+                 // Move the actual DOM element to the target square
+                 targetSquareElement.appendChild(movingPieceElement);
+
+                 movingPieceElement.classList.remove('moving');
+                 movingPieceElement.style.zIndex = 10; // Reset z-index
+
+                 // Handle post-move checks (continuous jumps, end turn, AI turn)
+                 handlePostMoveChecks(move);
+
+             }, { once: true }); // Use { once: true } to automatically remove the listener
+        }
+
+
+        function executeMoveLogic(fromRow, fromCol, move) {
+            const pieceData = boardState[fromRow][fromCol];
+            if (!pieceData) {
+                 console.error("ExecuteMoveLogic failed: No piece at origin", {fromRow, fromCol, move});
+                 return;
+             }
+            const toRow = move.row;
+            const toCol = move.col;
+
+            // Move the piece in the boardState
+            boardState[toRow][toCol] = pieceData;
+            boardState[fromRow][fromCol] = null;
+
+            // Handle capture
+            if (move.isJump && move.captured) {
+                const capR = move.captured.row;
+                const capC = move.captured.col;
+                if (isValidSquare(capR, capC) && boardState[capR][capC]) {
+                    if (boardState[capR][capC].player === PLAYER_WHITE) {
+                        capturedByWhite++;
+                    } else {
+                        capturedByBlack++;
+                    }
+                    boardState[capR][capC] = null; // Remove captured piece from state
+                    updateCapturedCounters();
+                } else {
+                     console.warn("ExecuteMoveLogic: Captured piece not found at", move.captured);
+                }
+            }
+
+            // Check for kinging *after* the move
+            checkForKing(toRow, toCol);
+        }
+
+        function handlePostMoveChecks(move) {
+            const toRow = move.row;
+            const toCol = move.col;
+            const movedPieceData = boardState[toRow][toCol];
+
+            if (move.isJump && movedPieceData) {
+                const nextJumps = calculateMovesForPieceInternal(toRow, toCol, true, boardState);
+                if (nextJumps.length > 0) {
+                    // More jumps possible for the same piece
+                    continuousJumpPossible = true;
+                    // Select the piece that just moved for the next jump
+                    selectPiece(toRow, toCol, getSquareElement(toRow, toCol)?.querySelector('.piece'));
+                    updateStatus("Complete the jump!");
+                    requestRender(); // Re-render to highlight next possible jump squares
+
+                    // If AI made a jump, trigger the next part of its turn
+                    if (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver) {
+                         isAiThinking = true; // Keep thinking state active
+                         // Add a small delay before the AI makes the next jump in the sequence
+                         setTimeout(makeAiMove, 500 + Math.random() * 200);
+                    }
+                    return; // Stay on the same turn
+                }
+            }
+
+            // No more jumps possible for this piece (or it wasn't a jump)
+            continuousJumpPossible = false;
+            endTurn(); // End the current player's turn
+        }
+
+        function checkForKing(row, col) { const piece = boardState[row]?.[col]; if (!piece || piece.isKing) return false; if ((piece.player === PLAYER_BLACK && row === 0) || (piece.player === PLAYER_WHITE && row === BOARD_SIZE - 1)) { piece.isKing = true; playSound('king'); return true; } return false; }
+        function endTurn() { deselectPiece(); if (checkWinCondition()) { return; } switchPlayer(); }
+        function switchPlayer() { currentPlayer = getOpponent(currentPlayer); continuousJumpPossible = false; updateStatus(); startTurnTimer(); requestRender(); if (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver) { isAiThinking = true; updateUndoButton(); updateHintButton(); renderBoard(); requestAnimationFrame(() => { setTimeout(makeAiMove, 1500 + Math.random() * 500); }); } else { isAiThinking = false; updateUndoButton(); updateHintButton(); } }
+        function updateStatus(message = null) { whiteIndicator.classList.remove('active-turn'); blackIndicator.classList.remove('active-turn'); if (!isGameOver) { if (currentPlayer === PLAYER_WHITE) whiteIndicator.classList.add('active-turn'); else blackIndicator.classList.add('active-turn'); } /* Status message is not displayed in the UI, only logged */ if(message) console.log("Status Update:", message); }
+        function checkWinCondition() {
+            if (isGameOver) return true; let blackPieces = 0; let whitePieces = 0; let blackCanMove = false; let whiteCanMove = false;
+            const blackMoves = getAllPossibleMoves(PLAYER_BLACK, false, boardState); const whiteMoves = getAllPossibleMoves(PLAYER_WHITE, false, boardState);
+            blackCanMove = blackMoves.length > 0; whiteCanMove = whiteMoves.length > 0;
+            for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = boardState[r][c]; if (piece) { if (piece.player === PLAYER_BLACK) blackPieces++; if (piece.player === PLAYER_WHITE) whitePieces++; } } }
+            let gameOverTriggered = false; let winMessage = "";
+            if (whitePieces === 0) { winMessage = "Black Wins (No White pieces left)!"; gameOverTriggered = true; }
+            else if (blackPieces === 0) { winMessage = "White Wins (No Black pieces left)!"; gameOverTriggered = true; }
+            else if (currentPlayer === PLAYER_BLACK && !blackCanMove && !whitePieces === 0) { winMessage = "White Wins (Black has no moves)!"; gameOverTriggered = true; } // Add check to not declare winner by no moves if opponent already lost by no pieces
+            else if (currentPlayer === PLAYER_WHITE && !whiteCanMove && !blackPieces === 0) { winMessage = "Black Wins (White has no moves)!"; gameOverTriggered = true; } // Add check
+
+            if (gameOverTriggered) { endGame(winMessage); return true; }
+            return false;
+        }
+        function saveCurrentStateToHistory() { const stateToSave = { boardState: deepCopyBoard(boardState), currentPlayer: currentPlayer, capturedByBlack: capturedByBlack, capturedByWhite: capturedByWhite, continuousJumpPossible: continuousJumpPossible, selectedPiece: selectedPiece ? { row: selectedPiece.row, col: selectedPiece.col } : null, }; moveHistory.push(stateToSave); updateUndoButton(); }
+        function undoMove() {
+             if (moveHistory.length < (gameMode === 'ai' ? 2 : 1) || isAiThinking || isGameOver) return;
+             stopTurnTimer();
+             clearHintHighlights(); // Clear any active hints
+
+             // For AI vs Human, undo needs to go back two states (AI's move + Human's move)
+             let statesToUndo = gameMode === 'ai' ? 2 : 1;
+             if (moveHistory.length < statesToUndo) return; // Not enough history to go back that far
+
+             // Remove current board state (potentially mid-jump if AI just jumped)
+             // We will restore from history anyway, but clear current UI state first
+             deselectPiece();
+             isAiThinking = false; // Ensure AI thinking is off
+
+             // Pop states from history
+             for(let i = 0; i < statesToUndo; i++) {
+                 const previousState = moveHistory.pop();
+                 // Apply the last state in history
+                 if (i === statesToUndo - 1) { // Apply the state from 'statesToUndo' steps ago
+                    boardState = previousState.boardState;
+                    currentPlayer = previousState.currentPlayer;
+                    capturedByBlack = previousState.capturedByBlack;
+                    capturedByWhite = previousState.capturedByWhite;
+                    continuousJumpPossible = previousState.continuousJumpPossible;
+                    // Restore selected piece from history if it existed (e.g. mid continuous jump)
+                     selectedPiece = previousState.selectedPiece ? {
+                         row: previousState.selectedPiece.row,
+                         col: previousState.selectedPiece.col,
+                         player: currentPlayer, // Player for the selected piece is the player whose turn it is now
+                         element: null // Element will be found by renderBoard
+                     } : null;
+                 }
+             }
+
+             isGameOver = false; // Undo always means the game is not over
+             gameOverScreen.classList.remove('visible'); // Hide game over screen
+
+             updateCapturedCounters();
+             updateStatus();
+             updateUndoButton();
+             updateHintButton();
+
+             // Re-create and render board to match the restored state
+             createBoardUI();
+             renderBoard();
+
+             startTurnTimer();
+
+             // If AI vs Human and turn was undone to AI's turn, trigger AI move after rendering
+             if (gameMode === 'ai' && currentPlayer === AI_PLAYER) {
+                 isAiThinking = true;
+                 updateUndoButton(); updateHintButton(); renderBoard(); // Re-render with AI thinking state
+                 requestAnimationFrame(() => {
+                     setTimeout(makeAiMove, 1500 + Math.random() * 500); // Add delay before AI moves
+                 });
+             }
+         }
+
+
+        function clearHintHighlights() { if (hintTimeoutId) { clearTimeout(hintTimeoutId); hintTimeoutId = null; } document.querySelectorAll('.hint-piece-suggestion, .hint-move-suggestion').forEach(el => { el.classList.remove('hint-piece-suggestion'); }); document.querySelectorAll('.square.possible-move.hint-move-suggestion').forEach(sq => { sq.classList.remove('hint-move-suggestion'); }); }
+        function showHint() { clearHintHighlights(); if (isGameOver || isAiThinking || (gameMode === 'ai' && currentPlayer === AI_PLAYER)) { return; }
+        let bestHintMove;
+        // For hint, calculate best move based on a shallow AI evaluation (e.g., depth 1 or 2)
+        // This is faster than full game AI depth and provides a reasonable suggestion.
+        const hintDepth = 2; // Use depth 2 for hints
+
+        const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState);
+        let movesToConsiderForHint = allPossibleJumps.length > 0 ? allPossibleJumps : getAllPossibleMoves(currentPlayer, false, boardState);
+
+        if (movesToConsiderForHint.length === 0) {
+             console.log("No moves available for hint.");
+             return; // No moves to suggest
+        }
+
+         // Use a simplified evaluation or just pick a random move for Easy difficulty hints
+         if (gameMode === 'human' && aiDifficulty === DIFFICULTIES.EASY) {
+              bestHintMove = movesToConsiderForHint[Math.floor(Math.random() * movesToConsiderForHint.length)];
+         } else {
+            // Use minimax for hint suggestion based on AI difficulty settings
+            // Pass current player as maximizing player for the hint evaluation
+            const result = minimax(deepCopyBoard(boardState), hintDepth, -Infinity, Infinity, true, currentPlayer, currentPlayer);
+             bestHintMove = result.move;
+         }
+
+
+        if (bestHintMove) {
+            const pieceSquare = getSquareElement(bestHintMove.origin.r, bestHintMove.origin.c);
+            const targetSquare = getSquareElement(bestHintMove.row, bestHintMove.col);
+            const pieceElement = pieceSquare?.querySelector('.piece');
+            if (pieceElement && targetSquare) {
+                pieceElement.classList.add('hint-piece-suggestion');
+                targetSquare.classList.add('hint-move-suggestion');
+                 // Ensure target square is marked as a possible move visually even if not currently selected
+                 if (!targetSquare.classList.contains('possible-move')) {
+                     targetSquare.classList.add('possible-move'); // Add possible-move visually for the hint
+                 }
+                hintTimeoutId = setTimeout(() => {
+                     clearHintHighlights();
+                     // Remove possible-move class if it was added *only* for the hint
+                     // This requires checking if it was already there before the hint.
+                     // A simpler approach is just to re-render board after hint removal.
+                     renderBoard(); // Rerender to clean up possible-move class if needed
+                }, 3000); // Hint duration
+                 playSound('hint'); // Play hint sound after successfully showing hint
+            } else {
+                 console.warn("Hint elements not found for move:", bestHintMove);
+            }
+        } else {
+             console.log("Could not find a move for hint.");
+        }
+    }
+
+        // --- AI Logic ---
+        function makeAiMove() {
+            if (isGameOver || currentPlayer !== AI_PLAYER || isAiThinking === false) { // Ensure it's AI's turn and thinking is enabled
+                 isAiThinking = false; // Should already be true, but safety
+                 requestRender();
+                 return;
+            }
+
+            let bestMoveResult;
+             // First, check if the current piece *must* continue a jump sequence
+             if (continuousJumpPossible && selectedPiece && selectedPiece.player === AI_PLAYER) {
+                const nextJumps = calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState);
+                 if (nextJumps.length > 0) {
+                     // If multiple jumps are possible for the AI mid-sequence, pick the one that leads to the best score
+                     // This needs a mini-minimax search on the possible jump branches
+                     bestMoveResult = findBestNextJumpForAI(selectedPiece.row, selectedPiece.col);
+
+                     // If no 'best' jump found (shouldn't happen if nextJumps > 0), just pick the first one
+                     if (!bestMoveResult || !bestMoveResult.move) {
+                         bestMoveResult = { move: nextJumps[0], score: 0 };
+                     }
+
+                 } else {
+                      // This case should ideally not be reached if continuousJumpPossible is true,
+                      // as nextJumps should have moves. If it is reached, it suggests an issue
+                      // or the jump sequence somehow ended unexpectedly.
+                      console.warn("AI was in continuous jump state but found no next jumps.");
+                      continuousJumpPossible = false; // Clear the state as no jumps are possible
+                      // Proceed to find a regular move (though this might indicate a bug)
+                      bestMoveResult = findBestMoveForAI();
+                 }
+             } else {
+                 // Not in a continuous jump state, find the best *initial* move (could be a jump or regular move)
+                 continuousJumpPossible = false; // Ensure flag is false
+                 bestMoveResult = findBestMoveForAI();
+             }
+
+
+            if (bestMoveResult && bestMoveResult.move) {
+                const chosenMove = bestMoveResult.move;
+                saveCurrentStateToHistory(); // Save state *before* the AI move
+
+                // Select the piece visually (needed for animation logic)
+                 const aiPieceSquare = getSquareElement(chosenMove.origin.r, chosenMove.origin.c);
+                 const aiPieceElement = aiPieceSquare?.querySelector('.piece');
+                 // Update the selectedPiece state for the animation/post-move logic
+                 selectedPiece = {
+                     row: chosenMove.origin.r,
+                     col: chosenMove.origin.c,
+                     player: AI_PLAYER,
+                     element: aiPieceElement
+                 };
+
+
+                // Trigger the animation and core game logic for the chosen move
+                animateAndMovePiece(chosenMove.origin.r, chosenMove.origin.c, chosenMove);
+
+                // Note: handlePostMoveChecks will be called automatically after animation
+                // It will check if more jumps are possible and either continue AI turn or end it.
+
+            } else {
+                // No moves found for AI - this should lead to game over, handled by checkWinCondition
+                 console.error("AI could not find a move.");
+                 isAiThinking = false; // Stop thinking state
+                 endTurn(); // End turn (will trigger checkWinCondition)
+            }
+        }
+
+         // Helper function to find the best move for the AI player using Minimax (or random for Easy)
+        function findBestMoveForAI() {
+            if (aiDifficulty === DIFFICULTIES.EASY) {
+                const allPossibleJumps = getAllPossibleMoves(AI_PLAYER, true, boardState);
+                let possibleAiMoves;
+                if (allPossibleJumps.length > 0) {
+                    possibleAiMoves = allPossibleJumps; // Must jump
+                } else {
+                    possibleAiMoves = getAllPossibleMoves(AI_PLAYER, false, boardState); // Regular moves
+                }
+
+                if (possibleAiMoves.length === 0) {
+                    return { move: null, score: 0 }; // No moves available
+                }
+
+                // For Easy, just pick a random move from the available ones
+                const randomMove = possibleAiMoves[Math.floor(Math.random() * possibleAiMoves.length)];
+                return { move: randomMove, score: 0 };
+
+            } else {
+                // Use Minimax for Medium and Hard difficulties
+                const depth = (aiDifficulty === DIFFICULTIES.HARD) ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM;
+                // Start minimax from the current board state, maximizing for the AI player
+                return minimax(deepCopyBoard(boardState), depth, -Infinity, Infinity, true, AI_PLAYER, AI_PLAYER);
+            }
+        }
+
+        // Helper function to find the best *next* jump during a continuous jump sequence for AI
+        function findBestNextJumpForAI(currentRow, currentCol) {
+             const nextPossibleJumps = calculateMovesForPieceInternal(currentRow, currentCol, true, boardState);
+             if (nextPossibleJumps.length === 0) {
+                  return { move: null, score: 0 }; // Should not happen if in continuous jump state
+             }
+
+            const depth = (aiDifficulty === DIFFICULTIES.HARD) ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM;
+            let bestScore = -Infinity;
+            let bestJump = null;
+
+             // Evaluate each possible next jump
+             for (const jump of nextPossibleJumps) {
+                 const tempBoard = deepCopyBoard(boardState);
+                 simulateMove(tempBoard, jump); // Perform the jump
+
+                 // Recursively simulate the *rest* of the forced jump sequence from this point
+                 let currentPos = { r: jump.row, c: jump.col };
+                 let forcedJumpSequence = true;
+                 let boardAfterSequence = deepCopyBoard(tempBoard); // Copy the board state after the first jump
+
+                 while(forcedJumpSequence) {
+                     const pieceAfterJump = boardAfterSequence[currentPos.r][currentPos.c];
+                     if (!pieceAfterJump) { break; } // Should not happen
+                     const nextNextJumps = calculateMovesForPieceInternal(currentPos.r, currentPos.c, true, boardAfterSequence);
+
+                     if (nextNextJumps.length > 0) {
+                         // For the AI's own forced sequence simulation, just pick the first next jump
+                         const nextNextJump = nextNextJumps[0];
+                         simulateMove(boardAfterSequence, nextNextJump);
+                         currentPos = { r: nextNextJump.row, c: nextNextJump.col };
+                          // Kinging check during simulation
+                          if (!pieceAfterJump.isKing) {
+                             if ((pieceAfterJump.player === PLAYER_BLACK && currentPos.r === 0) || (pieceAfterJump.player === PLAYER_WHITE && currentPos.r === BOARD_SIZE - 1)) {
+                                  boardAfterSequence[currentPos.r][currentPos.c].isKing = true;
+                             }
+                          }
+                     } else {
+                         forcedJumpSequence = false;
+                     }
+                 }
+
+                 // Evaluate the board state *after* the entire forced jump sequence is completed
+                 // The evaluation function needs the board state and the *original* player whose turn it was.
+                 const score = minimax(boardAfterSequence, depth - 1, -Infinity, Infinity, false, getOpponent(AI_PLAYER), AI_PLAYER); // Now it's opponent's turn (minimizing)
+
+                 if (score > bestScore) {
+                     bestScore = score;
+                     bestJump = jump;
+                 }
+             }
+             return { move: bestJump, score: bestScore };
+        }
+
+
+        // Minimax function implementation (Revised slightly for clarity and correctness)
+        function minimax(currentBoard, depth, alpha, beta, isMaximizingPlayer, currentPlayerInSim, originalPlayer) {
+            // Base case: Check depth limit or game over state in simulation
+            if (depth === 0 || checkGameOverSimulated(currentBoard, currentPlayerInSim) || checkGameOverSimulated(currentBoard, getOpponent(currentPlayerInSim))) {
+                return evaluateBoard(currentBoard, originalPlayer, depth); // Evaluate board state
+            }
+
+            const possibleMoves = getAllPossibleMoves(currentPlayerInSim, false, currentBoard);
+            const possibleJumps = possibleMoves.filter(m => m.isJump);
+            const movesToConsider = possibleJumps.length > 0 ? possibleJumps : possibleMoves;
+
+            // If no moves are possible for the current player in simulation,
+            // this turn essentially ends, and we evaluate the board from the perspective
+            // of the original player after this "skipped" turn.
+             if (movesToConsider.length === 0) {
+                 return evaluateBoard(currentBoard, originalPlayer, depth);
+             }
+
+
+            if (isMaximizingPlayer) { // AI's turn in simulation (Maximizing)
+                let maxScore = -Infinity;
+
+                // Sort moves to try potentially better moves first (simple heuristic: jumps first)
+                const sortedMoves = movesToConsider.sort((a, b) => b.isJump - a.isJump);
+
+
+                for (const move of sortedMoves) {
+                    const tempBoard = deepCopyBoard(currentBoard);
+
+                     // Simulate the full turn for this move, including any forced jumps
+                     let boardAfterTurn = simulateFullTurn(tempBoard, move);
+
+                    // Recursive call for the opponent's turn (minimizing player)
+                    const score = minimax(boardAfterTurn, depth - 1, alpha, beta, false, getOpponent(currentPlayerInSim), originalPlayer);
+                    maxScore = Math.max(maxScore, score);
+                    alpha = Math.max(alpha, maxScore);
+                    if (beta <= alpha) {
+                        break; // Alpha-beta pruning
+                    }
+                }
+                 // If no moves considered (shouldn't happen if movesToConsider > 0), return the value from the base case/no moves state
+                 // This handles cases where the loop might break early due to pruning but no score was set yet.
+                 // However, with movesToConsider.length > 0 and loop structure, maxScore will be set.
+                return maxScore;
+
+            } else { // Opponent's turn in simulation (Minimizing)
+                let minScore = Infinity;
+
+                 // Sort moves for opponent (simple heuristic: jumps first - they also want to jump)
+                 const sortedMoves = movesToConsider.sort((a, b) => b.isJump - a.isJump);
+
+                for (const move of sortedMoves) {
+                    const tempBoard = deepCopyBoard(currentBoard);
+
+                    // Simulate the full turn for this move, including any forced jumps
+                    let boardAfterTurn = simulateFullTurn(tempBoard, move);
+
+                    // Recursive call for the AI's turn (maximizing player)
+                    const score = minimax(boardAfterTurn, depth - 1, alpha, beta, true, getOpponent(currentPlayerInSim), originalPlayer);
+                    minScore = Math.min(minScore, score);
+                    beta = Math.min(beta, minScore);
+                    if (beta <= alpha) {
+                        break; // Alpha-beta pruning
+                    }
+                }
+                 // If no moves considered, return the value from the base case/no moves state
+                return minScore;
+            }
+        }
+
+         // Helper function to simulate a full turn including forced jumps sequence in a given board copy
+        function simulateFullTurn(board, initialMove) {
+            const tempBoard = deepCopyBoard(board); // Work on a copy
+
+            // Check if the initial move is valid in the temp board state
+            // (This check is more for debugging/safety, minimax should generate valid moves)
+            const pieceToMove = tempBoard[initialMove.origin.r]?.[initialMove.origin.c];
+            if (!pieceToMove || (initialMove.isJump && !tempBoard[initialMove.captured.row]?.[initialMove.captured.col]) || (initialMove.isJump && tempBoard[initialMove.captured.row]?.[initialMove.captured.col]?.player === pieceToMove.player)) {
+                 console.error("simulateFullTurn received an invalid initial move:", initialMove);
+                 // Return the board state *before* the invalid move attempt
+                 return deepCopyBoard(board); // Return original board state to signify no move happened
+            }
+
+
+            simulateSingleMove(tempBoard, initialMove); // Perform the initial move on the copy
+
+            let currentPos = { r: initialMove.row, c: initialMove.col };
+
+            // Check for and perform forced jumps recursively/iteratively
+            let moreJumpsPossible = true;
+            while(moreJumpsPossible) {
+                const pieceAfterMove = tempBoard[currentPos.r]?.[currentPos.c];
+                 if (!pieceAfterMove) { // Piece was somehow removed? Should not happen if simulateSingleMove is correct
+                     moreJumpsPossible = false;
+                     break;
+                 }
+
+                const nextJumps = calculateMovesForPieceInternal(currentPos.r, currentPos.c, true, tempBoard);
+
+                if (nextJumps.length > 0) {
+                     // In simulation of a *forced* sequence, pick one of the next jumps.
+                     // A more complex AI might branch here to evaluate all sequence possibilities,
+                     // but for a standard minimax implementation, picking one is common.
+                     // Let's pick the first available jump for simplicity in simulation.
+                     const nextJump = nextJumps[0];
+                     simulateSingleMove(tempBoard, nextJump); // Perform the next jump
+                     currentPos = { r: nextJump.row, c: nextJump.col };
+                     // simulateSingleMove now handles kinging, so no separate check needed here
+
+                } else {
+                    moreJumpsPossible = false; // No more jumps for this piece from this position
+                }
+            }
+
+             return tempBoard; // Return the board state *after* the full turn sequence
+        }
+
+        // Helper function to simulate just one move (either regular or jump) in a board copy
+        function simulateSingleMove(board, move) {
+            const pieceData = board[move.origin.r]?.[move.origin.c];
+            if (!pieceData) {
+                 console.error("simulateSingleMove failed: No piece at origin", move.origin);
+                 return; // Cannot perform move
+             }
+
+            // Move the piece
+            board[move.row][move.col] = { ...pieceData }; // Create a copy of the piece data
+            board[move.origin.r][move.origin.c] = null;
+
+            // Handle capture
+            if (move.isJump && move.captured) {
+                board[move.captured.row][move.captured.col] = null; // Remove captured piece
+            }
+
+            // Check for kinging *after* moving the piece
+            const movedPiece = board[move.row][move.col]; // Get the piece data at the new location
+            if (movedPiece && !movedPiece.isKing) {
+                if ((movedPiece.player === PLAYER_BLACK && move.row === 0) || (movedPiece.player === PLAYER_WHITE && move.row === BOARD_SIZE - 1)) {
+                    movedPiece.isKing = true; // King the piece
+                }
+            }
+        }
+
+
+        function evaluateBoard(currentBoard, player, depth = 0) {
+            let score = 0;
+            const opponent = getOpponent(player);
+            const WIN_SCORE = 10000; // Increased win score
+            const KING_VALUE = 30; // Increased king value
+            const PIECE_VALUE = 10; // Increased piece value
+            const ADVANCEMENT_VALUE = 0.5; // Increased advancement value
+            const MOBILITY_VALUE = 1; // Increased mobility factor
+             const CENTER_CONTROL_VALUE = 0.2; // Value for controlling center squares
+
+            let myPieces = 0, oppPieces = 0;
+            let myKings = 0, oppKings = 0;
+            let myTotalAdvancement = 0, oppTotalAdvancement = 0;
+            let myPossibleMovesCount = 0, oppPossibleMovesCount = 0;
+            let myCanMove = false, oppCanMove = false;
+
+            // Calculate mobility separately to avoid re-calculating inside the loop for every piece
+             const myMoves = getAllPossibleMoves(player, false, currentBoard);
+             const oppMoves = getAllPossibleMoves(opponent, false, currentBoard);
+             myPossibleMovesCount = myMoves.length;
+             oppPossibleMovesCount = oppMoves.length;
+             myCanMove = myPossibleMovesCount > 0;
+             oppCanMove = oppPossibleMovesCount > 0;
+
+
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    const piece = currentBoard[r][c];
+                    if (piece) {
+                        if (piece.player === player) {
+                            myPieces++;
+                            if (piece.isKing) myKings++;
+                            // Advancement: Row closer to the opponent's king row (row 0 for Black, row 7 for White)
+                            myTotalAdvancement += (player === PLAYER_BLACK ? (BOARD_SIZE - 1 - r) : r);
+
+                             // Center control bonus
+                            if (r >= 2 && r <= 5 && c >= 2 && c <= 5) { // Center 4x4 squares
+                                score += CENTER_CONTROL_VALUE;
+                            }
+
+                        } else { // Opponent's piece
+                            oppPieces++;
+                            if (piece.isKing) oppKings++;
+                            // Advancement: Row closer to my king row (row 0 for White, row 7 for Black)
+                            oppTotalAdvancement += (opponent === PLAYER_BLACK ? (BOARD_SIZE - 1 - r) : r);
+
+                            // Center control penalty
+                             if (r >= 2 && r <= 5 && c >= 2 && c <= 5) { // Center 4x4 squares
+                                score -= CENTER_CONTROL_VALUE;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Win/Loss Check (Most important)
+            // If opponent has no pieces or no moves, I win
+            if (oppPieces === 0 || !oppCanMove) {
+                 // Calculate score based on remaining pieces + bonus for winning faster (lower depth)
+                return WIN_SCORE + (myKings * KING_VALUE + (myPieces - myKings) * PIECE_VALUE) + (depth * 100); // Bonus for winning earlier in the search tree
+            }
+            // If I have no pieces or no moves, I lose
+            if (myPieces === 0 || !myCanMove) {
+                 // Calculate score based on opponent's remaining pieces + penalty for losing faster (lower depth)
+                return -WIN_SCORE - (oppKings * KING_VALUE + (oppPieces - oppKings) * PIECE_VALUE) - (depth * 100); // Penalty for losing earlier in the search tree
+            }
+
+            // Piece Count (Kings are more valuable)
+            score += (myKings * KING_VALUE + (myPieces - myKings) * PIECE_VALUE);
+            score -= (oppKings * KING_VALUE + (oppPieces - oppKings) * PIECE_VALUE);
+
+            // Advancement (Getting closer to king row)
+            score += myTotalAdvancement * ADVANCEMENT_VALUE;
+            score -= oppTotalAdvancement * ADVANCEMENT_VALUE;
+
+            // Mobility (Having more possible moves)
+            score += myPossibleMovesCount * MOBILITY_VALUE;
+            score -= oppPossibleMovesCount * MOBILITY_VALUE;
+
+             // Bonus for kinging a piece
+             // This is implicitly captured by the KING_VALUE difference, but a specific bonus might be added if a piece *just* got kinged in the simulated move.
+             // However, tracking the *change* requires comparing board states, which is more complex. Relying on piece/king value difference is standard.
+
+            return score;
+        }
+
+        // Utility to check game over state in a simulated board without side effects
+        function checkGameOverSimulated(board, playerToCheck) {
+            let pieces = 0;
+            for(let r=0; r<BOARD_SIZE; r++){
+                for(let c=0; c<BOARD_SIZE; c++){
+                    const piece = board[r][c];
+                    if(piece?.player === playerToCheck){
+                        pieces++;
+                    }
+                }
+            }
+             if (pieces === 0) return true; // Player has no pieces left
+
+             // Check if player has any possible moves
+             const possibleMoves = getAllPossibleMoves(playerToCheck, false, board);
+             if (possibleMoves.length === 0) return true; // Player has pieces but no valid moves
+
+            return false; // Game is not over for this player
+        }
+
+
+        // Removed addHoverEffects and removeHoverEffects as they are less relevant for touch.
+        // Cursors are also largely irrelevant on touch devices.
+         function addHoverEffects() {}
+         function removeHoverEffects() {}
+
+
+         function selectPiece(row, col, pieceElement) {
+             deselectPiece(); // Deselect any previously selected piece
+
+             const pieceData = boardState[row][col];
+             if (!pieceData) return; // Should not happen
+
+             selectedPiece = { row, col, player: pieceData.player, element: pieceElement };
+
+             // Add 'selected' class immediately
+             pieceElement?.classList.add('selected');
+
+             // Calculate and store possible moves for the newly selected piece
+             // Check if forced jumps are globally possible for the current player
+             const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState);
+             const forceJumpGlobally = allPossibleJumps.length > 0;
+
+             // If jumps are forced, calculate only jumps for this specific piece.
+             // Otherwise, calculate all moves (jumps and regular moves).
+             possibleMoves = calculateMovesForPieceInternal(row, col, forceJumpGlobally, boardState);
+
+             // Filter possible moves: If forced jumps globally, but this piece has no jumps, it cannot be selected UNLESS it's the ONLY piece that can move (unlikely in checkers).
+             // A simpler rule: if jumps are forced, a piece can only be selected if it *has* jumps.
+             if (forceJumpGlobally && possibleMoves.filter(m => m.isJump).length === 0) {
+                 // This piece cannot make a required jump. Deselect it.
+                 // Note: The piece click handler already prevents selection if continuousJumpPossible is true and it's the wrong piece.
+                 // We add this check here for completeness if selection logic changes.
+                 if (continuousJumpPossible) { // If already mid-jump sequence, this piece must jump
+                     if (possibleMoves.filter(m => m.isJump).length === 0) {
+                         console.warn("Selected piece cannot make required jump.");
+                         deselectPiece(); // Cannot select a piece that cannot jump if jump is required
+                         return;
+                     }
+                 } else if (forceJumpGlobally) { // If forced jumps are possible anywhere, but THIS piece has no jumps
+                      if (possibleMoves.filter(m => m.isJump).length === 0) {
+                          console.warn("Selected piece cannot make forced jump.");
+                           deselectPiece(); // Cannot select a piece that cannot jump if jumps are required elsewhere
+                           return;
+                      }
+                 }
+             }
+
+
+             // Rerender the board to highlight the possible move squares
+             requestRender();
+
+             // Play sound
+             playSound('select');
+         }
+
+        function deselectPiece() {
+            if (selectedPiece && selectedPiece.element) {
+                // Remove 'selected' class
+                selectedPiece.element.classList.remove('selected');
+                 // Clean up any inline styles added during drag that might linger
+                 selectedPiece.element.style.position = 'absolute';
+                 selectedPiece.element.style.left = '50%';
+                 selectedPiece.element.style.top = '50%';
+                 selectedPiece.element.style.transform = 'translate(-50%, -50%)';
+                 selectedPiece.element.style.zIndex = ''; // Reset z-index
+            }
+            selectedPiece = null;
+            possibleMoves = []; // Clear possible moves
+            requestRender(); // Rerender to remove highlights
+        }
+
+
+        // --- Initialization on Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM Loaded. Initializing...");
+
+            // Check if it's a touch device more reliably
+            isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+            console.log("Is Touch Device:", isTouchDevice);
+
+            updateSoundButtonIcon(); updateTimerButtonIcon();
+            settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible');
+            settingsOverlay.style.display = 'none';
+            boardSelectionScreen.classList.remove('visible'); pieceStyleSelectionScreen.classList.remove('visible'); confirmationModal.classList.remove('visible');
+            gameContainer.style.display = 'none'; gameOverScreen.classList.remove('visible');
+            startScreen.classList.remove('hidden-completely');
+            aiDifficultySelectorContainer.classList.remove('visible');
+            isSettingsPanelVisible = false; isGameOver = true;
+            loadBoardStyle(); loadPieceStyle();
+            updateTurnIndicatorVisuals(); updateUndoButton(); updateHintButton(); updateCapturedCounters(); updateTimerDisplay();
+            updateDifficultySelectorDisplay();
+
+             // Add drag/drop listeners using event delegation on the board element
+            boardElement.addEventListener(isTouchDevice ? 'touchstart' : 'mousedown', startDrag);
+
+            // Add click listeners for piece selection on non-touch devices or as fallback
+            // This is less crucial with drag-to-select, but good practice.
+             if (!isTouchDevice) {
+                  boardElement.addEventListener('click', handlePieceClick); // Piece clicks handled by delegation
+             }
+             // Square clicks for tap-to-move are added/removed in renderBoard based on selection and device type.
+
+
+            console.log("Initialization Complete. Ready.");
+        });
+
+         // --- Drag and Drop Logic (Optimized for Touch) ---
+         let initialX;
+         let initialY;
+         let currentDraggingPiece = null;
+         let currentDraggingSquare = null;
+         let dragOffset = { x: 0, y: 0 };
+         let dragPossibleMoves = [];
+         let startDragTimer = null; // Timer for potential long press (if implementing)
+
+
+         function startDrag(event) {
+             // Determine event type and get client coordinates
+             const clientX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
+             const clientY = event.type === 'touchstart' ? event.touches[0].clientY : event.clientY;
+             const targetElement = event.target; // The element that was actually touched/clicked
+
+             // Find the piece element that was touched/clicked
+             const pieceElement = targetElement.closest('.piece');
+
+             // --- Drag START Conditions ---
+             // 1. Not game over
+             // 2. AI is not thinking
+             // 3. Settings/Overlays are not open
+             // 4. It's the current player's turn (implicitly checked by .interactive)
+             // 5. The piece is interactive (correct player, not locked by continuous jump on another piece)
+             // 6. The piece must have possible moves (either jumps or regular moves)
+             // 7. If a continuous jump is required, this must be the piece that needs to jump.
+
+             const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible');
+             if (isInteractionBlocked || !pieceElement || !pieceElement.classList.contains('interactive')) {
+                 // If click/touch was on a piece but interaction is blocked, maybe deselect?
+                  if (pieceElement && !isInteractionBlocked) {
+                       const squareElement = pieceElement.closest('.square');
+                        if (squareElement) {
+                            const row = parseInt(squareElement.dataset.row);
+                            const col = parseInt(squareElement.dataset.col);
+                            const pieceData = boardState[row][col];
+                            // If clicking a piece that *can* be selected (correct player, not continuous jump lock)
+                            if (pieceData && pieceData.player === currentPlayer && !(continuousJumpPossible && selectedPiece && (selectedPiece.row !== row || selectedPiece.col !== col))) {
+                                // If it was already selected, deselect it on click/tap (handled by handlePieceClick)
+                                // If it was not selected, select it (handled by handlePieceClick)
+                                // The drag start shouldn't interfere with a simple tap-to-select
+                                 // Let's let handlePieceClick manage selection on tap, and startDrag purely manage drag.
+                                 // On touch devices, the *first* touchstart might trigger drag if movement occurs.
+
+                                 // Refined logic for touch devices:
+                                 // On touchstart, we *might* be starting a drag. Prevent default immediately.
+                                 // Set a timer/flag. If touchmove happens before the timer, it's a drag.
+                                 // If touchend happens quickly without significant move, treat as a tap (call handlePieceClick).
+                                 // This requires modifying the drag logic significantly to distinguish tap vs drag.
+
+                                 // For now, let's stick to the simpler model: mousedown/touchstart initiates potential drag.
+                                 // If it's a touch event, prevent default *only* if it's on a draggable piece.
+                                 if (event.type === 'touchstart') {
+                                      const squareElement = pieceElement.closest('.square');
+                                       if (squareElement) {
+                                           const row = parseInt(squareElement.dataset.row);
+                                           const col = parseInt(squareElement.dataset.col);
+                                           const pieceData = boardState[row][col];
+                                           const pieceMoves = calculateMovesForPieceInternal(row, col, false, boardState);
+                                           const hasMoves = pieceMoves.length > 0;
+
+                                           // Prevent default only if it's a piece that *could* be dragged/moved
+                                            if (pieceData && pieceData.player === currentPlayer && hasMoves && !(continuousJumpPossible && selectedPiece && (selectedPiece.row !== row || selectedPiece.col !== col)) ) {
+                                               event.preventDefault(); // Prevent default touch behavior (scroll/zoom)
+                                            } else {
+                                                // If it's a non-interactive piece, allow default scrolling etc.
+                                                return;
+                                            }
+                                       } else {
+                                            // Not on a square? Allow default.
+                                            return;
+                                       }
+                                 } else { // Mouse event
+                                     // No default prevention needed for mousedown typically
+                                 }
+
+                                 // Check if the piece has any moves. Cannot drag a piece that cannot move.
+                                 const squareElement = pieceElement.closest('.square');
+                                 if (!squareElement) return;
+                                 const row = parseInt(squareElement.dataset.row);
+                                 const col = parseInt(squareElement.dataset.col);
+                                 const pieceData = boardState[row][col]; // Re-get data in case state changed slightly
+
+                                 const pieceMoves = calculateMovesForPieceInternal(row, col, false, boardState); // Check all moves for this piece initially
+                                 const pieceHasMoves = pieceMoves.length > 0;
+
+                                  // If continuous jump is required, ensure this piece *must* jump.
+                                 const allPossibleJumpsAnywhere = getAllPossibleMoves(currentPlayer, true, boardState);
+                                 const forceJumpGlobally = allPossibleJumpsAnywhere.length > 0;
+                                 const thisPieceJumps = calculateMovesForPieceInternal(row, col, true, boardState);
+                                 const thisPieceCanJump = thisPieceJumps.length > 0;
+
+                                 // If jumps are forced globally, but this piece *cannot* jump, it's not draggable initially.
+                                 // UNLESS it's already selected and must continue a jump sequence (continuousJumpPossible).
+                                 if (forceJumpGlobally && !thisPieceCanJump && !continuousJumpPossible) {
+                                      // console.log("Piece cannot jump, and jump is required globally. Not draggable.");
+                                     deselectPiece(); // Ensure no incorrect selection happens
+                                     return; // Cannot drag a piece that doesn't have the required move
+                                 }
+
+                                  // If continuous jump is active, must drag the selected piece
+                                  if (continuousJumpPossible && selectedPiece && (selectedPiece.row !== row || selectedPiece.col !== col)) {
+                                       // console.log("Continuous jump required, but not on the correct piece.");
+                                       // Do not start drag, do not deselect
+                                       return;
+                                   }
+
+                                 // If we reach here, the piece is potentially draggable/selectable
+
+                                 // If no piece is currently selected, or if clicking the *currently* selected piece (in a non-continuous jump state), select it.
+                                 // In a continuous jump state, the piece *must* be the already selected one.
+                                 const shouldSelect = !selectedPiece || (selectedPiece.row === row && selectedPiece.col === col);
+
+                                  if (shouldSelect) {
+                                       selectPiece(row, col, pieceElement); // Select the piece to show valid drop targets
+                                       dragPossibleMoves = possibleMoves; // possibleMoves is set by selectPiece
+                                  } else {
+                                       // Clicking a different piece when one is already selected (and no continuous jump)
+                                       // The handlePieceClick would deselect the old one and select the new one.
+                                       // If drag starts here, we should probably just deselect the old one and select this one.
+                                       selectPiece(row, col, pieceElement);
+                                       dragPossibleMoves = possibleMoves; // possibleMoves is set by selectPiece
+                                  }
+
+
+                                 if (dragPossibleMoves.length === 0 && !continuousJumpPossible) {
+                                     // If after selection, the piece has no possible moves (and no forced jump sequence is active), it shouldn't be dragged.
+                                      // This case should be rare if the piece passed the initial `pieceHasMoves` check,
+                                      // but could happen with complex rules or bugs.
+                                       console.warn("Piece has no valid moves after selection. Not draggable.");
+                                      deselectPiece();
+                                      return;
+                                 }
+
+                                 // --- Start Drag ---
+                                 currentDraggingPiece = pieceElement;
+                                 currentDraggingSquare = squareElement;
+
+                                 // Append to body for proper stacking context during drag
+                                 document.body.appendChild(currentDraggingPiece);
+                                 currentDraggingPiece.style.position = 'fixed'; // Use fixed position while dragging
+
+                                 const rect = currentDraggingPiece.getBoundingClientRect();
+                                 dragOffset = { x: clientX - rect.left - rect.width / 2, y: clientY - rect.top - rect.height / 2 }; // Offset from center
+
+
+                                 currentDraggingPiece.classList.add('dragging');
+                                 // Need to immediately position it at the cursor + offset
+                                 moveDrag(event); // Call moveDrag once immediately
+
+                                 document.addEventListener(isTouchDevice ? 'touchmove' : 'mousemove', moveDrag);
+                                 document.addEventListener(isTouchDevice ? 'touchend' : 'mouseup', endDrag);
+
+                                 // Prevent default only if we are actually starting a drag (on a piece with moves)
+                                 // For touch, preventDefault was done earlier based on interactive piece check.
+                                  if (event.type === 'mousedown') {
+                                       event.preventDefault(); // Prevent default mouse selection behaviors
+                                  }
+
+                                 playSound('select', { volume: 0.1 }); // Small sound for picking up
+                                 return; // Exit the function after starting drag
+                             }
+
+
+             // If we reach here, it means the touch/click did NOT start a drag (e.g., clicked on empty square, non-interactive piece, etc.)
+             // On touch devices, if preventDefault wasn't called, standard browser behavior happens.
+             // If preventDefault *was* called (because it was a potentially draggable piece),
+             // but we decided not to drag (e.g., it had no moves after all, or continuous jump applied elsewhere),
+             // we need to handle the tap vs. drag distinction more robustly or just let handlePieceClick manage taps.
+
+             // For simplicity, let's refine:
+             // - Mousedown: Initiates potential drag. If piece is valid and has moves, start drag. If not, deselect.
+             // - Touchstart: Prevents default if on a valid piece. If piece is valid and has moves, start drag. If not, let touch end/cancel restore defaults.
+             // - handlePieceClick: ONLY used for taps (either mouse click on piece or touchtap gesture detected). It will select/deselect.
+
+              if (!pieceElement) {
+                  // Clicked on an empty square or board boundary.
+                  // If it's a possible move square for the selected piece, handle it.
+                  // Otherwise, deselect.
+                  const squareElement = targetElement.closest('.square.dark-square');
+                  if (squareElement) {
+                       handleSquareClick(event); // Use square click handler
+                  } else {
+                      // Clicked somewhere else on the body/game container, deselect piece
+                      deselectPiece();
+                  }
+              } else {
+                  // Clicked on a piece element, but drag didn't start (e.g., blocked, no moves).
+                  // Let the handlePieceClick decide selection state for taps.
+                  // On touch, if preventDefault was called, we might need custom tap detection here.
+                  // For now, assume handlePieceClick is sufficient for taps (might require small delay logic to differentiate from drag).
+              }
+
+         }
+
+
+         function moveDrag(event) {
+             if (!currentDraggingPiece) return;
+
+             // Prevent default touch behavior (like scrolling) if this was a touch drag
+             if (event.type === 'touchmove') {
+                  event.preventDefault();
+             }
+
+             const clientX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
+             const clientY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
+
+             // Position the piece relative to the cursor, adjusted by the offset
+             currentDraggingPiece.style.left = `${clientX - dragOffset.x}px`;
+             currentDraggingPiece.style.top = `${clientY - dragOffset.y}px`;
+
+             // Highlight valid drop target square under the piece
+             // Find the square element under the piece's center or cursor
+             const elementUnderCursor = document.elementFromPoint(clientX, clientY);
+             const targetSquare = elementUnderCursor?.closest('.square.dark-square.possible-move');
+
+             // Clear previous drag-target highlights
+             boardElement.querySelectorAll('.square.drag-target').forEach(sq => sq.classList.remove('drag-target'));
+
+             // Add highlight to the current target square
+             if (targetSquare) {
+                  targetSquare.classList.add('drag-target');
+             }
+         }
+
+
+         function endDrag(event) {
+             if (!currentDraggingPiece) return;
+
+             // Prevent default touch behavior if this was a touch drag
+              if (event.type === 'touchend') {
+                event.preventDefault(); // Prevent synthetic mouse events and other default behaviors
+             }
+
+             const clientX = event.type === 'touchend' ? event.changedTouches[0].clientX : event.clientX;
+             const clientY = event.type === 'touchend' ? event.changedTouches[0].clientY : event.changedTouches ? event.changedTouches[0].clientY : event.clientY; // Handle potential missing changedTouches on some mouse events? No, use clientY for mouse.
+
+             currentDraggingPiece.classList.remove('dragging');
+             boardElement.querySelectorAll('.square.drag-target').forEach(sq => sq.classList.remove('drag-target')); // Clean up highlights
+
+             // Remove event listeners
+             document.removeEventListener(isTouchDevice ? 'touchmove' : 'mousemove', moveDrag);
+             document.removeEventListener(isTouchDevice ? 'touchend' : 'mouseup', endDrag);
+
+             // Determine the target square based on the drop position
+             const elementUnderCursor = document.elementFromPoint(clientX, clientY);
+             const targetSquare = elementUnderCursor?.closest('.square.dark-square'); // Find any dark square under the drop point
+
+             let moveMade = false;
+             let validMove = null;
+
+             if (targetSquare && selectedPiece) { // Check if a square was found AND a piece was selected/dragged
+                 const targetRow = parseInt(targetSquare.dataset.row);
+                 const targetCol = parseInt(targetSquare.dataset.col);
+
+                 // Find if the drop square is a valid possible move for the selected piece
+                 // dragPossibleMoves was calculated when the drag started (via selectPiece)
+                 validMove = dragPossibleMoves.find(move => move.row === targetRow && move.col === targetCol);
+
+                 if (validMove) {
+                     // Valid move found!
+                      // The piece element is currently outside the board DOM structure (appended to body)
+                      // We need to move it back into the board structure at the target square's position.
+
+                      // Execute the core game logic first to update boardState
+                      saveCurrentStateToHistory(); // Save state BEFORE the move
+                      executeMoveLogic(selectedPiece.row, selectedPiece.col, validMove);
+
+                      // Update piece's data-piece-id to reflect its new position
+                      currentDraggingPiece.dataset.pieceId = `${validMove.row}-${validMove.col}`;
+
+                      // Now, place the DOM element correctly in the target square
+                      const targetSquareElement = getSquareElement(validMove.row, validMove.col);
+                      if (targetSquareElement) {
+                           targetSquareElement.appendChild(currentDraggingPiece);
+                           currentDraggingPiece.style.position = 'absolute'; // Restore original positioning relative to square
+                           currentDraggingPiece.style.left = '50%';
+                           currentDraggingPiece.style.top = '50%';
+                           currentDraggingPiece.style.transform = 'translate(-50%, -50%)'; // Center it in the square
+                           currentDraggingPiece.style.transition = ''; // Remove any leftover drag transitions
+                            currentDraggingPiece.style.zIndex = 10; // Reset z-index
+                      } else {
+                           console.error("EndDrag: Target square element not found after valid move logic?");
+                            // Fallback: Just remove the piece if the target square is somehow gone from the DOM
+                           currentDraggingPiece.remove();
+                      }
+
+
+                     // Check for king *after* move logic updates the piece data
+                      const pieceAfterMove = boardState[validMove.row][validMove.col];
+                     if(pieceAfterMove?.isKing && !currentDraggingPiece.classList.contains('king')) {
+                         currentDraggingPiece.classList.add('king');
+                         // King sound is played in checkForKing, which is called by executeMoveLogic
+                     }
+
+
+                      handlePostMoveChecks(validMove); // Check for multi-jumps, end turn, etc.
+
+                     moveMade = true;
+                     // Sound for move or capture is played in animateAndMovePiece (which executeMoveLogic calls)
+                     // For drag/drop, we skipped the animation step but still call executeMoveLogic and handlePostMoveChecks.
+                     // Let's play sound here based on validMove type.
+                      if (validMove.isJump) {
+                          playSound('capture');
+                      } else {
+                           playSound('move');
+                      }
+
+
+                 }
+             }
+
+             // If no valid move was made (dropped on invalid square, outside board, or no piece selected)
+             if (!moveMade && currentDraggingPiece) {
+                 // Snap the piece back to its original square
+                 const originalSquare = currentDraggingSquare; // This was set at drag start
+                 const originalSquareElement = getSquareElement(parseInt(originalSquare.dataset.row), parseInt(originalSquare.dataset.col));
+
+
+                 if (originalSquareElement) {
+                      // Temporarily set back to absolute positioning relative to the board for snapping animation calculation
+                      currentDraggingPiece.style.position = 'absolute';
+
+                       // Need to calculate the position in the original square's center relative to the body/viewport
+                       const originalRect = originalSquareElement.getBoundingClientRect();
+                       const bodyRect = document.body.getBoundingClientRect(); // Get body position
+
+                       const targetX = originalRect.left + originalRect.width / 2; // Center of original square relative to viewport
+                       const targetY = originalRect.top + originalRect.height / 2; // Center of original square relative to viewport
+
+                       // Set piece position to this viewport center target
+                       // The piece is currently fixed relative to the viewport, so this positions it directly.
+                       // Then apply the negative translate(-50%, -50%) to center it *at* that point.
+                       currentDraggingPiece.style.left = `${targetX}px`;
+                       currentDraggingPiece.style.top = `${targetY}px`;
+                       currentDraggingPiece.style.transform = 'translate(-50%, -50%)';
+
+
+                       // Animate snap back using 'transition' property (ensure transform is included)
+                      currentDraggingPiece.style.transition = 'transform 0.2s ease-in-out';
+
+
+                      // Move element back to original square in DOM *after* animation
+                      currentDraggingPiece.addEventListener('transitionend', function handler() {
+                           currentDraggingPiece.removeEventListener('transitionend', handler);
+
+                           // Move the element back to its parent square in the DOM
+                           originalSquareElement.appendChild(currentDraggingPiece);
+
+                           // Reset position and transform for standard rendering flow
+                           currentDraggingPiece.style.position = 'absolute';
+                           currentDraggingPiece.style.left = '50%';
+                           currentDraggingPiece.style.top = '50%';
+                           currentDraggingPiece.style.transform = 'translate(-50%, -50%)';
+                           currentDraggingPiece.style.transition = ''; // Remove transition
+                           currentDraggingPiece.style.zIndex = 10; // Reset z-index
+
+                           // After snapping back, deselect the piece *unless* it was a continuous jump opportunity that was dropped invalidly.
+                           // If continuousJumpPossible is true, the piece should remain selected, and renderBoard will highlight valid next jumps.
+                           if (!continuousJumpPossible) {
+                               deselectPiece(); // Deselect if it was a regular move attempt or start of a jump sequence
+                           } else {
+                                // If mid-jump and dropped invalidly, the piece remains selected.
+                                renderBoard(); // Rerender to ensure highlights for next jumps are shown
+                           }
+
+                           playSound('undo'); // Play a sound indicating an invalid drop/snap back
+
+                      }, { once: true }); // Use { once: true } to automatically remove the listener
+
+                 } else {
+                      // If original square is missing (should not happen), just remove the element
+                      console.error("EndDrag: Original square element not found for snap back.");
+                       currentDraggingPiece.remove();
+                       // If original square is missing, the game state is likely corrupted, maybe force return to menu?
+                       deselectPiece(); // Attempt to reset state
+                 }
+
+             } else if (!moveMade && !currentDraggingPiece && selectedPiece) {
+                 // This case happens if a piece was *selected* (via tap or startDrag) but not actually dragged,
+                 // and the touchend/mouseup event occurred without a drag, or on an invalid target.
+                 // This effectively behaves like a tap on an invalid target after selection.
+                 // The handleSquareClick / handlePieceClick logic already covers this:
+                 // Clicking an invalid square -> deselect (unless continuous jump required).
+                 // Clicking an interactive piece -> deselect/reselect.
+                 // We should just ensure deselect happens here if no drag occurred or drop was invalid.
+                 // Deselect is already handled by handlePostMoveChecks for successful moves,
+                 // and within the snap-back logic for failed drags.
+                 // If a piece was selected *without* a drag starting (e.g., simple tap on non-touch), and then *another* element is clicked/tapped (triggering endDrag without startDrag),
+                 // this flow might be complex. Let's simplify: endDrag only cleans up if currentDraggingPiece is set.
+                 // Taps are handled by handlePieceClick/handleSquareClick separately.
+             }
+
+
+             currentDraggingPiece = null;
+             currentDraggingSquare = null;
+             dragPossibleMoves = [];
+
+             // The deselectPiece() or the snap-back logic handles final UI cleanup and rendering.
+         }
+
+         // Add event listeners for drag start using event delegation on the board element
+         // boardElement.addEventListener(isTouchDevice ? 'touchstart' : 'mousedown', startDrag); // Already added in DOMContentLoaded
+
+    </script>
+
+</body>
+</html>
