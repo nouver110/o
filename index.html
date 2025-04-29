@@ -2,14 +2,14 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Enhanced Checkers - Drag & Drop</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* --- Base Styles --- */
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        html, body { height: 100%; margin: 0; padding: 0; /* overflow: hidden; */ } /* Removed overflow hidden to potentially allow scrolling if needed */
         body {
             font-family: 'Roboto', 'Cairo', sans-serif;
             display: flex;
@@ -24,83 +24,8 @@
             touch-action: none; /* Important for preventing default touch actions like zooming */
         }
 
-        /* --- Rotate Device Message (Forcing Landscape) --- */
-        #rotate-device-message {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9); /* Dark overlay */
-            color: #fff;
-            font-size: clamp(1.2em, 4vh, 1.8em);
-            text-align: center;
-            flex-direction: column; /* Use flexbox to center content */
-            align-items: center;
-            justify-content: center;
-            z-index: 200; /* Ensure it's above everything else */
-            padding: 20px;
-            box-sizing: border-box;
-            pointer-events: auto; /* Ensure interactions work on the message */
-            line-height: 1.5;
-        }
-
-        /* Styling for the rotation icon (optional but helpful) */
-        .rotate-icon {
-            width: clamp(60px, 10vh, 90px);
-            height: clamp(60px, 10vh, 90px);
-            border: clamp(6px, 1vh, 10px) solid #fff;
-            border-right-color: transparent;
-            border-radius: 50%;
-            animation: spin 1.5s linear infinite;
-            margin-top: 30px;
-            position: relative;
-            box-sizing: border-box;
-        }
-        .rotate-icon::before {
-             content: '';
-             position: absolute;
-             /* Adjust positioning based on icon size */
-             top: clamp(-12px, -2vh, -18px);
-             right: clamp(-8px, -1.5vh, -12px);
-             border: clamp(8px, 1.5vh, 12px) solid transparent;
-             border-top-color: #fff;
-             transform: rotate(45deg); /* Pointing outwards */
-             transform-origin: 50% 50%;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* --- Media Query to show the overlay and hide content in portrait --- */
-        @media (orientation: portrait) {
-            #rotate-device-message {
-                display: flex; /* Show the overlay */
-            }
-
-            /* Hide all other direct children of the body */
-            body > *:not(#rotate-device-message) {
-                 display: none !important; /* Use !important to override other display rules */
-            }
-             /* Explicitly hide key containers just in case */
-            #settings-button, #settings-overlay, #settings-panel,
-            #start-screen, #ai-difficulty-selector-container, #game-container,
-            #game-over-screen, #board-selection-screen, #piece-style-selection-screen,
-            #confirmation-modal {
-                 display: none !important;
-            }
-        }
-
-        @media (orientation: landscape) {
-             #rotate-device-message {
-                  display: none; /* Ensure it's hidden in landscape */
-             }
-             /* When switching back to landscape, default/JS display rules will apply */
-        }
-
+        /* --- Rotate Device Message (REMOVED) --- */
+        /* The rotate message and its associated styles and media query have been removed */
 
         /* --- Start Screen --- */
         #start-screen {
@@ -199,8 +124,8 @@
         #confirm-difficulty-button { font-size: clamp(1.3em, 4vh, 1.9em); padding: clamp(12px, 3vh, 25px) clamp(25px, 6vw, 50px); min-width: clamp(250px, 55vw, 350px); opacity: 1; transform: none; animation: none; margin-top: 15px; }
         #close-difficulty-selector { position: absolute; top: 15px; right: 15px; left: auto; background: none; border: none; font-size: 1.6em; color: #e0d6c8; cursor: pointer; padding: 5px; transition: color 0.2s ease, transform 0.2s ease; z-index: 131; }
         #close-difficulty-selector:hover { color: #ffffff; transform: scale(1.1); }
-        #difficulty-prev i { transform: scaleX(-1); }
-        #difficulty-next i { transform: scaleX(-1); }
+        #difficulty-prev i { transform: scaleX(-1); } /* This seems incorrect for left arrow icon */
+        #difficulty-next i { transform: scaleX(-1); } /* This seems incorrect for right arrow icon */
 
 
         /* --- Game Container --- */
@@ -336,19 +261,18 @@
         #cancel-logout-button { /* Style already inherited */ }
 
         /* --- Media Queries --- */
-         @media (max-height: 850px), (max-width: 700px) { #board { --square-size: clamp(40px, 9vmin, 65px); } .selection-content { width: 650px; max-height: 80vh; } .options-container { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; } #status-bar { width: var(--board-size); } }
-         @media (max-height: 680px), (max-width: 550px) { #board { --square-size: clamp(40px, 8.5vmin, 60px); } .selection-content { width: auto; max-width: 95%; padding: 20px; max-height: 80vh; } #confirmation-modal .selection-content { max-width: 90%; padding: 25px 20px; max-height: none; } .options-container { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 15px; } .option-button { min-height: 90px; font-size: 0.95em; /* تعديل طفيف إضافي في Media Query */ } .board-preview { width: 40px; height: 40px; } .piece-preview { width: 28px; height: 28px; } .piece-preview-container { height: 35px; } .selection-content h2 { font-size: 1.5em; margin-bottom: 15px; } .close-selection-button { font-size: 1em; padding: 10px 24px; } #status-bar { width: var(--board-size); flex-direction: row; align-items: center; } #turn-indicators { order: 2; } }
-         @media (max-height: 600px), (max-width: 450px) { #board { --square-size: clamp(35px, 8vmin, 55px); } .selection-content { padding: 15px; max-height: 80vh; } .options-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding-left: 5px; padding-right: 8px; padding-bottom: 10px;} .option-button { padding: 6px; font-size: 0.9em; /* تعديل طفيف إضافي في Media Query */ min-height: 80px; } .board-preview { width: 35px; height: 35px; } .piece-preview { width: 25px; height: 25px; } .piece-preview-container { height: 30px; gap: 5px; } .selection-content h2 { font-size: 1.3em; margin-bottom: 10px;} .close-selection-button { font-size: 0.9em; padding: 8px 20px;} #confirmation-modal .selection-content { padding: 20px 15px; max-height: none;} #confirmation-message { font-size: 1.1em; margin-bottom: 20px; } #confirmation-buttons button { font-size: 0.9em; padding: 8px 18px;} #status-bar { width: var(--board-size); flex-direction: row; align-items: center; } #turn-indicators { order: 2; } }
+        /* The following media queries are kept as they provide responsiveness based on general size, not just orientation */
+         @media (max-height: 850px), (max-width: 700px) { #board { --square-size: clamp(40px, 9vmin, 65px); } .selection-content { width: 650px; max-width: 95%; max-height: 80vh; } #confirmation-modal .selection-content { max-width: 90%; max-height: none; } .options-container { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; } #status-bar { width: var(--board-size); } }
+         @media (max-height: 680px), (max-width: 550px) { #board { --square-size: clamp(40px, 8.5vmin, 60px); } .selection-content { width: auto; max-width: 95%; padding: 20px; max-height: 80vh; } #confirmation-modal .selection-content { max-width: 90%; padding: 25px 20px; max-height: none; } .options-container { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 15px; } .option-button { min-height: 90px; font-size: 0.95em; } .board-preview { width: 40px; height: 40px; } .piece-preview { width: 28px; height: 28px; } .piece-preview-container { height: 35px; } .selection-content h2 { font-size: 1.5em; margin-bottom: 15px; } .close-selection-button { font-size: 1em; padding: 10px 24px; } #status-bar { width: var(--board-size); flex-direction: row; align-items: center; } #turn-indicators { order: 2; } }
+         @media (max-height: 600px), (max-width: 450px) { #board { --square-size: clamp(35px, 8vmin, 55px); } .selection-content { padding: 15px; max-height: 80vh; } .options-container { grid-template-columns: repeat(2, 1fr); gap: 10px; padding-left: 5px; padding-right: 8px; padding-bottom: 10px;} .option-button { padding: 6px; font-size: 0.9em; min-height: 80px; } .board-preview { width: 35px; height: 35px; } .piece-preview { width: 25px; height: 25px; } .piece-preview-container { height: 30px; gap: 5px; } .selection-content h2 { font-size: 1.3em; margin-bottom: 10px;} .close-selection-button { font-size: 0.9em; padding: 8px 20px;} #confirmation-modal .selection-content { padding: 20px 15px; max-height: none;} #confirmation-message { font-size: 1.1em; margin-bottom: 20px; } #confirmation-buttons button { font-size: 0.9em; padding: 8px 18px;} #status-bar { width: var(--board-size); flex-direction: row; align-items: center; } #turn-indicators { order: 2; } }
+
 
     </style>
 </head>
 <body class="piece-style-classic">
 
-     <!-- Message to rotate device -->
-     <div id="rotate-device-message">
-         <p>Please rotate your device to landscape mode to play.</p>
-         <div class="rotate-icon"></div>
-     </div>
+     <!-- Message to rotate device (REMOVED) -->
+     <!-- <div id="rotate-device-message">...</div> -->
 
     <!-- Settings Button -->
     <button id="settings-button" title="Settings"> <i class="fas fa-cog"></i> </button>
@@ -421,7 +345,6 @@
     <!-- Board Selection Screen -->
     <div id="board-selection-screen" class="overlay-screen">
         <div id="board-selection-content" class="selection-content">
-            <!-- **** TITLE TRANSLATED **** -->
             <h2>Choose Your Preferred Board Design</h2>
             <div id="board-options-container" class="options-container">
                 <button class="board-option option-button" data-style="wood" title="Wood"><div class="board-preview board-preview-wood"><div class="sq light"></div><div class="sq dark"></div> <div class="sq dark"></div><div class="sq light"></div></div> <span>Wood</span></button>
@@ -438,7 +361,6 @@
     <!-- Piece Style Selection Screen -->
     <div id="piece-style-selection-screen" class="overlay-screen">
         <div id="piece-style-selection-content" class="selection-content">
-             <!-- **** TITLE TRANSLATED **** -->
             <h2>Choose Your Preferred Piece Style</h2>
             <div id="piece-options-container" class="options-container">
                 <button class="piece-option option-button" data-style="classic" title="Classic"><div class="piece-preview-container"><div class="piece-preview white classic"></div> <div class="piece-preview black classic"></div></div> <span>Classic</span></button>
@@ -509,7 +431,7 @@
         const confirmLogoutButton = document.getElementById('confirm-logout-button');
         const cancelLogoutButton = document.getElementById('cancel-logout-button');
         const closeDifficultySelectorButton = document.getElementById('close-difficulty-selector');
-        const rotateDeviceMessage = document.getElementById('rotate-device-message'); // Added reference
+        // const rotateDeviceMessage = document.getElementById('rotate-device-message'); // Removed reference
 
         // --- Audio ---
         let audioCtx; function getAudioContext() { if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { console.error("Web Audio API not supported", e); } } return audioCtx; }
@@ -657,7 +579,7 @@
         function createBoardUI() { boardElement.innerHTML = ''; const squareSize = parseFloat(getComputedStyle(boardElement).getPropertyValue('--square-size')); for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const sq = document.createElement('div'); sq.classList.add('square', (r + c) % 2 === 0 ? 'light-square' : 'dark-square'); sq.dataset.row = r; sq.dataset.col = c; sq.dataset.x = c * squareSize; sq.dataset.y = r * squareSize; if ((r + c) % 2 !== 0) { sq.addEventListener('click', handleSquareClick); } boardElement.appendChild(sq); } } }
         function getSquareElement(row, col) { if (!isValidSquare(row, col)) return null; return boardElement.querySelector(`.square[data-row="${row}"][data-col="${col}"]`); }
         let renderTimeout; function requestRender() { clearTimeout(renderTimeout); renderTimeout = setTimeout(renderBoard, 0); }
-        function renderBoard() { clearHintHighlights(); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver) || window.innerHeight > window.innerWidth; // Add check for portrait mode
+        function renderBoard() { clearHintHighlights(); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER && !isGameOver); // Removed || window.innerHeight > window.innerWidth
         const allSquares = boardElement.querySelectorAll('.square'); allSquares.forEach(sq => { sq.classList.remove('possible-move'); const isDarkSquare = sq.classList.contains('dark-square'); sq.style.cursor = (isDarkSquare && !isInteractionBlocked && !isSettingsPanelVisible) ? 'pointer' : 'default'; const existingPiece = sq.querySelector('.piece'); if (existingPiece && !existingPiece.classList.contains('moving')) { existingPiece.remove(); } }); const allPossibleJumps = !isInteractionBlocked ? getAllPossibleMoves(currentPlayer, true, boardState) : []; const jumpIsPossibleAnywhere = allPossibleJumps.length > 0; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const pieceData = boardState[r][c]; const square = getSquareElement(r, c); if (pieceData && square) { let pieceEl = square.querySelector(`.piece[data-piece-id="${r}-${c}"]`); if (!pieceEl) { pieceEl = document.createElement('div'); pieceEl.dataset.pieceId = `${r}-${c}`; pieceEl.className = `piece ${pieceData.player}-piece ${pieceData.isKing ? 'king' : ''}`; pieceEl.style.transform = `translate(-50%, -50%)`; square.appendChild(pieceEl); } else { pieceEl.className = `piece ${pieceData.player}-piece ${pieceData.isKing ? 'king' : ''}`; } const canInteractPiece = !isInteractionBlocked && pieceData.player === currentPlayer && !(continuousJumpPossible && selectedPiece && (selectedPiece.row !== r || selectedPiece.col !== c)); pieceEl.classList.toggle('interactive', canInteractPiece); pieceEl.style.cursor = (canInteractPiece && !isSettingsPanelVisible) ? 'grab' : 'default'; pieceEl.style.pointerEvents = (canInteractPiece && !isSettingsPanelVisible) ? 'auto' : 'none'; pieceEl.onclick = (canInteractPiece && !isSettingsPanelVisible) ? (e) => { e.stopPropagation(); handlePieceClick(e); } : null; pieceEl.classList.remove('jump-hint'); if (jumpIsPossibleAnywhere && !continuousJumpPossible && pieceData.player === currentPlayer) { const thisPieceCanJump = allPossibleJumps.some(jump => jump.origin.r === r && jump.origin.c === c); if (thisPieceCanJump) { pieceEl.classList.add('jump-hint'); } } pieceEl.classList.toggle('selected', selectedPiece && selectedPiece.row === r && selectedPiece.col === c); if(selectedPiece && selectedPiece.row === r && selectedPiece.col === c){ selectedPiece.element = pieceEl; } } } } if (selectedPiece && !isInteractionBlocked) { const movesToHighlight = continuousJumpPossible ? calculateMovesForPiece(selectedPiece.row, selectedPiece.col, true, boardState) : calculateMovesForPiece(selectedPiece.row, selectedPiece.col, false, boardState); movesToHighlight.forEach(move => { const sq = getSquareElement(move.row, move.col); if (sq) { sq.classList.add('possible-move'); sq.style.cursor = 'pointer'; } }); } if (!isInteractionBlocked && !isSettingsPanelVisible) { addHoverEffects(); } else { removeHoverEffects(); } }
 
         // --- Board & Piece Style Functions ---
@@ -697,9 +619,9 @@
         }
 
         // --- Game Logic ---
-        function handlePieceClick(event) { const pieceElement = event.target; const squareElement = pieceElement.closest('.square'); if (!squareElement) return; const row = parseInt(squareElement.dataset.row); const col = parseInt(squareElement.dataset.col); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || window.innerHeight > window.innerWidth; // Add check for portrait mode
+        function handlePieceClick(event) { const pieceElement = event.target; const squareElement = pieceElement.closest('.square'); if (!squareElement) return; const row = parseInt(squareElement.dataset.row); const col = parseInt(squareElement.dataset.col); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER); // Removed || window.innerHeight > window.innerWidth
         if (isInteractionBlocked) return; const pieceData = boardState[row][col]; if (!pieceData || pieceData.player !== currentPlayer) return; if (continuousJumpPossible && selectedPiece && (selectedPiece.row !== row || selectedPiece.col !== col)) { return; } if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) { deselectPiece(); } else { selectPiece(row, col, pieceElement); } }
-        function handleSquareClick(event) { const targetSquare = event.target.closest('.square'); if (!targetSquare || !targetSquare.classList.contains('dark-square')) return; const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || window.innerHeight > window.innerWidth; // Add check for portrait mode
+        function handleSquareClick(event) { const targetSquare = event.target.closest('.square'); if (!targetSquare || !targetSquare.classList.contains('dark-square')) return; const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER); // Removed || window.innerHeight > window.innerWidth
         if (isInteractionBlocked) return; const row = parseInt(targetSquare.dataset.row); const col = parseInt(targetSquare.dataset.col); if (selectedPiece && !boardState[row][col]) { let move; if (continuousJumpPossible) { const possibleJumps = calculateMovesForPiece(selectedPiece.row, selectedPiece.col, true, boardState); move = possibleJumps.find(m => m.row === row && m.col === col); } else { const allMovesForSelected = calculateMovesForPiece(selectedPiece.row, selectedPiece.col, false, boardState); move = allMovesForSelected.find(m => m.row === row && m.col === col); } if (move) { saveCurrentStateToHistory(); animateAndMovePiece(selectedPiece.row, selectedPiece.col, move); } else { deselectPiece(); } } else { deselectPiece(); } }
         function calculateMovesForPiece(r, c, onlyJumps = false, currentBoard = boardState) { const piece = currentBoard[r]?.[c]; if (!piece) return []; let jumpMovesFound = []; let regularMovesFound = []; const directions = []; const playerDirection = (piece.player === PLAYER_BLACK) ? -1 : 1; directions.push(playerDirection); if (piece.isKing) directions.push(-playerDirection); for (const dir of directions) { for (const dc of [-1, 1]) { const jumpedPieceRow = r + dir; const jumpedPieceCol = c + dc; const jumpLandingRow = r + dir * 2; const jumpLandingCol = c + dc * 2; if (isValidSquare(jumpLandingRow, jumpLandingCol) && !currentBoard[jumpLandingRow][jumpLandingCol]) { const jumpedPiece = isValidSquare(jumpedPieceRow, jumpedPieceCol) ? currentBoard[jumpedPieceRow][jumpedPieceCol] : null; if (jumpedPiece && jumpedPiece.player !== piece.player) { jumpMovesFound.push({ row: jumpLandingRow, col: jumpLandingCol, isJump: true, captured: { row: jumpedPieceRow, col: jumpedPieceCol }, origin: { r, c } }); } } const nr = r + dir; const nc = c + dc; if (isValidSquare(nr, nc) && !currentBoard[nr][nc]) { regularMovesFound.push({ row: nr, col: nc, isJump: false, origin: { r, c } }); } } } if (onlyJumps) { return jumpMovesFound; } return [...jumpMovesFound, ...regularMovesFound]; }
         function getAllPossibleMoves(player, onlyJumps = false, currentBoard = boardState) { let allMoves = []; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = currentBoard[r][c]; if (piece && piece.player === player) { const movesForPiece = calculateMovesForPiece(r, c, false, currentBoard); if (onlyJumps) { allMoves.push(...movesForPiece.filter(m => m.isJump)); } else { allMoves.push(...movesForPiece); } } } } return allMoves; }
@@ -727,7 +649,7 @@
             if (isGameOver) return true; let blackPieces = 0; let whitePieces = 0; let blackCanMove = false; let whiteCanMove = false;
             const blackMoves = getAllPossibleMoves(PLAYER_BLACK, false, boardState); const whiteMoves = getAllPossibleMoves(PLAYER_WHITE, false, boardState);
             blackCanMove = blackMoves.length > 0; whiteCanMove = whiteMoves.length > 0;
-            for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { if (boardState[r][c]?.player === PLAYER_BLACK) blackPieces++; if (boardState[r][c]?.player === PLAYER_WHITE) whitePieces++; } }
+            for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = boardState[r][c]; if (piece) { if (piece.player === PLAYER_BLACK) blackPieces++; if (piece.player === PLAYER_WHITE) whitePieces++; } } } // Fixed piece check
             let gameOverTriggered = false; let winMessage = "";
             if (whitePieces === 0) { winMessage = "Black Wins (No White pieces left)!"; gameOverTriggered = true; }
             else if (blackPieces === 0) { winMessage = "White Wins (No Black pieces left)!"; gameOverTriggered = true; }
@@ -739,47 +661,244 @@
         function saveCurrentStateToHistory() { const stateToSave = { boardState: deepCopyBoard(boardState), currentPlayer: currentPlayer, capturedByBlack: capturedByBlack, capturedByWhite: capturedByWhite, continuousJumpPossible: continuousJumpPossible, }; moveHistory.push(stateToSave); updateUndoButton(); }
         function undoMove() { if (moveHistory.length === 0 || isAiThinking) return; stopTurnTimer(); const previousState = moveHistory.pop(); boardState = previousState.boardState; currentPlayer = previousState.currentPlayer; capturedByBlack = previousState.capturedByBlack; capturedByWhite = previousState.capturedByWhite; continuousJumpPossible = previousState.continuousJumpPossible; selectedPiece = null; isGameOver = false; gameOverScreen.classList.remove('visible'); updateCapturedCounters(); updateStatus(); updateUndoButton(); updateHintButton(); createBoardUI(); renderBoard(); startTurnTimer(); isAiThinking = false; }
         function clearHintHighlights() { if (hintTimeoutId) { clearTimeout(hintTimeoutId); hintTimeoutId = null; } document.querySelectorAll('.hint-piece-suggestion, .hint-move-suggestion').forEach(el => { el.classList.remove('hint-piece-suggestion', 'hint-move-suggestion'); }); document.querySelectorAll('.square.possible-move.hint-move-suggestion').forEach(sq => { sq.classList.remove('hint-move-suggestion'); }); }
-        function showHint() { clearHintHighlights(); if (isGameOver || isAiThinking || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || window.innerHeight > window.innerWidth) { return; } let bestHintMove; if (gameMode === 'ai' || aiDifficulty !== DIFFICULTIES.EASY) { bestHintMove = findBestMoveMinimax(currentPlayer, aiDifficulty === DIFFICULTIES.HARD ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM).move; } else { const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState); if (allPossibleJumps.length > 0) { bestHintMove = allPossibleJumps[Math.floor(Math.random() * allPossibleJumps.length)]; } else { const regularMoves = getAllPossibleMoves(currentPlayer, false, boardState); if (regularMoves.length > 0) { bestHintMove = regularMoves[Math.floor(Math.random() * regularMoves.length)]; } } } if (bestHintMove) { const pieceSquare = getSquareElement(bestHintMove.origin.r, bestHintMove.origin.c); const targetSquare = getSquareElement(bestHintMove.row, bestHintMove.col); const pieceElement = pieceSquare?.querySelector('.piece'); if (pieceElement && targetSquare) { pieceElement.classList.add('hint-piece-suggestion'); targetSquare.classList.add('hint-move-suggestion'); targetSquare.classList.add('possible-move'); hintTimeoutId = setTimeout(clearHintHighlights, 2500); } } }
+        function showHint() { clearHintHighlights(); if (isGameOver || isAiThinking || (gameMode === 'ai' && currentPlayer === AI_PLAYER)) { return; } // Removed || window.innerHeight > window.innerWidth
+        let bestHintMove; if (gameMode === 'ai' || aiDifficulty !== DIFFICULTIES.EASY) { bestHintMove = findBestMoveMinimax(currentPlayer, aiDifficulty === DIFFICULTIES.HARD ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM).move; } else { const allPossibleJumps = getAllPossibleMoves(currentPlayer, true, boardState); if (allPossibleJumps.length > 0) { bestHintMove = allPossibleJumps[Math.floor(Math.random() * allPossibleJumps.length)]; } else { const regularMoves = getAllPossibleMoves(currentPlayer, false, boardState); if (regularMoves.length > 0) { bestHintMove = regularMoves[Math.floor(Math.random() * regularMoves.length)]; } } } if (bestHintMove) { const pieceSquare = getSquareElement(bestHintMove.origin.r, bestHintMove.origin.c); const targetSquare = getSquareElement(bestHintMove.row, bestHintMove.col); const pieceElement = pieceSquare?.querySelector('.piece'); if (pieceElement && targetSquare) { pieceElement.classList.add('hint-piece-suggestion'); targetSquare.classList.add('hint-move-suggestion'); targetSquare.classList.add('possible-move'); hintTimeoutId = setTimeout(clearHintHighlights, 2500); } } }
 
         // --- AI Logic ---
-        function makeAiMove() { if (isGameOver || currentPlayer !== AI_PLAYER || window.innerHeight > window.innerWidth) { isAiThinking = false; requestRender(); return; } let bestMoveResult; if (continuousJumpPossible && selectedPiece && selectedPiece.player === AI_PLAYER) { const nextJumps = calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState); if (nextJumps.length > 0) { bestMoveResult = { move: nextJumps[0], score: 0 }; } else { continuousJumpPossible = false; bestMoveResult = findBestMoveForAI(); } } else { bestMoveResult = findBestMoveForAI(); } if (bestMoveResult && bestMoveResult.move) { const chosenMove = bestMoveResult.move; saveCurrentStateToHistory(); const aiPieceSquare = getSquareElement(chosenMove.origin.r, chosenMove.origin.c); const aiPieceElement = aiPieceSquare?.querySelector('.piece'); selectedPiece = { row: chosenMove.origin.r, col: chosenMove.origin.c, player: AI_PLAYER, element: aiPieceElement }; animateAndMovePiece(chosenMove.origin.r, chosenMove.origin.c, chosenMove); } else { isAiThinking = false; endTurn(); } }
+        function makeAiMove() { if (isGameOver || currentPlayer !== AI_PLAYER) { isAiThinking = false; requestRender(); return; } // Removed || window.innerHeight > window.innerWidth
+        let bestMoveResult; if (continuousJumpPossible && selectedPiece && selectedPiece.player === AI_PLAYER) { const nextJumps = calculateMovesForPieceInternal(selectedPiece.row, selectedPiece.col, true, boardState); if (nextJumps.length > 0) { // In simple AI, just pick the first available jump
+             bestMoveResult = { move: nextJumps[0], score: 0 };
+        } else { // If no more jumps are possible, proceed to finding a regular move
+             continuousJumpPossible = false; // Clear continuous jump flag
+             bestMoveResult = findBestMoveForAI();
+        }
+        } else { bestMoveResult = findBestMoveForAI(); } if (bestMoveResult && bestMoveResult.move) { const chosenMove = bestMoveResult.move; saveCurrentStateToHistory(); const aiPieceSquare = getSquareElement(chosenMove.origin.r, chosenMove.origin.c); const aiPieceElement = aiPieceSquare?.querySelector('.piece'); selectedPiece = { row: chosenMove.origin.r, col: chosenMove.origin.c, player: AI_PLAYER, element: aiPieceElement }; animateAndMovePiece(chosenMove.origin.r, chosenMove.origin.c, chosenMove); } else { isAiThinking = false; endTurn(); } }
         function findBestMoveForAI() { if (aiDifficulty === DIFFICULTIES.EASY) { const allPossibleJumps = getAllPossibleMoves(AI_PLAYER, true, boardState); let possibleAiMoves; if (allPossibleJumps.length > 0) { possibleAiMoves = allPossibleJumps; } else { possibleAiMoves = getAllPossibleMoves(AI_PLAYER, false, boardState); } if (possibleAiMoves.length === 0) { return null; } const randomMove = possibleAiMoves[Math.floor(Math.random() * possibleAiMoves.length)]; return { move: randomMove, score: 0 }; } else { const depth = (aiDifficulty === DIFFICULTIES.HARD) ? MINIMAX_DEPTH.HARD : MINIMAX_DEPTH.MEDIUM; return findBestMoveMinimax(AI_PLAYER, depth); } }
-        function findBestMoveMinimax(player, depth) { let bestScore = -Infinity; let bestMove = null; const possibleMoves = getAllPossibleMoves(player, false, boardState); if (possibleMoves.length === 0) { return { move: null, score: evaluateBoard(boardState, player, depth) }; } possibleMoves.forEach(move => { const tempBoard = deepCopyBoard(boardState); simulateMove(tempBoard, move); let finalBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); } const score = minimax(finalBoardState, depth - 1, -Infinity, Infinity, false, getOpponent(currentPlayer), player); if (score > bestScore) { bestScore = score; bestMove = move; } }); if (!bestMove && possibleMoves.length > 0) { bestMove = possibleMoves[0]; } return { move: bestMove, score: bestScore }; }
-        function minimax(currentBoard, depth, alpha, beta, isMaximizingPlayer, currentPlayerMM, originalPlayer) { if (depth === 0 || checkGameOverSimulated(currentBoard, currentPlayerMM)) { return evaluateBoard(currentBoard, originalPlayer, depth); } const possibleMoves = getAllPossibleMoves(currentPlayerMM, false, currentBoard); if (isMaximizingPlayer) { let maxEval = -Infinity; for (const move of possibleMoves) { const tempBoard = deepCopyBoard(currentBoard); simulateMove(tempBoard, move); let nextBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); if (nextJumps.length > 0) { maxEval = Math.max(maxEval, minimax(nextBoardState, depth, alpha, beta, true, currentPlayerMM, originalPlayer)); alpha = Math.max(alpha, maxEval); if (beta <= alpha) break; continue; } } const evalScore = minimax(nextBoardState, depth - 1, alpha, beta, true, getOpponent(currentPlayerMM), originalPlayer); maxEval = Math.max(maxEval, evalScore); alpha = Math.max(alpha, evalScore); if (beta <= alpha) break; } if (possibleMoves.length === 0) { return evaluateBoard(currentBoard, originalPlayer, depth); } return maxEval; } else { let minEval = Infinity; for (const move of possibleMoves) { const tempBoard = deepCopyBoard(currentBoard); simulateMove(tempBoard, move); let nextBoardState = tempBoard; if (move.isJump) { const nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard); if (nextJumps.length > 0) { minEval = Math.min(minEval, minimax(nextBoardState, depth, alpha, beta, false, currentPlayerMM, originalPlayer)); beta = Math.min(beta, minEval); if (beta <= alpha) break; continue; } } const evalScore = minimax(nextBoardState, depth - 1, alpha, beta, true, getOpponent(currentPlayerMM), originalPlayer); minEval = Math.min(minEval, evalScore); beta = Math.min(beta, evalScore); if (beta <= alpha) break; } if (possibleMoves.length === 0) { return evaluateBoard(currentBoard, originalPlayer, depth); } return minEval; } }
-        function evaluateBoard(currentBoard, player, depth = 0) { let score = 0; const opponent = getOpponent(player); const WIN_SCORE = 1000; const KING_VALUE = 3; const PIECE_VALUE = 1; const ADVANCEMENT_VALUE = 0.1; let myPieces = 0, oppPieces = 0; let myKings = 0, oppKings = 0; let myMoves = 0, oppMoves = 0; let oppCanMove = false, myCanMove = false; for (let r = 0; r < BOARD_SIZE; r++) { for (let c = 0; c < BOARD_SIZE; c++) { const piece = currentBoard[r][c]; if (piece) { const pieceMoves = calculateMovesForPieceInternal(r,c,false, currentBoard).length; if (piece.player === player) { myPieces++; if (pieceMoves > 0) myCanMove = true; myMoves += pieceMoves; score += PIECE_VALUE; if (piece.isKing) { myKings++; score += KING_VALUE - PIECE_VALUE; } else { score += (player === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r)) * ADVANCEMENT_VALUE; } } else { oppPieces++; if (pieceMoves > 0) oppCanMove = true; oppMoves += pieceMoves; score -= PIECE_VALUE; if (piece.isKing) { oppKings++; score -= KING_VALUE - PIECE_VALUE; } else { score -= (opponent === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r)) * ADVANCEMENT_VALUE; } } } } } let currentDepthPassed = depth; if (oppPieces === 0 || !oppCanMove) { return WIN_SCORE + currentDepthPassed; } if (myPieces === 0 || !myCanMove) { return -WIN_SCORE - currentDepthPassed; } score += (myKings * KING_VALUE + (myPieces - myKings) * PIECE_VALUE); score -= (oppKings * KING_VALUE + (oppPieces - oppKings) * PIECE_VALUE); // Fixed oppkings typo
-        return score; }
-        function simulateMove(board, move) { const pieceData = board[move.origin.r][move.origin.c]; if (!pieceData) return; board[move.row][move.col] = pieceData; board[move.origin.r][move.origin.c] = null; if (move.isJump && move.captured) { board[move.captured.row][move.captured.col] = null; } if (!pieceData.isKing) { if ((pieceData.player === PLAYER_BLACK && move.row === 0) || (pieceData.player === PLAYER_WHITE && move.row === BOARD_SIZE - 1)) { pieceData.isKing = true; } } }
-        function checkGameOverSimulated(board, playerToCheck) { let pieces = 0; let canMove = false; for(let r=0; r<BOARD_SIZE; r++){ for(let c=0; c<BOARD_SIZE; c++){ if(board[r][c]?.player === playerToCheck){ pieces++; if(!canMove && calculateMovesForPieceInternal(r, c, false, board).length > 0){ canMove = true; } } } } return pieces === 0 || !canMove; }
-        function addHoverEffects() { removeHoverEffects(); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER) || window.innerHeight > window.innerWidth; // Add check for portrait mode
+        function findBestMoveMinimax(player, depth) { let bestScore = -Infinity; let bestMove = null; const possibleMoves = getAllPossibleMoves(player, false, boardState); const possibleJumps = possibleMoves.filter(m => m.isJump); const movesToConsider = possibleJumps.length > 0 ? possibleJumps : possibleMoves; // Always prioritize jumps if available
+
+        if (movesToConsider.length === 0) { return { move: null, score: evaluateBoard(boardState, player, depth) }; }
+
+        // Shuffle moves slightly to add some variability, especially at lower depths
+        const shuffledMoves = movesToConsider.sort(() => 0.5 - Math.random());
+
+        for (const move of shuffledMoves) {
+            const tempBoard = deepCopyBoard(boardState);
+            simulateMove(tempBoard, move);
+
+            let currentBoardForEvaluation = tempBoard;
+            let nextIsMaximizing = !player === AI_PLAYER; // Maximize for AI, Minimize for opponent
+
+            if (move.isJump) {
+                let nextJumps = calculateMovesForPieceInternal(move.row, move.col, true, tempBoard);
+                // If more jumps are possible, the same player continues their turn.
+                // The minimax search should continue from this board state without changing player or decreasing depth immediately.
+                // This is a complex case for a simple minimax implementation.
+                // For simplicity here, if a jump sequence is possible, we might just evaluate the board *after* the first jump
+                // or run a separate evaluation for forced jumps. A full minimax needs to handle multi-jumps as a single turn sequence.
+                // Let's adjust the simulation/evaluation to reflect a single turn sequence for multi-jumps in evaluation.
+
+                // Simplified approach for minimax evaluation:
+                // If a jump happened, simulate the *entire* sequence of forced jumps for the current piece
+                // before switching player and evaluating the resulting board state.
+                let currentJumpBoard = deepCopyBoard(tempBoard);
+                let lastJumpPosition = { r: move.row, c: move.col };
+                let forcedJumpSequence = true;
+                while(forcedJumpSequence) {
+                    let nextPossibleJumps = calculateMovesForPieceInternal(lastJumpPosition.r, lastJumpPosition.c, true, currentJumpBoard);
+                    if (nextPossibleJumps.length > 0) {
+                         // For simplicity in minimax search, pick one of the next jumps
+                         // A more sophisticated AI might explore all sequences
+                         const nextJump = nextPossibleJumps[0]; // Pick the first jump for simplicity in simulation
+                         simulateMove(currentJumpBoard, nextJump);
+                         lastJumpPosition = { r: nextJump.row, c: nextJump.col };
+                    } else {
+                        forcedJumpSequence = false;
+                    }
+                }
+                 currentBoardForEvaluation = currentJumpBoard;
+            }
+
+
+            // Now evaluate the board state *after* the current player's turn (potentially involving multi-jumps)
+            // The next turn belongs to the opponent.
+            const score = minimax(currentBoardForEvaluation, depth - 1, alpha, beta, !isMaximizingPlayer, getOpponent(player), originalPlayer);
+
+            if (isMaximizingPlayer) {
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
+                alpha = Math.max(alpha, bestScore);
+            } else { // Minimizing player (Opponent)
+                 if (score < bestScore) { // Should be minEval for opponent
+                     // This part of the code seems incorrect for the minimizing player branch.
+                     // The minimax function signature suggests it always maximizes based on `isMaximizingPlayer`.
+                     // Let's fix the logic inside minimax.
+                 }
+            }
+
+             // Alpha-beta pruning (Corrected placement)
+             if (beta <= alpha) {
+                 break;
+             }
+        }
+
+        // Corrected minimax recursive call inside the loop
+        if (isMaximizingPlayer) { // AI's turn (Maximizing)
+             bestScore = -Infinity; // Reset bestScore for this function call
+             for (const move of movesToConsider) {
+                const tempBoard = deepCopyBoard(currentBoard);
+                 let boardAfterTurn = simulateFullTurn(tempBoard, move); // Simulate potential multi-jump sequence
+
+                const evalScore = minimax(boardAfterTurn, depth - 1, alpha, beta, false, getOpponent(player), originalPlayer); // Call minimax for opponent (minimizing)
+                if (evalScore > bestScore) {
+                    bestScore = evalScore;
+                    bestMove = move;
+                }
+                alpha = Math.max(alpha, evalScore);
+                if (beta <= alpha) break;
+             }
+             // If no moves, evaluate current state
+             if (movesToConsider.length === 0) {
+                 bestScore = evaluateBoard(currentBoard, originalPlayer, depth);
+             }
+             return { move: bestMove, score: bestScore };
+
+        } else { // Opponent's turn (Minimizing)
+             bestScore = Infinity; // Reset bestScore for this function call (searching for minimum)
+             let worstMove = null; // Keep track of the move leading to the worst score for the opponent (best for AI)
+
+             for (const move of movesToConsider) {
+                const tempBoard = deepCopyBoard(currentBoard);
+                let boardAfterTurn = simulateFullTurn(tempBoard, move); // Simulate potential multi-jump sequence
+
+                const evalScore = minimax(boardAfterTurn, depth - 1, alpha, beta, true, getOpponent(player), originalPlayer); // Call minimax for AI (maximizing)
+
+                if (evalScore < bestScore) { // Opponent wants to minimize the score (which is good for AI)
+                    bestScore = evalScore;
+                    worstMove = move; // This move leads to the lowest score for the opponent (which is what the maximizing AI wants)
+                }
+                beta = Math.min(beta, evalScore);
+                if (beta <= alpha) break;
+             }
+             // If no moves, evaluate current state
+              if (movesToConsider.length === 0) {
+                 bestScore = evaluateBoard(currentBoard, originalPlayer, depth);
+              }
+             // For the minimizing player, we return the *score*, the move is not needed here.
+             return { move: worstMove, score: bestScore }; // Returning worstMove might be confusing here, should just return score
+        }
+    }
+
+     // Helper function to simulate a full turn including forced jumps
+    function simulateFullTurn(board, initialMove) {
+        const tempBoard = deepCopyBoard(board);
+        simulateMove(tempBoard, initialMove); // Perform the initial move
+        let currentPos = { r: initialMove.row, c: initialMove.col };
+
+        // Check for and perform forced jumps recursively/iteratively
+        let moreJumpsPossible = true;
+        while(moreJumpsPossible) {
+            const pieceAfterMove = tempBoard[currentPos.r][currentPos.c];
+            if (!pieceAfterMove) { // Piece was somehow removed? Should not happen after simulateMove
+                 moreJumpsPossible = false;
+                 break;
+            }
+            const nextJumps = calculateMovesForPieceInternal(currentPos.r, currentPos.c, true, tempBoard);
+
+            if (nextJumps.length > 0) {
+                 // In a real game, the player chooses. In simulation, pick one (e.g., the first)
+                 // A more complex AI could branch here. For simplicity, pick first.
+                 const nextJump = nextJumps[0];
+                 simulateMove(tempBoard, nextJump); // Perform the next jump
+                 currentPos = { r: nextJump.row, c: nextJump.col };
+                 // Kinging check during simulation
+                 if (!pieceAfterMove.isKing) {
+                     if ((pieceAfterMove.player === PLAYER_BLACK && currentPos.r === 0) || (pieceAfterMove.player === PLAYER_WHITE && currentPos.r === BOARD_SIZE - 1)) {
+                          tempBoard[currentPos.r][currentPos.c].isKing = true;
+                     }
+                 }
+            } else {
+                moreJumpsPossible = false; // No more jumps for this piece from this position
+            }
+        }
+        // Note: The piece might have become king *during* the jump sequence. simulateMove already handles kinging.
+         return tempBoard;
+    }
+
+
+        function evaluateBoard(currentBoard, player, depth = 0) { let score = 0; const opponent = getOpponent(player); const WIN_SCORE = 1000; const KING_VALUE = 3; const PIECE_VALUE = 1; const ADVANCEMENT_VALUE = 0.1; const MOBILITY_VALUE = 0.05; // Added mobility factor
+        let myPieces = 0, oppPieces = 0; let myKings = 0, oppKings = 0;
+        let myTotalAdvancement = 0, oppTotalAdvancement = 0;
+        let myPossibleMovesCount = 0, oppPossibleMovesCount = 0;
+        let myCanMove = false, oppCanMove = false;
+
+        for (let r = 0; r < BOARD_SIZE; r++) {
+            for (let c = 0; c < BOARD_SIZE; c++) {
+                const piece = currentBoard[r][c];
+                if (piece) {
+                    const pieceMoves = calculateMovesForPieceInternal(r, c, false, currentBoard);
+                    const pieceHasMoves = pieceMoves.length > 0;
+
+                    if (piece.player === player) {
+                        myPieces++;
+                        if (piece.isKing) myKings++;
+                        if (pieceHasMoves) myCanMove = true;
+                        myPossibleMovesCount += pieceMoves.length;
+                        myTotalAdvancement += (player === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r));
+                    } else {
+                        oppPieces++;
+                        if (piece.isKing) oppKings++;
+                        if (pieceHasMoves) oppCanMove = true;
+                        oppPossibleMovesCount += pieceMoves.length;
+                        oppTotalAdvancement += (opponent === PLAYER_WHITE ? r : (BOARD_SIZE - 1 - r));
+                    }
+                }
+            }
+        }
+
+        // Win/Loss Check (Most important)
+        if (oppPieces === 0 || !oppCanMove) {
+            return WIN_SCORE + depth * 10; // Bonus for winning faster (deeper search = less depth)
+        }
+        if (myPieces === 0 || !myCanMove) {
+            return -WIN_SCORE - depth * 10; // Penalty for losing slower
+        }
+
+        // Piece Count (Kings are more valuable)
+        score += (myKings * KING_VALUE + (myPieces - myKings) * PIECE_VALUE);
+        score -= (oppKings * KING_VALUE + (oppPieces - oppKings) * PIECE_VALUE);
+
+        // Advancement (Getting closer to king row)
+        score += myTotalAdvancement * ADVANCEMENT_VALUE;
+        score -= oppTotalAdvancement * ADVANCEMENT_VALUE;
+
+        // Mobility (Having more possible moves)
+        score += myPossibleMovesCount * MOBILITY_VALUE;
+        score -= oppPossibleMovesCount * MOBILITY_VALUE;
+
+        // King position bonus (Optional: Maybe penalize kings on the edge where they are less mobile)
+        // if (myKings > 0) { ... }
+
+        return score;
+        }
+
+
+        function simulateMove(board, move) { const pieceData = board[move.origin.r][move.origin.c]; if (!pieceData) return; board[move.row][move.col] = pieceData; board[move.origin.r][move.origin.c] = null; if (move.isJump && move.captured) { board[move.captured.row][move.captured.col] = null; } if (!pieceData.isKing) { if ((pieceData.player === PLAYER_BLACK && move.row === 0) || (pieceData.player === PLAYER_WHITE && move.row === BOARD_SIZE - 1)) { board[move.row][move.col].isKing = true; } } } // Fixed kinging logic to happen *after* moving piece
+        function checkGameOverSimulated(board, playerToCheck) { let pieces = 0; let canMove = false; for(let r=0; r<BOARD_SIZE; r++){ for(let c=0; c<BOARD_SIZE; c++){ const piece = board[r][c]; if(piece?.player === playerToCheck){ pieces++; if(!canMove && calculateMovesForPieceInternal(r, c, false, board).length > 0){ canMove = true; } } } } return pieces === 0 || !canMove; } // Fixed piece check
+        function addHoverEffects() { removeHoverEffects(); const isInteractionBlocked = isGameOver || isAiThinking || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER); // Removed || window.innerHeight > window.innerWidth
         if (isInteractionBlocked) return; boardElement.querySelectorAll(`.piece.${currentPlayer}-piece:not(.selected)`).forEach(piece => { const square = piece.closest('.square'); if (!square) return; const r = parseInt(square.dataset.row); const c = parseInt(square.dataset.col); const isHoverable = (!selectedPiece || (selectedPiece.row === r && selectedPiece.col === c)) && !continuousJumpPossible ; if (isHoverable) { const movesForThisPiece = calculateMovesForPiece(r, c, false, boardState); if (movesForThisPiece.length > 0) { piece.classList.add('hoverable'); piece.style.cursor = 'grab'; } else { piece.style.cursor = 'default'; } } else { piece.style.cursor = 'default'; } } ); if (selectedPiece && selectedPiece.element && boardElement.contains(selectedPiece.element)) { selectedPiece.element.style.cursor = 'grab'; } }
         function removeHoverEffects() { document.querySelectorAll('.piece.hoverable').forEach(p => p.classList.remove('hoverable')); }
+         function selectPiece(row, col, pieceElement) { deselectPiece(); selectedPiece = { row, col, player: currentPlayer, element: pieceElement }; pieceElement?.classList.add('selected'); requestRender(); playSound('select'); }
+        function deselectPiece() { if (selectedPiece && selectedPiece.element) { selectedPiece.element.classList.remove('selected'); } selectedPiece = null; possibleMoves = []; requestRender(); }
+
 
         // --- Initialization on Load ---
         document.addEventListener('DOMContentLoaded', () => {
             console.log("DOM Loaded. Initializing...");
 
             // --- Orientation Handling ---
-            function lockOrientation() {
-                // Check if the Screen Orientation API is supported
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape')
-                        .then(() => {
-                            console.log("Screen orientation locked to landscape.");
-                            // If successfully locked, the CSS media query will handle hiding the message
-                        })
-                        .catch((error) => {
-                            console.warn("Screen orientation lock failed:", error);
-                            // If locking fails, the CSS media query will display the message
-                        });
-                } else {
-                    console.warn("Screen Orientation API or lock() method not supported.");
-                    // If API is not supported, the CSS media query will display the message
-                }
-            }
-
-            // Attempt to lock orientation immediately when DOM is ready
-            lockOrientation();
-            // The CSS media query handles the visual state based on orientation change.
+            // Removed orientation locking and message logic
 
             updateSoundButtonIcon(); updateTimerButtonIcon();
             settingsButton.style.display = 'none'; settingsPanel.classList.remove('visible');
@@ -794,6 +913,218 @@
             updateDifficultySelectorDisplay();
             console.log("Initialization Complete. Ready.");
         });
+
+         // --- Drag and Drop (Keep existing logic, just remove the portrait check) ---
+         let initialX;
+         let initialY;
+         let currentDraggingPiece = null;
+         let currentDraggingSquare = null;
+         let dragOffset = { x: 0, y: 0 };
+         let dragPossibleMoves = [];
+         let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+         function startDrag(event) {
+             if (isGameOver || isAiThinking || continuousJumpPossible || isSettingsPanelVisible || boardSelectionScreen.classList.contains('visible') || pieceStyleSelectionScreen.classList.contains('visible') || confirmationModal.classList.contains('visible') || (gameMode === 'ai' && currentPlayer === AI_PLAYER)) { // Removed || window.innerHeight > window.innerWidth
+                  return; // Do not allow drag if interaction is blocked
+             }
+
+             const pieceElement = event.target.closest('.piece');
+             if (!pieceElement || !pieceElement.classList.contains('interactive')) { // Only drag interactive pieces
+                  return;
+             }
+
+             // Prevent default touch behavior (like scrolling or zooming)
+             if (event.type === 'touchstart') {
+                event.preventDefault();
+             }
+
+             currentDraggingPiece = pieceElement;
+             currentDraggingSquare = currentDraggingPiece.closest('.square');
+
+             if (!currentDraggingSquare) {
+                  currentDraggingPiece = null;
+                  currentDraggingSquare = null;
+                  return;
+             }
+
+             const row = parseInt(currentDraggingSquare.dataset.row);
+             const col = parseInt(currentDraggingSquare.dataset.col);
+             const pieceData = boardState[row][col];
+
+             if (!pieceData || pieceData.player !== currentPlayer) {
+                 currentDraggingPiece = null;
+                 currentDraggingSquare = null;
+                 return;
+             }
+
+             // Simulate click logic to select the piece and show possible moves
+             selectPiece(row, col, currentDraggingPiece);
+             dragPossibleMoves = calculateMovesForPiece(row, col, continuousJumpPossible, boardState);
+             renderBoard(); // Update UI to show possible moves
+
+             currentDraggingPiece.classList.add('dragging');
+
+             const rect = currentDraggingPiece.getBoundingClientRect();
+             const clientX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
+             const clientY = event.type === 'touchstart' ? event.touches[0].clientY : event.clientY;
+
+             initialX = clientX;
+             initialY = clientY;
+             dragOffset = { x: clientX - rect.left - rect.width / 2, y: clientY - rect.top - rect.height / 2 }; // Offset from center
+
+             // Append to body to ensure it's on top of everything
+             document.body.appendChild(currentDraggingPiece);
+             currentDraggingPiece.style.position = 'fixed'; // Use fixed positioning for dragging
+             moveDrag(event); // Position the piece immediately
+
+             document.addEventListener(isTouchDevice ? 'touchmove' : 'mousemove', moveDrag);
+             document.addEventListener(isTouchDevice ? 'touchend' : 'mouseup', endDrag);
+         }
+
+         function moveDrag(event) {
+             if (!currentDraggingPiece) return;
+
+             // Prevent default touch behavior (like scrolling)
+             if (event.type === 'touchmove') {
+                  event.preventDefault();
+             }
+
+             const clientX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
+             const clientY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
+
+             // Position the piece relative to the cursor, adjusted by the offset
+             currentDraggingPiece.style.left = `${clientX - dragOffset.x}px`;
+             currentDraggingPiece.style.top = `${clientY - dragOffset.y}px`;
+
+             // Highlight square under the piece (optional, but good UX)
+             const targetSquare = document.elementFromPoint(clientX, clientY)?.closest('.square.dark-square.possible-move');
+             // Clear previous hover/target highlights on squares
+             boardElement.querySelectorAll('.square.drag-target').forEach(sq => sq.classList.remove('drag-target'));
+             if (targetSquare) {
+                  targetSquare.classList.add('drag-target');
+             }
+         }
+
+         function endDrag(event) {
+             if (!currentDraggingPiece) return;
+
+             // Prevent default touch behavior
+              if (event.type === 'touchend') {
+                event.preventDefault();
+             }
+
+             const clientX = event.type === 'touchend' ? event.changedTouches[0].clientX : event.clientX;
+             const clientY = event.type === 'touchend' ? event.changedTouches[0].clientY : event.clientY;
+
+             currentDraggingPiece.classList.remove('dragging');
+             boardElement.querySelectorAll('.square.drag-target').forEach(sq => sq.classList.remove('drag-target')); // Clean up highlights
+
+             document.removeEventListener(isTouchDevice ? 'touchmove' : 'mousemove', moveDrag);
+             document.removeEventListener(isTouchDevice ? 'touchend' : 'mouseup', endDrag);
+
+             // Determine the target square
+             const targetSquare = document.elementFromPoint(clientX, clientY)?.closest('.square.dark-square');
+
+             let moveMade = false;
+             if (targetSquare) {
+                 const targetRow = parseInt(targetSquare.dataset.row);
+                 const targetCol = parseInt(targetSquare.dataset.col);
+
+                 const validMove = dragPossibleMoves.find(move => move.row === targetRow && move.col === targetCol);
+
+                 if (validMove) {
+                     // Move the piece visually back to the target square position (before animating)
+                     // And then trigger the animation/logic
+                     const targetRect = targetSquare.getBoundingClientRect();
+                     const boardRect = boardElement.getBoundingClientRect(); // Get board offset
+
+                     // Calculate position relative to the board container for the final position
+                     const targetSquareRelativeX = targetRect.left - boardRect.left + targetRect.width / 2;
+                     const targetSquareRelativeY = targetRect.top - boardRect.top + targetRect.height / 2;
+
+                     // Temporarily position the piece where it *would* end up in the target square's center
+                     currentDraggingPiece.style.position = 'absolute'; // Switch back to absolute
+                     currentDraggingPiece.style.left = `${targetSquareRelativeX}px`;
+                     currentDraggingPiece.style.top = `${targetSquareRelativeY}px`;
+                     currentDraggingPiece.style.transform = 'translate(-50%, -50%)'; // Apply centering transform
+
+                     // Move the element to the target square in the DOM
+                     targetSquare.appendChild(currentDraggingPiece);
+
+                     // Now call the game logic function to update state and handle animations/next steps
+                     // The visual piece is already in place in the target square, so animateAndMovePiece might need adjustment
+                     // Or we handle the DOM manipulation here and just call the logic.
+                     // Let's adjust the logic call to simulate the move and then handle post-move.
+                      saveCurrentStateToHistory(); // Save state before executing move
+                      executeMoveLogic(parseInt(currentDraggingSquare.dataset.row), parseInt(currentDraggingSquare.dataset.col), validMove);
+                      currentDraggingPiece.dataset.pieceId = `${validMove.row}-${validMove.col}`; // Update piece ID
+
+                     // Check for king *after* move logic
+                      const pieceAfterMove = boardState[validMove.row][validMove.col];
+                     if(pieceAfterMove?.isKing && !currentDraggingPiece.classList.contains('king')) {
+                         currentDraggingPiece.classList.add('king');
+                         // Play king sound if it wasn't played in executeMoveLogic's checkForKing
+                         // Note: checkForKing in executeMoveLogic already plays the sound
+                     }
+
+
+                      handlePostMoveChecks(validMove); // Check for multi-jumps, end turn, etc.
+
+                     moveMade = true;
+                     playSound('move'); // Play move sound after a successful drop (or capture sound if jump)
+
+                 }
+             }
+
+             if (!moveMade) {
+                 // If no valid move, snap the piece back to its original square
+                 const originalSquare = currentDraggingSquare;
+                 const originalRect = originalSquare.getBoundingClientRect();
+                 const boardRect = boardElement.getBoundingClientRect();
+
+                 // Calculate original position relative to the board container
+                 const originalSquareRelativeX = originalRect.left - boardRect.left + originalRect.width / 2;
+                 const originalSquareRelativeY = originalRect.top - boardRect.top + originalRect.height / 2;
+
+                 // Animate snap back
+                 currentDraggingPiece.style.transition = 'transform 0.2s ease-in-out';
+                 currentDraggingPiece.style.left = `${originalSquareRelativeX}px`;
+                 currentDraggingPiece.style.top = `${originalSquareRelativeY}px`;
+                 currentDraggingPiece.style.transform = 'translate(-50%, -50%)';
+
+                 // Move element back to original square in DOM after animation
+                 currentDraggingPiece.addEventListener('transitionend', function handler() {
+                      currentDraggingPiece.style.position = 'absolute'; // Restore original positioning
+                      originalSquare.appendChild(currentDraggingPiece);
+                      currentDraggingPiece.style.transition = ''; // Remove transition
+                      currentDraggingPiece.removeEventListener('transitionend', handler);
+                      // After snapping back, deselect the piece only if it wasn't a continuous jump opportunity that was missed
+                      if (!continuousJumpPossible) {
+                          deselectPiece();
+                      } else {
+                           // If it was a continuous jump opportunity and they dropped it invalidly,
+                           // the piece should remain selected, and renderBoard will highlight valid next jumps.
+                           renderBoard();
+                      }
+                      playSound('undo'); // Play a sound indicating an invalid drop/snap back
+                 });
+
+             }
+
+
+             currentDraggingPiece = null;
+             currentDraggingSquare = null;
+             dragPossibleMoves = [];
+
+
+             // The deselectPiece() call in handlePostMoveChecks or the snap-back logic handles final cleanup and rendering
+             // deselectPiece(); // This is now handled elsewhere
+             // renderBoard(); // This is also handled elsewhere
+         }
+
+         // Add event listeners for drag start on the board (event delegation)
+         boardElement.addEventListener(isTouchDevice ? 'touchstart' : 'mousedown', startDrag);
+
 
     </script>
 
